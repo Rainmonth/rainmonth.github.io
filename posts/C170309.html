@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要本文主要介绍git常用命令的使用方法，同时介绍一些常见问题的处理方法，持续更新中…">
+<meta name="keywords" content="Service">
+<meta property="og:type" content="article">
+<meta property="og:title" content="git 攻略">
+<meta property="og:url" content="http://yoursite.com/posts/C170309.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要本文主要介绍git常用命令的使用方法，同时介绍一些常见问题的处理方法，持续更新中…">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-04-24T09:12:39.290Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="git 攻略">
+<meta name="twitter:description" content="摘要本文主要介绍git常用命令的使用方法，同时介绍一些常见问题的处理方法，持续更新中…">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/C170309.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>git 攻略 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/C170309.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">git 攻略</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-09T00:00:00+08:00">2017-03-09</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/四大组件/" itemprop="url" rel="index"><span itemprop="name">四大组件</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>本文主要介绍git常用命令的使用方法，同时介绍一些常见问题的处理方法，持续更新中…</p>
+<a id="more"></a>
+<h2 id="git命令通用选项"><a href="#git命令通用选项" class="headerlink" title="git命令通用选项"></a>git命令通用选项</h2><p>大多数git命令都适用的选项列表如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-v, --verbose         show hash and subject, give twice for upstream branch</span><br><span class="line">-q, --quiet           suppress informational messages</span><br><span class="line">-t, --track           set up tracking mode (see git-pull(1))</span><br><span class="line">--set-upstream        change upstream info</span><br><span class="line">-u, --set-upstream-to &lt;upstream&gt; change the upstream info</span><br><span class="line">--unset-upstream      Unset the upstream info</span><br><span class="line">--color[=&lt;when&gt;]      use colored output</span><br><span class="line">-r, --remotes         act on remote-tracking branches</span><br><span class="line">--contains &lt;commit&gt;   print only branches that contain the commit</span><br><span class="line">--abbrev[=&lt;n&gt;]        use &lt;n&gt; digits to display SHA-1s</span><br></pre></td></tr></table></figure>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><h3 id="git-help"><a href="#git-help" class="headerlink" title="git help"></a>git help</h3><p>使用方式如下，其中command_name 具体使用的时候替换成要查询的命令名。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git help &lt;command_name&gt;</span><br></pre></td></tr></table></figure>
+<p><em>git help</em> 命令的输出结构（以输入<em>git help help</em>为例）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">NAME（命令名称）</span><br><span class="line">	git-help - 显示git有关的帮助信息</span><br><span class="line">    </span><br><span class="line">SYNOPSIS（梗概）(相同的option选项会放在同一个[]中，许多命令提供了简写形式)</span><br><span class="line">	git help [-a|--all] [-g|--guide] [-i|--info|-m|--man|-w|--web] [COMMAND|GUIDE]</span><br><span class="line">	</span><br><span class="line">DESCRIPTION（描述）</span><br><span class="line">	help命令使用的一些描述（包括如何使用、使用注意事项以及如何能最高效的得到你想要的结果）</span><br><span class="line"></span><br><span class="line">OPTION（选项）</span><br><span class="line">	对具体的option选项（即SYNOPSIS中中括号展示出来的选项）具体的解释</span><br><span class="line">	</span><br><span class="line">CONFIGURATION VARIABLES</span><br><span class="line">	关于该命令的可选配置（即该命令在.gitconfig文件中可以进行的一些配置操作）</span><br></pre></td></tr></table></figure>
+<p>首次使用，可以输入git help，该命令会展示一些使用git的总体帮助信息，展示如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">git命令使用的不同场景:</span><br><span class="line"></span><br><span class="line">创建一个git工作区 (万里长征的第一步)</span><br><span class="line">   clone      克隆分支</span><br><span class="line">   init       创建一个新的git仓库或者重新初始化一个已经存在的git仓库（放心，在一个已经存在的git仓库中执行git init命令是安全的，执行该命令的主要原因是为了快速挑选出新近添加的模版或者使用惊醒仓库移动）</span><br><span class="line"></span><br><span class="line">针对当前分支的操作 （详情请看：git help everyday）</span><br><span class="line">   add        将文件添加到git的索引中（方便提交）</span><br><span class="line">   mv         将文件（目录等）进行移动或重命名</span><br><span class="line">   reset      将当前分支的HEAD（最新提交）Reset到指定的commit</span><br><span class="line">   rm         将文件从工作树和工作索引中移除</span><br><span class="line"></span><br><span class="line">检查历史及状态的相关命令(详情请看： git help revisions)</span><br><span class="line">   bisect     Find by binary search the change that introduced a bug</span><br><span class="line">   grep       Print lines matching a pattern</span><br><span class="line">   log        Show commit logs</span><br><span class="line">   show       Show various types of objects</span><br><span class="line">   status     Show the working tree status</span><br><span class="line"></span><br><span class="line">grow, mark and tweak your common history</span><br><span class="line">   branch     查询、创建或删除分支</span><br><span class="line">   checkout   切换分支或者恢复当前工作区的文件</span><br><span class="line">   commit     将更改记录到仓库，及本地提交</span><br><span class="line">   diff       比较不同提交（分支和工作目录）之间的差异等</span><br><span class="line">   merge      将开发记录合并</span><br><span class="line">   rebase     将本地提交放在提交记录的顶部（及记录栈栈顶）具体可查看git rebase 中的示例</span><br><span class="line">   tag        创建、查询、删除或核对一个用GPG协议签名的Tag</span><br><span class="line"></span><br><span class="line">collaborate (see also: git help workflows)</span><br><span class="line">   fetch      拉取更新，不合并</span><br><span class="line">   pull       拉取更新并合并</span><br><span class="line">   push       推送更新到相关分支</span><br><span class="line"></span><br><span class="line">git help -a	 列出所有git命令（方便查看有哪些git命令）</span><br><span class="line">git help -g  列出所有概念性的指导（很有用）</span><br></pre></td></tr></table></figure>
+<h3 id="git-add"><a href="#git-add" class="headerlink" title="git add"></a>git add</h3><p>git add支持以通配符形式的添加文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git add .		添加当前目录所有改变（修改、删除、新增）的文件信息到索引库（常用）</span><br><span class="line">git add -u . 	添加当前目录所有修改、删除的文件信息到索引库，不处理untracked文件</span><br><span class="line">git add -A .	添加当前目录所有修改、删除的文件信息导索引库，并将untracked文件添加到索引库</span><br><span class="line">git add -i .	交互式添加当目录所有修改、删除、新增的文件信息到索引库</span><br></pre></td></tr></table></figure>
+<p><em>git add -i .</em> 输入之后，会进入一个子命令系统，会列出当前工作目录所有tracked和untracked的文件信息，同时会在下方列出以下八个子命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1: [s]tatus     2: [u]pdate     3: [r]evert     4: [a]dd untracked</span><br><span class="line">5: [p]atch      6: [d]iff       7: [q]uit       8: [h]elp</span><br></pre></td></tr></table></figure>
+<p>这八个子命令都是见名知意的，使用方式都是输入相应子命令后，列出带序号的文件列表，选择要操作的文件序号（可多选），执行命令，显示命令结果，之后按回车键，返回子命令系统目录。</p>
+<h3 id="git-push"><a href="#git-push" class="headerlink" title="git push"></a>git push</h3><p>首次使用<em>git push</em>命令（即直接输入git push），git 会提示设置set upstream，其实就是让你设置本地分支同远程分支见的对应关系，建立跟踪关系的方法：</p>
+<ol>
+<li><p>建立分支时采用 —track，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git branch --track local_branch origin/remote_branch_name</span><br><span class="line">执行之后，本地分支local_branch 和 远程分支remote_branch_name间就建立了跟踪关系</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用—set-upstream（相当于修改项目根目录.get文件夹下的config文件），如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch --set-upstream test_branch origin/test_branch</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>push操作时使用—set-upstream，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push origin --set-upstream test_bransh:origin/test_branch</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>push命令具体分析：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">git push -u origin local_branch:remote_branch </span><br><span class="line">	推送成功后，local_branch和remote_branch间就存在对应关系了；</span><br><span class="line">git push --prune（中文意思裁剪）</span><br><span class="line">	推送之后，如果本地分支不存在了，同名的远程分支也将被删除</span><br><span class="line">git push -n </span><br><span class="line">	模拟推送，除了真正的将更新推送过去这件事不干外，其他push会发生的操作都进行了</span><br><span class="line">git push --delete remote_branch_name</span><br><span class="line">	删除远程分支remote_branch_name（效果同git push origin :remote_branch_name）</span><br><span class="line">git push --all </span><br><span class="line">	推送所有分支</span><br><span class="line">git push --quiet</span><br><span class="line">	推送之后不现实输出结果，除非发生了错误</span><br><span class="line">git push --progress</span><br><span class="line">	推送之后显示推送进度</span><br></pre></td></tr></table></figure>
+<p>push命令的一些便捷操作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">git push</span><br><span class="line">	将当前的分支推送到关联的远程分支，没有的话git会予以提示；</span><br><span class="line">git push origin</span><br><span class="line">	同上，没有的话会报错</span><br><span class="line">git push origin :</span><br><span class="line">	将当前的分支推送到匹配的远程分支</span><br><span class="line">git push origin master</span><br><span class="line">	将master分支推送到远程的master分支，如果远程没有，则会创建相同名称的远程分支</span><br><span class="line">git push origin HEAD</span><br><span class="line">	将当前分支推送到相同名车个的远程分支</span><br></pre></td></tr></table></figure>
+<h3 id="git-merge"><a href="#git-merge" class="headerlink" title="git merge"></a>git merge</h3><p>git merge 操作需要操作着熟悉vim编辑器，由于自己使用的较少，顾不做描述，建议采用GUI环境来进行Merge操作（通常就是解决冲突）</p>
+<p>待我熟悉了vim，我会不全的。</p>
+<h3 id="git-pull"><a href="#git-pull" class="headerlink" title="git pull"></a>git pull</h3><p>首次使用<em>git pull</em>命里该，效果同首次使用<em>git push</em>命令相同。在默认的<em>git pull</em>选项中，该命令相当于执行以下命令组：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git fetch remote</span><br><span class="line">git merge FETCH_HEAD</span><br></pre></td></tr></table></figure>
+<p>使用<em>git pull —rebase</em>时，相当于执行以下命令组：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git fetch remote</span><br><span class="line">git rebase</span><br></pre></td></tr></table></figure>
+<p>git pull具体分析</p>
+<p>pull命令本身只有三个option选项（-q, -v, —[no-]recurese-submodules），但由于pull命令是fetch和merge两个命令的组合，使用pull命令时要注意fetch命令和merge命令的一些注意事项。</p>
+<h3 id="git-rebase"><a href="#git-rebase" class="headerlink" title="git rebase"></a>git rebase</h3><p>俗称变基操作，举个栗子来说明（来源于git文档）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Assume the following history exists and the current branch is &quot;topic&quot;:</span><br><span class="line"></span><br><span class="line">                     A---B---C topic</span><br><span class="line">                    /</span><br><span class="line">               D---E---F---G master</span><br><span class="line"></span><br><span class="line">From this point, the result of either of the following commands:</span><br><span class="line"></span><br><span class="line">    git rebase master</span><br><span class="line">    git rebase master topic</span><br><span class="line"></span><br><span class="line">would be:</span><br><span class="line"></span><br><span class="line">              A&apos;--B&apos;--C&apos; topic</span><br><span class="line">              /</span><br><span class="line">  D---E---F---G master</span><br></pre></td></tr></table></figure>
+<p> 我的理解就是，将并行两个commit记录（采用新的commit来）串行处理。</p>
+<p>rebase过程中如果存在冲突，先解决冲突，然后采用git add .将更改的文件添加到索引库，在继续rebase操作（无需提交），具体命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">git rebase master</span><br><span class="line">git rebase master topic（或者采用git pull --rebase）</span><br><span class="line"></span><br><span class="line">if(conflicts occures) &#123;</span><br><span class="line">	First, resolve the conflicts;（实际上就是一些merge操作）</span><br><span class="line">  	Then, git add .（添加merge修改的文件）</span><br><span class="line">  	Finally, git rebase --continue</span><br><span class="line">&#125;</span><br><span class="line">变基操作完成。</span><br></pre></td></tr></table></figure>
+<p>rebase过程中如果想放弃变基操作，可采用如下命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git rebase --abort</span><br><span class="line">	该命令会放弃变基，让操纵的回到之前的状态</span><br></pre></td></tr></table></figure>
+<p>还有其他选项，会在使用过程中陆续添加</p>
+<h3 id="git-log"><a href="#git-log" class="headerlink" title="git log"></a>git log</h3><p>显示提交记录，其选项较多，大多是美化log输出、设置log输出格式、设置log输出范围等</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">git log --follow &lt;filePath&gt;</span><br><span class="line">	显示特定文件的历史更改记录</span><br><span class="line">git log -g</span><br><span class="line">	显示所有的记录（包括丢失的），用来做数据恢复很方便，等同于命令git reflog</span><br><span class="line">git log &lt;revirsion range&gt;</span><br><span class="line">	显示已定范围的log</span><br><span class="line">git log --merges</span><br><span class="line">	显示所有的merge记录</span><br></pre></td></tr></table></figure>
+<h3 id="git-branch"><a href="#git-branch" class="headerlink" title="git branch"></a>git branch</h3><p>展示、创建或删除分支</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">git branch</span><br><span class="line">	列出所有本地分支</span><br><span class="line">git branch -a </span><br><span class="line">	列出所有远程分支和本地分支</span><br><span class="line">git branch -r</span><br><span class="line">	列出所有远程分支</span><br><span class="line">git branch -d local_branch_name</span><br><span class="line">	删除本地分支（对local_branch_name分支的合并状态有要求，必须完全合并）</span><br><span class="line">git branch -f branch_name</span><br><span class="line">	创建分支branch_name，如果branch_name存在，则重置（不使用-f的区别就是如果branch_name存在则重用branch_name分支</span><br><span class="line">git branch -D（shortcut for --delete --force）</span><br><span class="line">	删除本地分支（对local_branch_name分支的合并状态无要求，相当于强删）</span><br><span class="line">git branch -m old_branch_name new_branch_name</span><br><span class="line">	重命名old_branch_name为new_branch_name（对old_branch_name分支的merge状态有要求）</span><br><span class="line">git branch -M old_branch_name new_branch_name</span><br><span class="line">	重命名old_branch_name为new_branch_name（对old_branch_name强行重命名）</span><br><span class="line">git branch --color=[always, never, auto] color_branch_name</span><br><span class="line">	高亮显示color_branch_name这个分支</span><br></pre></td></tr></table></figure>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="中文文件名在git中显示乱码"><a href="#中文文件名在git中显示乱码" class="headerlink" title="中文文件名在git中显示乱码"></a>中文文件名在git中显示乱码</h3><p>原因是因为git中文默认以\xxx八进制形式展现，会对对0x80以上的字符进行quote，只要将core.quotepath设置为false即可解决问题</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --global core.quotepath false</span><br></pre></td></tr></table></figure>
+<h3 id="恢复已删除的的分支、会见或丢失的commit"><a href="#恢复已删除的的分支、会见或丢失的commit" class="headerlink" title="恢复已删除的的分支、会见或丢失的commit"></a>恢复已删除的的分支、会见或丢失的commit</h3><p><strong><em>前提是存在恢复的可能性</em></strong>，以下情况不能恢复：</p>
+<p><strong><em>丢失的分支或commit信息没有被git gc清除，一般情况下，gc对那些无用的object会保留很长时间后才清除的。</em></strong></p>
+<p>恢复方法，具体步骤如下：</p>
+<ol>
+<li>执行git reflog（或git log -g）命令，查看所有历史操作信息，得到要恢复的commit的<strong><em>commit id</em></strong>；</li>
+<li>执行git branch recover_branch_name <em>commit id</em>命令，创建一个恢复分支；</li>
+<li>将恢复分支合并到当前工作分支，打完收工。</li>
+</ol>
+<h3 id="忽略已经跟踪的文件"><a href="#忽略已经跟踪的文件" class="headerlink" title="忽略已经跟踪的文件"></a>忽略已经跟踪的文件</h3><p>假设已经跟踪的文件为git.txt，执行以下代码即可</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git rm --cached</span><br><span class="line">git update-index --assume-unchanged git.txt</span><br><span class="line">git update-index --no-assume-unchanged git.txt</span><br></pre></td></tr></table></figure>
+<h2 id="常用工作流程"><a href="#常用工作流程" class="headerlink" title="常用工作流程"></a>常用工作流程</h2><h2 id="重要概念"><a href="#重要概念" class="headerlink" title="重要概念"></a>重要概念</h2><h2 id="常用git-IDE推荐"><a href="#常用git-IDE推荐" class="headerlink" title="常用git IDE推荐"></a>常用git IDE推荐</h2><p>SourceTree</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Service/" rel="tag"># Service</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/O180114.html" rel="prev" title="Hexo搭建个人博客">
+                Hexo搭建个人博客 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#git命令通用选项"><span class="nav-number">2.</span> <span class="nav-text">git命令通用选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用命令"><span class="nav-number">3.</span> <span class="nav-text">常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#git-help"><span class="nav-number">3.1.</span> <span class="nav-text">git help</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-add"><span class="nav-number">3.2.</span> <span class="nav-text">git add</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-push"><span class="nav-number">3.3.</span> <span class="nav-text">git push</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-merge"><span class="nav-number">3.4.</span> <span class="nav-text">git merge</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-pull"><span class="nav-number">3.5.</span> <span class="nav-text">git pull</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-rebase"><span class="nav-number">3.6.</span> <span class="nav-text">git rebase</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-log"><span class="nav-number">3.7.</span> <span class="nav-text">git log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-branch"><span class="nav-number">3.8.</span> <span class="nav-text">git branch</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见问题"><span class="nav-number">4.</span> <span class="nav-text">常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#中文文件名在git中显示乱码"><span class="nav-number">4.1.</span> <span class="nav-text">中文文件名在git中显示乱码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#恢复已删除的的分支、会见或丢失的commit"><span class="nav-number">4.2.</span> <span class="nav-text">恢复已删除的的分支、会见或丢失的commit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#忽略已经跟踪的文件"><span class="nav-number">4.3.</span> <span class="nav-text">忽略已经跟踪的文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用工作流程"><span class="nav-number">5.</span> <span class="nav-text">常用工作流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重要概念"><span class="nav-number">6.</span> <span class="nav-text">重要概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用git-IDE推荐"><span class="nav-number">7.</span> <span class="nav-text">常用git IDE推荐</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

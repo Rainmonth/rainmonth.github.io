@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要这里记录了已经完成和待完成的学习计划，内容包括（但不限于）Android、Java和Python。希望自己能严格执行。 Android Android系统篇 Android系统的启动流程 Android APP的启动流程 Android Activity的启动流程 Android Service的启动流程 Android Binder机制(todo) Android IPC机制 Android">
+<meta property="og:type" content="website">
+<meta property="og:title" content="日程表">
+<meta property="og:url" content="http://yoursite.com/schedule/index.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要这里记录了已经完成和待完成的学习计划，内容包括（但不限于）Android、Java和Python。希望自己能严格执行。 Android Android系统篇 Android系统的启动流程 Android APP的启动流程 Android Activity的启动流程 Android Service的启动流程 Android Binder机制(todo) Android IPC机制 Android">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.812Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="日程表">
+<meta name="twitter:description" content="摘要这里记录了已经完成和待完成的学习计划，内容包括（但不限于）Android、Java和Python。希望自己能严格执行。 Android Android系统篇 Android系统的启动流程 Android APP的启动流程 Android Activity的启动流程 Android Service的启动流程 Android Binder机制(todo) Android IPC机制 Android">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/schedule/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>日程表 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">日程表</h1>
+
+<div class="post-meta">
+  
+  
+
+
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>这里记录了已经完成和待完成的学习计划，内容包括（但不限于）Android、Java和Python。希望自己能严格执行。</p>
+<h2 id="Android"><a href="#Android" class="headerlink" title="Android"></a>Android</h2><ul>
+<li>Android系统篇<ul>
+<li><a href="https://rainmonth.github.io/posts/A191021.html" target="_blank" rel="noopener">Android系统的启动流程</a></li>
+<li><a href="https://rainmonth.github.io/posts/1001.html" target="_blank" rel="noopener">Android APP的启动流程</a></li>
+<li><a href="https://rainmonth.github.io/posts/A180505.html" target="_blank" rel="noopener">Android Activity的启动流程</a></li>
+<li><a href="https://rainmonth.github.io/posts/A191025.html" target="_blank" rel="noopener">Android Service的启动流程</a></li>
+<li><a href="https://rainmonth.github.io/posts/1004.html" target="_blank" rel="noopener">Android Binder机制</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/A180427.html" target="_blank" rel="noopener">Android IPC机制</a></li>
+<li><a href="https://rainmonth.github.io/posts/A191018.html" target="_blank" rel="noopener">Android AMS分析</a></li>
+<li><a href="https://rainmonth.github.io/posts/1007.html" target="_blank" rel="noopener">Android Hander机制</a>(<strong>todo</strong>)</li>
+<li><a href="">Android WMS分析</a>(<strong>todo</strong>)</li>
+</ul>
+</li>
+<li>Android多媒体篇<ul>
+<li><a href="https://rainmonth.github.io/posts/A191208.html" target="_blank" rel="noopener">Android官方关于多媒体的说明介绍</a></li>
+<li><a href="https://rainmonth.github.io/posts/A191210.html" target="_blank" rel="noopener">Android常用的的播放器介绍</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/1103.html" target="_blank" rel="noopener">Android FFMpeg简介</a>(<strong>todo</strong>)<ul>
+<li>参考文章：<ul>
+<li><a href="https://blog.csdn.net/leixiaohua1020/article/details/15811977" target="_blank" rel="noopener">[总结]FFMPEG视音频编解码零基础学习方法</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="https://rainmonth.github.io/posts/A191206.html" target="_blank" rel="noopener">Android IjkPlayer源码分析</a>(<strong>todo</strong>)</li>
+<li>Android ExoPlayer源码分析<ul>
+<li><a href="https://rainmonth.github.io/posts/A191101.html" target="_blank" rel="noopener">Android ExoPlayer使用与分析</a></li>
+<li><a href="http://rainmonth.github.io/posts/A191130.html" target="_blank" rel="noopener">Android理解ExoPlayer的Timeline</a></li>
+<li><a href="http://rainmonth.github.io/posts/A191224.html" target="_blank" rel="noopener">Android基于ExoPlayer封装的音视频播放器</a>(<strong>todo</strong>)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Android开源库篇<ul>
+<li><a href="https://rainmonth.github.io/posts/1200.html" target="_blank" rel="noopener">Android事件总线框架——EventBus分析</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/1201.html" target="_blank" rel="noopener">Android网络请求框架——OKHttp分析</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/1202.html" target="_blank" rel="noopener">Android图片加载框架——Fresco分析</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/1203.html" target="_blank" rel="noopener">Android数据存储框架——GreeDAO分析</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/1204.html" target="_blank" rel="noopener">Android网络请求框架——Retrofit源码分析</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/1205.html" target="_blank" rel="noopener">Android RxJava源码分析</a>(<strong>todo</strong>)</li>
+</ul>
+</li>
+<li>Android性能优化篇<ul>
+<li><a href="https://rainmonth.github.io/posts/1300.html" target="_blank" rel="noopener">Android性能优化之内存优化</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/A180418.html" target="_blank" rel="noopener">Android性能优化之布局优化</a></li>
+<li><a href="https://rainmonth.github.io/posts/1302.html" target="_blank" rel="noopener">Android性能优化之卡顿优化</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/1303.html" target="_blank" rel="noopener">Android性能优化之ANR分析</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/1304.html" target="_blank" rel="noopener">Android性能优化之启动优化</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/1305.html" target="_blank" rel="noopener">Android性能优化之优化工具篇</a>(<strong>todo</strong>)</li>
+</ul>
+</li>
+<li>Android NDK开发篇<ul>
+<li><a href="https://rainmonth.github.io/posts/A191021.html" target="_blank" rel="noopener">Android NDK 开发环境的搭建</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="JAVA"><a href="#JAVA" class="headerlink" title="JAVA"></a>JAVA</h2><ul>
+<li>基础<ul>
+<li><a href="https://rainmonth.github.io/posts/J191110.html" target="_blank" rel="noopener">Java基础之不同Java版本的特性比较说明</a>(<strong>todo</strong>)</li>
+<li><a href="https://rainmonth.github.io/posts/J180319.html" target="_blank" rel="noopener">Java集合简介</a></li>
+<li><a href="https://rainmonth.github.io/posts/J191115.html" target="_blank" rel="noopener">Java注解</a></li>
+<li><a href="https://rainmonth.github.io/posts/J191117.html" target="_blank" rel="noopener">Java并发基础</a>(<strong>todo</strong>)</li>
+<li><a href="(https://rainmonth.github.io/posts/J191203.html">Java之AOP简介及使用</a>(<strong>todo</strong>))</li>
+</ul>
+</li>
+<li>设计模式<ul>
+<li><a href="https://rainmonth.github.io/posts/A180321.html" target="_blank" rel="noopener">Java设计模式之策略模式</a></li>
+<li><a href="https://rainmonth.github.io/posts/A180322.html" target="_blank" rel="noopener">Java设计模式之单例模式</a></li>
+<li><a href="https://rainmonth.github.io/posts/A180323.html" target="_blank" rel="noopener">Java设计模式之建造者模式</a></li>
+<li><a href="https://rainmonth.github.io/posts/A180324.html" target="_blank" rel="noopener">Java设计模式之责任链模式</a></li>
+<li><a href="https://rainmonth.github.io/posts/A180325.html" target="_blank" rel="noopener">Java设计模式之中介者模式</a></li>
+<li><a href="https://rainmonth.github.io/posts/A180326.html" target="_blank" rel="noopener">Java设计模式之装饰器模式</a></li>
+</ul>
+</li>
+</ul>
+<p>Python</p>
+<ul>
+<li><p>基础篇</p>
+</li>
+<li><p>爬虫篇</p>
+</li>
+<li>优秀第三方库篇</li>
+</ul>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+
+
+
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android"><span class="nav-number">2.</span> <span class="nav-text">Android</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JAVA"><span class="nav-number">3.</span> <span class="nav-text">JAVA</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

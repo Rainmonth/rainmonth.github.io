@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要 adb，指的是Android Debug Bridge，即Android调试桥，顾名思义，和Android调试有莫大的关系。可以在命令通过输入命令来查看Android系统支持的服务的各种运行状态。  环境配置 首先要已经搭建好Android开发环境（具体请自行百度）  其次，为了避免频繁调用cd（切换目录命令，建议配置好环境变量，Mac下具体配置如下） 1export PATH=$&amp;#123">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android adb学习">
+<meta property="og:url" content="http://yoursite.com/posts/A191020.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要 adb，指的是Android Debug Bridge，即Android调试桥，顾名思义，和Android调试有莫大的关系。可以在命令通过输入命令来查看Android系统支持的服务的各种运行状态。  环境配置 首先要已经搭建好Android开发环境（具体请自行百度）  其次，为了避免频繁调用cd（切换目录命令，建议配置好环境变量，Mac下具体配置如下） 1export PATH=$&amp;#123">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.789Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android adb学习">
+<meta name="twitter:description" content="摘要 adb，指的是Android Debug Bridge，即Android调试桥，顾名思义，和Android调试有莫大的关系。可以在命令通过输入命令来查看Android系统支持的服务的各种运行状态。  环境配置 首先要已经搭建好Android开发环境（具体请自行百度）  其次，为了避免频繁调用cd（切换目录命令，建议配置好环境变量，Mac下具体配置如下） 1export PATH=$&amp;#123">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A191020.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android adb学习 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A191020.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android adb学习</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-20T10:17:00+08:00">2019-10-20</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><blockquote>
+<p>adb，指的是Android Debug Bridge，即Android调试桥，顾名思义，和Android调试有莫大的关系。可以在命令通过输入命令来查看Android系统支持的服务的各种运行状态。</p>
+</blockquote>
+<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><ul>
+<li><p>首先要已经搭建好Android开发环境（具体请自行百度）</p>
+</li>
+<li><p>其次，为了避免频繁调用cd（切换目录命令，建议配置好环境变量，Mac下具体配置如下）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export PATH=$&#123;PATH&#125;:/Users/RandyZhang/Library/Android/sdk/platform-tools</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<a id="more"></a>
+<h2 id="全局配置选项"><a href="#全局配置选项" class="headerlink" title="全局配置选项"></a>全局配置选项</h2><ul>
+<li><p>-a，使用该选项将监听所有的网络接口，而不仅仅是localhost；</p>
+</li>
+<li><p>-d，使用USB设备（即真机设备，当连有多个设备时将报错，因为不知道到底该用哪个）</p>
+</li>
+<li><p>-e，使用TCP/IP设备（即模拟器设备，同上多个设备将报错）</p>
+</li>
+<li><p>-s SERIAL，使用使用给定的序列号设备（序列号唯一，多个设备不会报错，会覆盖$ANDROID_SERIAL环境变量），使用如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb -s SERIAL command</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>-p PRODUCT，指定输出apk的名字或输出路径（会覆盖$ANDROID_PRODUCT_OUT环境变量），使用如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb -p name(or path) command</span><br></pre></td></tr></table></figure>
+<p><strong><em>注意：这里是小写的p</em></strong></p>
+</li>
+<li><p>-H，adb server的名称，默认localhost；</p>
+</li>
+<li><p>-P，adb server的端口号，默认5037；</p>
+</li>
+<li><p>-L SOCKET，在指定的socket上监听adb server，默认tcp:=localhost:5037;</p>
+</li>
+</ul>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><ul>
+<li><p>devices[-l]， 列出已连接的设备（-l时输出详细结果）；</p>
+</li>
+<li><p>help，查看帮助，如：</p>
+  <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查看所有帮助</span></span><br><span class="line">adb <span class="built_in">help</span> </span><br><span class="line"><span class="comment">#查看commond命令的帮助</span></span><br><span class="line">adb <span class="built_in">help</span> <span class="built_in">command</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>version，查看adb 版本号；</p>
+</li>
+<li><p>文件传输</p>
+<ul>
+<li><p>push，将SOURCE_DIR推送到DIS_DIR，使用方式：<code>adb push SOURCE_DIR DIS_DIR</code>；</p>
+</li>
+<li><p>pull，将REMOTE_DIR拉到LOCAL_DIR，使用方式：<code>adb pull REMOTE_DIR LOCAL_DIR</code>；</p>
+</li>
+</ul>
+</li>
+<li><p>shell，通过输入<code>adb shell</code>，可以进入目标机器的shell命令行环境，改命令会单独介绍；</p>
+</li>
+<li><p>安装与卸载</p>
+<ul>
+<li>install</li>
+<li>uninstall</li>
+</ul>
+</li>
+</ul>
+<h2 id="shell命令"><a href="#shell命令" class="headerlink" title="shell命令"></a>shell命令</h2><p>通用使用方法：adb [-d|-e|-s serial_number] shell shell_command</p>
+<ul>
+<li>adb shell am，am(activity manager)</li>
+<li>adb shell pm，pm(package manager)</li>
+<li>adb shell pm list permissions  列出权限组</li>
+</ul>
+<h3 id="am"><a href="#am" class="headerlink" title="am"></a>am</h3><p><code>am</code>，其实就是<code>ActivityManagerService</code>的命令行表现形式而已，也就是说，通过<code>AMS</code>的几乎所有功能都可以使用am来实现。am支持很多子命令，可以在<strong><em>shell</em></strong>环境下输入<code>am</code>查看帮助说明，现列出几个重要的命令。</p>
+<h3 id="pm"><a href="#pm" class="headerlink" title="pm"></a>pm</h3><h3 id="dumpsys"><a href="#dumpsys" class="headerlink" title="dumpsys"></a>dumpsys</h3><p>Android系统源码com.android.server包下面定义了一系列的服务，如果对应的Java代码里面有dump方法，就支持使用<code>dumpsys</code>来打印信息</p>
+<p>连接Android设备，输入adb shell,进入到手机的shell交互界面</p>
+<ul>
+<li><code>dumpsys --help</code>, 查看dumpsys的帮助信息</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">usage: dumpsys</span><br><span class="line">         To dump all services.</span><br><span class="line">or:</span><br><span class="line">       dumpsys [-t TIMEOUT] [--help | -l | --skip SERVICES | SERVICE [ARGS]]</span><br><span class="line">         --help: shows this help</span><br><span class="line">         -l: only list services, do not dump them</span><br><span class="line">         -t TIMEOUT: TIMEOUT to use in seconds instead of default 10 seconds</span><br><span class="line">         --skip SERVICES: dumps all services but SERVICES (comma-separated list)</span><br><span class="line">         SERVICE [ARGS]: dumps only service SERVICE, optionally passing ARGS to it</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>dumpsys -l</code>，列出那些服务支持dump，但不进行dump</li>
+<li><code>dumpsys --skip SERVICES</code>，dump 除了指定SERVICES外的其他服务的信息</li>
+<li><code>dumpsys SERVICES [ARGS]</code>，dump 指定SERVICES的信息，[ARGS]为SERVICES支持的参数</li>
+</ul>
+<p>先看看支持dump哪些服务，输入<code>dumpsys -l</code>，会输出当前运行的服务，常用的几个如下：</p>
+<ul>
+<li>activity，</li>
+<li>window</li>
+<li>batterystats</li>
+<li>package</li>
+<li>appwidget</li>
+<li>meminfo</li>
+<li>gfxinfo<br>下面对上面常用的一些命令做说明</li>
+</ul>
+<h4 id="activity"><a href="#activity" class="headerlink" title="activity"></a>activity</h4><p>对应于<code>ActivityManagerService.java</code></p>
+<h4 id="window"><a href="#window" class="headerlink" title="window"></a>window</h4><p>对应于<code>WindowManagerService.java</code></p>
+<h4 id="batterystats"><a href="#batterystats" class="headerlink" title="batterystats"></a>batterystats</h4><p>对应于<code>BatteryStatsService.java</code>，</p>
+<h4 id="package"><a href="#package" class="headerlink" title="package"></a>package</h4><p>对应于<code>PackageManagerService.java</code>，</p>
+<h4 id="memoinfo"><a href="#memoinfo" class="headerlink" title="memoinfo"></a>memoinfo</h4><p>dumpsys meminfo + 包名，查看特定的进程的内存信息</p>
+<p>查看对应包名内存信息，如输入<code>adb shell dumpsys memoinfo com.hhdd.kadahd</code>，会得到如下结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">Applications Memory Usage (kB):</span><br><span class="line">Uptime: 96605508 Realtime: 171616432</span><br><span class="line"></span><br><span class="line">** MEMINFO in pid 24404 [com.hhdd.kadahd] **</span><br><span class="line">                   Pss  Private  Private  Swapped     Heap     Heap     Heap</span><br><span class="line">                 Total    Dirty    Clean    Dirty     Size    Alloc     Free</span><br><span class="line">                ------   ------   ------   ------   ------   ------   ------</span><br><span class="line">  Native Heap       20       20        0        0    12080     8058     2797</span><br><span class="line">  Dalvik Heap     7031     6920        0        4    13452     7278     6174</span><br><span class="line"> Dalvik Other     5713     5636       12      380</span><br><span class="line">        Stack      360      360        0       12</span><br><span class="line">       Ashmem     1996     1996        0        0</span><br><span class="line">    Other dev    32413     4080    28268        0</span><br><span class="line">     .so mmap     2699      888     1240     2052</span><br><span class="line">    .apk mmap      377        0      140        0</span><br><span class="line">    .ttf mmap      189        0       68        0</span><br><span class="line">    .dex mmap    10819      724     9052       12</span><br><span class="line">   Other mmap       34        4       12        0</span><br><span class="line">      Unknown     8451     8440        0       28</span><br><span class="line">        TOTAL    70102    29068    38792     2488    25532    15336     8971</span><br><span class="line"></span><br><span class="line"> Objects</span><br><span class="line">               Views:      301         ViewRootImpl:        1</span><br><span class="line">         AppContexts:        3           Activities:        1</span><br><span class="line">              Assets:        2        AssetManagers:        2</span><br><span class="line">       Local Binders:       16        Proxy Binders:       22</span><br><span class="line">    Death Recipients:        1</span><br><span class="line">     OpenSSL Sockets:        3</span><br><span class="line"></span><br><span class="line"> SQL</span><br><span class="line">         MEMORY_USED:      399</span><br><span class="line">  PAGECACHE_OVERFLOW:      127          MALLOC_SIZE:       62</span><br><span class="line"></span><br><span class="line"> DATABASES</span><br><span class="line">      pgsz     dbsz   Lookaside(b)          cache  Dbname</span><br><span class="line">         4       84            125     234/171/14  /data/data/com.hhdd.kadahd/databases/kada_60008834</span><br><span class="line">         4       20             17         0/24/1  /data/data/com.hhdd.kadahd/databases/security</span><br><span class="line">         4       52            117       59/39/16  /data/data/com.hhdd.kadahd/databases/bugly_db_</span><br></pre></td></tr></table></figure>
+<p>各项指标的含义：</p>
+<p>VSS - Virtual Set Size 虚拟耗用内存（包含共享库占用的内存）<br>RSS - Resident Set Size 实际使用物理内存（包含共享库占用的内存）<br>PSS - Proportional Set Size 实际使用的物理内存（比例分配共享库占用的内存）<br>USS - Unique Set Size 进程独自占用的物理内存（不包含共享库占用的内存）</p>
+<h4 id="gfxinfo"><a href="#gfxinfo" class="headerlink" title="gfxinfo"></a>gfxinfo</h4><blockquote>
+<p><em>dumpsys</em>是一款运行在设备上的Android工具，将 <em>gfxinfo</em>命令传递给dumpsys可在logcat中提供输出，其中包含各阶段发生的动画以及帧相关的性能信息。</p>
+</blockquote>
+<p>比如运行</p>
+<p><code>adb shell dumpsys gfxinfo com.hhdd.kada</code>，会输出如下结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys gfxinfo com.hhdd.kada</span><br><span class="line">Applications Graphics Acceleration Info:</span><br><span class="line">Uptime: 281418709 Realtime: 1154925861</span><br><span class="line"></span><br><span class="line">** Graphics info for pid 23406 [com.hhdd.kada] **</span><br><span class="line"></span><br><span class="line">Stats since: 261201402950201ns</span><br><span class="line">Total frames rendered: 200653 # 共收集了200653帧</span><br><span class="line">Janky frames: 171683 (85.56%) # 耗时超过16ms的帧为171683，卡顿率为85.63%</span><br><span class="line">90th percentile: 97ms					# 90%的在97ms绘制完成</span><br><span class="line">95th percentile: 105ms				# 95%的在105ms绘制完成</span><br><span class="line">99th percentile: 113ms				# 99%的在113ms绘制完成</span><br><span class="line">Number Missed Vsync: 76237		# 垂直同步失败的帧有76237</span><br><span class="line">Number High input latency: 1037 # 处理input时间超时的帧1037</span><br><span class="line">Number Slow UI thread: 121801   # 因UI线程导致超时的帧121801</span><br><span class="line">Number Slow bitmap uploads: 479 # 因bitmap加载超时的帧479</span><br><span class="line">Number Slow issue draw commands: 156855  #因绘制命令超时的帧156855</span><br><span class="line"></span><br><span class="line">Caches:</span><br><span class="line">Current memory usage / total memory usage (bytes):</span><br><span class="line">  TextureCache          7826168 / 75497472</span><br><span class="line">  LayerCache             589824 / 50331648 (numLayers = 1)</span><br><span class="line">    Layer size 384x384; isTextureLayer()=0; texid=32 fbo=0; refs=1</span><br><span class="line">  Layers total     589824 (numLayers = 1)</span><br><span class="line">  RenderBufferCache           0 /  8388608</span><br><span class="line">  GradientCache               0 /  1048576</span><br><span class="line">  PathCache             1936512 / 33554432</span><br><span class="line">  TessellationCache       12000 /  1048576</span><br><span class="line">  TextDropShadowCache         0 /  6291456</span><br><span class="line">  PatchCache                576 /   131072</span><br><span class="line">  FontRenderer 0 A8     1048576 /  1048576</span><br><span class="line">  FontRenderer 0 RGBA         0 /        0</span><br><span class="line">  FontRenderer 0 total  1048576 /  1048576</span><br><span class="line">Other:</span><br><span class="line">  FboCache                    0 /        0</span><br><span class="line">Total memory usage:</span><br><span class="line">  11413656 bytes, 10.88 MB</span><br><span class="line"></span><br><span class="line">Profile data in ms:</span><br><span class="line"></span><br><span class="line">	com.hhdd.kada/com.hhdd.kada.main.ui.activity.MainActivity/android.view.ViewRootImpl@934192b (visibility=0)</span><br><span class="line">	Draw	Prepare	Process	Execute</span><br><span class="line">	38.87	0.85	32.90	1.29</span><br><span class="line">	32.53	0.85	33.40	1.39</span><br><span class="line">	42.86	0.87	32.51	1.37</span><br><span class="line">	34.05	0.79	33.39	1.49</span><br><span class="line">	29.17	0.91	32.37	1.48</span><br><span class="line">	20.68	0.81	33.87	1.64</span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">Stats since: 261201402950201ns</span><br><span class="line">Total frames rendered: 200654</span><br><span class="line">Janky frames: 171684 (85.56%)</span><br><span class="line">90th percentile: 97ms</span><br><span class="line">95th percentile: 105ms</span><br><span class="line">99th percentile: 113ms</span><br><span class="line">Number Missed Vsync: 76238</span><br><span class="line">Number High input latency: 1037</span><br><span class="line">Number Slow UI thread: 121801</span><br><span class="line">Number Slow bitmap uploads: 479</span><br><span class="line">Number Slow issue draw commands: 156856</span><br><span class="line"></span><br><span class="line">View hierarchy:</span><br><span class="line"></span><br><span class="line">  com.hhdd.kada/com.hhdd.kada.main.ui.activity.MainActivity/android.view.ViewRootImpl@934192b</span><br><span class="line">  921 views, 915.59 kB of display lists</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Total ViewRootImpl: 1</span><br><span class="line">Total Views:        921</span><br><span class="line">Total DisplayList:  915.59 kB</span><br></pre></td></tr></table></figure>
+<h3 id="app安装／卸载"><a href="#app安装／卸载" class="headerlink" title="app安装／卸载"></a>app安装／卸载</h3><h3 id="备份／恢复"><a href="#备份／恢复" class="headerlink" title="备份／恢复"></a>备份／恢复</h3><h3 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h3><ul>
+<li>adb bugreport [PATH]，将bug报告输出到PATH指定位置</li>
+<li>adb jdwp，列出所有持有JDWP（Java 平台调试体系结构）的进程id</li>
+<li>adb logcat，logcat相关配置</li>
+</ul>
+<h3 id="安全"><a href="#安全" class="headerlink" title="安全"></a>安全</h3><h3 id="脚本命令"><a href="#脚本命令" class="headerlink" title="脚本命令"></a>脚本命令</h3><h3 id="内部调试"><a href="#内部调试" class="headerlink" title="内部调试"></a>内部调试</h3><ul>
+<li>adb start-server    开启服务器</li>
+<li>adb kill-server关闭服务器</li>
+<li>adb reconnect         服务器端的重连</li>
+<li>adb reconnect device 设备端的重连</li>
+</ul>
+<h2 id="相关环境变量"><a href="#相关环境变量" class="headerlink" title="相关环境变量"></a>相关环境变量</h2><pre><code>2、安装(-r 替换已存在的应用)
+adb -s 5LM7N16531010541 shell pm install -r &quot;/data/local/tmp/tinker.sample.android&quot;
+</code></pre><p>adb push <local apk="" file="" path=""> <remote apk="" file="" path=""> 将本地apk文件推送到模拟器（或手机）上</remote></local></p>
+<p>例如：<br>​    1、推送<br>​    adb push /Users/RandyZhang/AndroidStudioProjects/tinker/tinker-sample-android/app/build/outputs/apk/app-debug.apk /data/local/tmp/tinker.sample.android<br>​    2、安装(-r 替换已存在的应用)<br>​    adb shell pm install -r “/data/local/tmp/tinker.sample.android”</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A191018.html" rel="next" title="Android AMS分析">
+                <i class="fa fa-chevron-left"></i> Android AMS分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A191019.html" rel="prev" title="Android系统的启动">
+                Android系统的启动 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境配置"><span class="nav-number">2.</span> <span class="nav-text">环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全局配置选项"><span class="nav-number">3.</span> <span class="nav-text">全局配置选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用命令"><span class="nav-number">4.</span> <span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#shell命令"><span class="nav-number">5.</span> <span class="nav-text">shell命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#am"><span class="nav-number">5.1.</span> <span class="nav-text">am</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pm"><span class="nav-number">5.2.</span> <span class="nav-text">pm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dumpsys"><span class="nav-number">5.3.</span> <span class="nav-text">dumpsys</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#activity"><span class="nav-number">5.3.1.</span> <span class="nav-text">activity</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#window"><span class="nav-number">5.3.2.</span> <span class="nav-text">window</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#batterystats"><span class="nav-number">5.3.3.</span> <span class="nav-text">batterystats</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#package"><span class="nav-number">5.3.4.</span> <span class="nav-text">package</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#memoinfo"><span class="nav-number">5.3.5.</span> <span class="nav-text">memoinfo</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gfxinfo"><span class="nav-number">5.3.6.</span> <span class="nav-text">gfxinfo</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#app安装／卸载"><span class="nav-number">5.4.</span> <span class="nav-text">app安装／卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份／恢复"><span class="nav-number">5.5.</span> <span class="nav-text">备份／恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试"><span class="nav-number">5.6.</span> <span class="nav-text">调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安全"><span class="nav-number">5.7.</span> <span class="nav-text">安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#脚本命令"><span class="nav-number">5.8.</span> <span class="nav-text">脚本命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内部调试"><span class="nav-number">5.9.</span> <span class="nav-text">内部调试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关环境变量"><span class="nav-number">6.</span> <span class="nav-text">相关环境变量</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

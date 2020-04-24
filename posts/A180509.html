@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要 本文旨在介绍JVM、DALVIK和ART的概念，比较了JVM和Dalvik、Dalvik和ART，并记录了自己对这三者的理解。">
+<meta name="keywords" content="运行环境,ART,Dalvik,JVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android JVM、Dalvik和ART">
+<meta property="og:url" content="http://yoursite.com/posts/A180509.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要 本文旨在介绍JVM、DALVIK和ART的概念，比较了JVM和Dalvik、Dalvik和ART，并记录了自己对这三者的理解。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.786Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android JVM、Dalvik和ART">
+<meta name="twitter:description" content="摘要 本文旨在介绍JVM、DALVIK和ART的概念，比较了JVM和Dalvik、Dalvik和ART，并记录了自己对这三者的理解。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A180509.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android JVM、Dalvik和ART | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A180509.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android JVM、Dalvik和ART</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-09T00:00:00+08:00">2018-05-09</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><blockquote>
+<p>本文旨在介绍JVM、DALVIK和ART的概念，比较了JVM和Dalvik、Dalvik和ART，并记录了自己对这三者的理解。</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><h3 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h3><blockquote>
+<p>JVM是Java Virtual Machine（Java虚拟机）的缩写，是一种用于计算设备的规范，它是一个虚构出来的计算机，是通过在实际的计算机上仿真模拟各种计算机功能来实现的。它是Java语言实现<strong><em>平台无关性的</em></strong>的关键。</p>
+</blockquote>
+<h3 id="Dalvik"><a href="#Dalvik" class="headerlink" title="Dalvik"></a>Dalvik</h3><blockquote>
+<p>Dalvik是Google公司设计的用于Android平台的虚拟机。</p>
+</blockquote>
+<p>Dalvik是在<strong>Android 2.2</strong>之后才加入J<strong>IT</strong>（<strong>J</strong>ust <strong>I</strong>n <strong>T</strong>ime，即时编译）技术的，每次都要编译+运行，这就导致应用的启动时间加长，执行效率低。</p>
+<h3 id="ART"><a href="#ART" class="headerlink" title="ART"></a>ART</h3><blockquote>
+<p>ART是Android Runtime的缩写，从字面上讲，ART就是Android运行时环境，它是Android L后提取的用来无缝替换Dalvik的一种方案。</p>
+</blockquote>
+<p>ART采用的时<strong>AOT</strong>（<strong>A</strong>head <strong>O</strong>f <strong>T</strong>ime，预编译）技术的，在安装的时候九江dex字节码转化成机器码，这就导致应用的安装时间加长，但启动时间缩短，执行效率高。</p>
+<h2 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h2><h3 id="JVM和Dalvik比较"><a href="#JVM和Dalvik比较" class="headerlink" title="JVM和Dalvik比较"></a>JVM和Dalvik比较</h3><p>都是虚拟机，来看看二者的区别：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>JVM</th>
+<th>Dalvik</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>指令集基于什么</td>
+<td>基于堆栈的</td>
+<td>基于寄存器的（能更快的执行，但由于寄存器与设备有关，牺牲了部分平台无关性）</td>
+</tr>
+<tr>
+<td>编译何种文件</td>
+<td>.class文件</td>
+<td>更小.dex文件（为什么，因为Android设备内存、CPU资源有限）</td>
+</tr>
+</tbody>
+</table>
+<p>还有一点，Android系统中存在一个特殊的Dalvik虚拟机进程——Zygote，它是Dalik虚拟机实例的孵化器，随着系统的启动而启动，并完成虚拟机的初始化、库加载等操作，并在Android 应用启动时通过fork本身快速创建与该应用对应的虚拟机实例。</p>
+<p>二者的相同点：</p>
+<ul>
+<li>二者都可以启动多个不同的实例，其中Android每个应用都会有一个与之对应的Dalvik虚拟机实例</li>
+<li>都是基于Java实现的。</li>
+</ul>
+<h3 id="Dalvik和ART比较"><a href="#Dalvik和ART比较" class="headerlink" title="Dalvik和ART比较"></a>Dalvik和ART比较</h3><table>
+<thead>
+<tr>
+<th></th>
+<th>Dalvik</th>
+<th>ART</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>编译方式</td>
+<td>JIT（Android 2.2以上）</td>
+<td>AOT</td>
+</tr>
+<tr>
+<td>占用空间</td>
+<td>运行时进行dex到机器码的转换，占用空间小</td>
+<td>安装的时候就讲dex变成机器码，空间大（空间换时间）</td>
+</tr>
+<tr>
+<td>电池续航</td>
+<td>要重复编译，续航性能不好</td>
+<td>不需重复编译，续航性能好</td>
+</tr>
+</tbody>
+</table>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="Dalvik其他特性"><a href="#Dalvik其他特性" class="headerlink" title="Dalvik其他特性"></a>Dalvik其他特性</h3><h4 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h4><p>Dalvik内存大体分以下三个部分：</p>
+<ul>
+<li>Java Object Heap：用来分配Java对象的，new关键字新建的对象内存分配。</li>
+<li>Bitmap Memory：用来处理图像的，<ul>
+<li>在HoneyComb之前，在Native Heap中分配，同样计入Java Object Heap</li>
+<li>之后，直接在Java Object Heap中分配。</li>
+</ul>
+</li>
+<li>Native Heap：在native code中使用malloc分配出来的内存，不收Java Object Heap大小限制，滥用会导致内存急剧减少</li>
+</ul>
+<blockquote>
+<p>问：为什么处理图像容易OOM（OutOfMemory）</p>
+<p>答：图像的内存在Native Heap中分配，而Native Heap中分配的内存不收Java Object Heap的限制</p>
+</blockquote>
+<h4 id="垃圾收集（GC）"><a href="#垃圾收集（GC）" class="headerlink" title="垃圾收集（GC）"></a>垃圾收集（GC）</h4><ul>
+<li>在GingerBread（Android 2.2之前），有如下特点：<ul>
+<li>Stop-the-world，GC线程执行时，其他线程都停止</li>
+<li>Full-heap-collection，一次收集完所有垃圾</li>
+<li>收集垃圾造成的程序中止时间通常大于100ms</li>
+</ul>
+</li>
+<li>之后，有如下特点：<ul>
+<li>Concurrent，大多情况下，GC线程与其他线程并发执行</li>
+<li>Partial Collection，一次回收一部分</li>
+<li>收集垃圾造成的程序中止时间通常小于5ms</li>
+</ul>
+</li>
+</ul>
+<p>本文完，后面还会做更深入的补充。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/运行环境/" rel="tag"># 运行环境</a>
+          
+            <a href="/tags/ART/" rel="tag"># ART</a>
+          
+            <a href="/tags/Dalvik/" rel="tag"># Dalvik</a>
+          
+            <a href="/tags/JVM/" rel="tag"># JVM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A180508.html" rel="next" title="Android KLog源码分析">
+                <i class="fa fa-chevron-left"></i> Android KLog源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A180510.html" rel="prev" title="Android中动画的深入分析">
+                Android中动画的深入分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概念"><span class="nav-number">2.</span> <span class="nav-text">概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM"><span class="nav-number">2.1.</span> <span class="nav-text">JVM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dalvik"><span class="nav-number">2.2.</span> <span class="nav-text">Dalvik</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ART"><span class="nav-number">2.3.</span> <span class="nav-text">ART</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#比较"><span class="nav-number">3.</span> <span class="nav-text">比较</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM和Dalvik比较"><span class="nav-number">3.1.</span> <span class="nav-text">JVM和Dalvik比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dalvik和ART比较"><span class="nav-number">3.2.</span> <span class="nav-text">Dalvik和ART比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-number">4.</span> <span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dalvik其他特性"><span class="nav-number">4.1.</span> <span class="nav-text">Dalvik其他特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#内存管理"><span class="nav-number">4.1.1.</span> <span class="nav-text">内存管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾收集（GC）"><span class="nav-number">4.1.2.</span> <span class="nav-text">垃圾收集（GC）</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

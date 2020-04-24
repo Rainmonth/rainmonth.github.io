@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Android 原生与H5交互[TOC] JS中调用Android的函数方法在Android程序中建立接口，并用建立的handler对象处理1234567891011private Handler handler = new Handler();final class InJavaScript&amp;#123;	public void runOnAndroidJavaScript(final Strin">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 原生与H5交互">
+<meta property="og:url" content="http://yoursite.com/posts/A180415.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="Android 原生与H5交互[TOC] JS中调用Android的函数方法在Android程序中建立接口，并用建立的handler对象处理1234567891011private Handler handler = new Handler();final class InJavaScript&amp;#123;	public void runOnAndroidJavaScript(final Strin">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.794Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 原生与H5交互">
+<meta name="twitter:description" content="Android 原生与H5交互[TOC] JS中调用Android的函数方法在Android程序中建立接口，并用建立的handler对象处理1234567891011private Handler handler = new Handler();final class InJavaScript&amp;#123;	public void runOnAndroidJavaScript(final Strin">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A180415.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android 原生与H5交互 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A180415.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 原生与H5交互</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-15T00:00:00+08:00">2018-04-15</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android-原生与H5交互"><a href="#Android-原生与H5交互" class="headerlink" title="Android 原生与H5交互"></a>Android 原生与H5交互</h1><p>[TOC]</p>
+<h2 id="JS中调用Android的函数方法"><a href="#JS中调用Android的函数方法" class="headerlink" title="JS中调用Android的函数方法"></a>JS中调用Android的函数方法</h2><h3 id="在Android程序中建立接口，并用建立的handler对象处理"><a href="#在Android程序中建立接口，并用建立的handler对象处理" class="headerlink" title="在Android程序中建立接口，并用建立的handler对象处理"></a>在Android程序中建立接口，并用建立的handler对象处理</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Handler handler = <span class="keyword">new</span> Handler();</span><br><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">InJavaScript</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">runOnAndroidJavaScript</span><span class="params">(<span class="keyword">final</span> String str)</span></span>&#123;</span><br><span class="line">		handler.post(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="comment">// todo 对传递过来的参数进行处理</span></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h3 id="通过给WebView添加JavaScriptInterface接口"><a href="#通过给WebView添加JavaScriptInterface接口" class="headerlink" title="通过给WebView添加JavaScriptInterface接口"></a>通过给WebView添加JavaScriptInterface接口</h3><p>即调用addJavaScriptInterface(new InJavaScript(), “injs”)，其中第一个参数为前面定义的接口的实例，第二个参数为该对象对应的名字</p>
+<h3 id="在js代码中通过类似一下函数的方法调用Android中定义好的方法"><a href="#在js代码中通过类似一下函数的方法调用Android中定义好的方法" class="headerlink" title="在js代码中通过类似一下函数的方法调用Android中定义好的方法"></a>在js代码中通过类似一下函数的方法调用Android中定义好的方法</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">sendToAndroid</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> str = <span class="string">"Call the Android method in js"</span>;</span><br><span class="line">	<span class="built_in">window</span>.injs.runOnAndroidJavaScript(str);<span class="comment">// injs为Android程序中建立的InJavaScript对象的一个实例名字</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Android中调用JS中的方法"><a href="#Android中调用JS中的方法" class="headerlink" title="Android中调用JS中的方法"></a>Android中调用JS中的方法</h2><h3 id="在JS代码中定义好要被Android程序调用的方法"><a href="#在JS代码中定义好要被Android程序调用的方法" class="headerlink" title="在JS代码中定义好要被Android程序调用的方法"></a>在JS代码中定义好要被Android程序调用的方法</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFromAndroid</span>(<span class="params">str</span>) </span>&#123;</span><br><span class="line">	<span class="built_in">document</span>.getElementById(<span class="string">"android"</span>).innerHTML = str;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="在Android程序中通过以下方式调用该方法（要注意调用的格式javascript-要调用的方法名）"><a href="#在Android程序中通过以下方式调用该方法（要注意调用的格式javascript-要调用的方法名）" class="headerlink" title="在Android程序中通过以下方式调用该方法（要注意调用的格式javascript:+要调用的方法名）"></a>在Android程序中通过以下方式调用该方法（要注意调用的格式javascript:+要调用的方法名）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Button button = (Button) findViewById(R.id.button);  </span><br><span class="line">button.setOnClickListener(<span class="keyword">new</span> OnClickListener() &#123;  </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View arg0)</span> </span>&#123;  </span><br><span class="line">    <span class="comment">//调用javascript中的方法  </span></span><br><span class="line">    webView.loadUrl(<span class="string">"javascript:getFromAndroid('Cookie call the js function from Android')"</span>);  </span><br><span class="line">	&#125;  </span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="通过约定的scheme来完成H5到原生App的跳转"><a href="#通过约定的scheme来完成H5到原生App的跳转" class="headerlink" title="通过约定的scheme来完成H5到原生App的跳转"></a>通过约定的scheme来完成H5到原生App的跳转</h2><ol>
+<li><p>在H5要跳转到的原生页面所在的Activity中设定好scheme，如SplashActivity中</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">".SplashActivity"</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">    	<span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.MAIN"</span> /&gt;</span></span><br><span class="line">    	<span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">"android.intent.category.LAUNCHER"</span> /&gt;</span></span><br><span class="line">    	<span class="tag">&lt;<span class="name">data</span> <span class="attr">android:scheme</span>=<span class="string">"myapp"</span> <span class="attr">android:host</span>=<span class="string">"path"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>其中schema表示这个链接的前缀，host代表短链的名字。如果你要在你的schema里面传参数，比如你要传uid和user_type，那么就跟普通的url的get参数格式一样：mls://userpage?uid=123&amp;user_type=mogujie。</p>
+<p><strong><em>注意，中间千万不能有空格</em></strong>。</p>
+<ol>
+<li><p>SplashActivity接受参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">String uid,userType;  </span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">parseUriParams</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">  	Uri uri = getIntent().getData();  </span><br><span class="line">  	<span class="keyword">if</span> (uri != <span class="keyword">null</span>) &#123;  </span><br><span class="line">    	uid = uri.getQueryParameter(<span class="string">"uid"</span>);  </span><br><span class="line">    	userType = uri.getQueryParameter(<span class="string">"user_type"</span>);  </span><br><span class="line">  	&#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在WebViewClient的shouldOverrideUrlLoading方法中作拦截URL判断</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyWebChromeClient</span> <span class="keyword">extends</span> <span class="title">WebViewClient</span> </span>&#123;  </span><br><span class="line">  	<span class="meta">@Override</span>  </span><br><span class="line">  	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">shouldOverrideUrlLoading</span><span class="params">(WebView view, String url)</span> </span>&#123;  </span><br><span class="line">    	<span class="keyword">if</span> (url.startsWith(<span class="string">"mls://"</span>)) &#123;  </span><br><span class="line">      		Intent intent = <span class="keyword">new</span> Intent();  </span><br><span class="line">      		intent.setData(Uri.parse(url));  </span><br><span class="line">      		startActivity(intent);  </span><br><span class="line">      		Log.v(<span class="string">"tag_2"</span>, url);  </span><br><span class="line">      		<span class="keyword">return</span> <span class="keyword">true</span>;  </span><br><span class="line">    	&#125;  </span><br><span class="line">   		<span class="keyword">return</span> <span class="keyword">super</span>.shouldOverrideUrlLoading(view, url);  </span><br><span class="line">  	&#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="设置问题"><a href="#设置问题" class="headerlink" title="设置问题"></a>设置问题</h2><ul>
+<li><p>通过WebView的setWebChromeClient方法还可以处理JS的警告、对话框以及输出JS控制台的信息到logcat中；</p>
+</li>
+<li><p>Android 4.2以后（API17+）出于安全因素的考虑，JS只能访问带有@JavascriptInterface注解的函数。</p>
+<blockquote>
+<p>在此之前，任何public的函数都可以在JS中访问，而Java对象的继承关系会导致很多public函数都可以在JS中访问，其中一个重要的函数就是getClass()。然后JS可以通过反射来访问一些其他内容，就会出现安全问题，加上注解之后，JS就只能访问带有@JavascriptInterface注解的public函数，增强了安全性。</p>
+</blockquote>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A180414.html" rel="next" title="Android 自定义键盘">
+                <i class="fa fa-chevron-left"></i> Android 自定义键盘
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A180417.html" rel="prev" title="Android 从一个简单的弹窗说起">
+                Android 从一个简单的弹窗说起 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-原生与H5交互"><span class="nav-number">1.</span> <span class="nav-text">Android 原生与H5交互</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JS中调用Android的函数方法"><span class="nav-number">1.1.</span> <span class="nav-text">JS中调用Android的函数方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在Android程序中建立接口，并用建立的handler对象处理"><span class="nav-number">1.1.1.</span> <span class="nav-text">在Android程序中建立接口，并用建立的handler对象处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过给WebView添加JavaScriptInterface接口"><span class="nav-number">1.1.2.</span> <span class="nav-text">通过给WebView添加JavaScriptInterface接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在js代码中通过类似一下函数的方法调用Android中定义好的方法"><span class="nav-number">1.1.3.</span> <span class="nav-text">在js代码中通过类似一下函数的方法调用Android中定义好的方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android中调用JS中的方法"><span class="nav-number">1.2.</span> <span class="nav-text">Android中调用JS中的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在JS代码中定义好要被Android程序调用的方法"><span class="nav-number">1.2.1.</span> <span class="nav-text">在JS代码中定义好要被Android程序调用的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在Android程序中通过以下方式调用该方法（要注意调用的格式javascript-要调用的方法名）"><span class="nav-number">1.2.2.</span> <span class="nav-text">在Android程序中通过以下方式调用该方法（要注意调用的格式javascript:+要调用的方法名）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通过约定的scheme来完成H5到原生App的跳转"><span class="nav-number">1.3.</span> <span class="nav-text">通过约定的scheme来完成H5到原生App的跳转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设置问题"><span class="nav-number">1.4.</span> <span class="nav-text">设置问题</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

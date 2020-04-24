@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="#Android 零散知识点（持续更新） [TOC]  Q：为什么Android的更新试图操作必须在主线程中进行？  这是因为Android系统中的视图组件并不是线程安全的。通常应该让主线程负责创建、显示和更新UI，启动子线程，停止子线程。让子线程完成计算并向主线程发出更新UI的消息，让主线程来更新UI。这就促使Android中产生了Handler机制。     Q：如何更改Android Stu">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 零散知识点（持续更新）">
+<meta property="og:url" content="http://yoursite.com/posts/A180123.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="#Android 零散知识点（持续更新） [TOC]  Q：为什么Android的更新试图操作必须在主线程中进行？  这是因为Android系统中的视图组件并不是线程安全的。通常应该让主线程负责创建、显示和更新UI，启动子线程，停止子线程。让子线程完成计算并向主线程发出更新UI的消息，让主线程来更新UI。这就促使Android中产生了Handler机制。     Q：如何更改Android Stu">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T10:06:23.554Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 零散知识点（持续更新）">
+<meta name="twitter:description" content="#Android 零散知识点（持续更新） [TOC]  Q：为什么Android的更新试图操作必须在主线程中进行？  这是因为Android系统中的视图组件并不是线程安全的。通常应该让主线程负责创建、显示和更新UI，启动子线程，停止子线程。让子线程完成计算并向主线程发出更新UI的消息，让主线程来更新UI。这就促使Android中产生了Handler机制。     Q：如何更改Android Stu">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A180123.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android 零散知识点（持续更新） | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A180123.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 零散知识点（持续更新）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-23T00:00:00+08:00">2018-01-23</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/工作小记/" itemprop="url" rel="index"><span itemprop="name">工作小记</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>#Android 零散知识点（持续更新）</p>
+<p>[TOC]</p>
+<ul>
+<li><p>Q：为什么Android的更新试图操作必须在主线程中进行？</p>
+<blockquote>
+<p>这是因为Android系统中的视图组件并不是线程安全的。通常应该让主线程负责创建、显示和更新UI，启动子线程，停止子线程。让子线程完成计算并向主线程发出更新UI的消息，让主线程来更新UI。这就促使Android中产生了Handler机制。</p>
+</blockquote>
+</li>
+</ul>
+<ul>
+<li><p>Q：如何更改Android Studio编译所采用的API版本？</p>
+<blockquote>
+<p>通过module setting 的Flavors选项卡进行Android API编译版本的更改；</p>
+</blockquote>
+</li>
+</ul>
+<a id="more"></a>
+<h2 id="自定义模板"><a href="#自定义模板" class="headerlink" title="自定义模板"></a>自定义模板</h2><ol>
+<li><a href="https://blog.csdn.net/lmj623565791/article/details/51635533" target="_blank" rel="noopener">Android Studio自定义模板 写页面竟然可以如此轻松</a></li>
+<li>新建类文件的自定义模板方法<ul>
+<li>File and code template-&gt;新建模板，输入名字，选择扩展名，填入模板内容</li>
+<li>模板内容中的自定义变量采用<code>${变量}</code>来声明，声明之后会在新建的时候要求你输入，<strong>但要注意，这个变量必须是在当前这个模板中声明的，不能是引用自其它模板的自定义变量</strong></li>
+<li>模板中可以使用静态文本，也可以使用预设的变量，如${DATE}等。</li>
+</ul>
+</li>
+</ol>
+<h2 id="权限适配问题"><a href="#权限适配问题" class="headerlink" title="权限适配问题"></a>权限适配问题</h2><ul>
+<li>索尼手机，debug模式打开webView就崩溃</li>
+</ul>
+<h2 id="控件问题"><a href="#控件问题" class="headerlink" title="控件问题"></a>控件问题</h2><ul>
+<li><p>EditText 的光标为何不显示？</p>
+<blockquote>
+<p>首先设置cursorVisible属性为true，然后设置textCursorDrawable（背景色与<br>控件背景色不要一样），textCursorDrawable属性是在API11才推出的属性；</p>
+</blockquote>
+</li>
+<li><p>ListView的android:listSelector属性如何使用？</p>
+<blockquote>
+</blockquote>
+</li>
+<li><p>TextView 设置按压状态无效过？（但同样的效果应用在Button上却有效果）</p>
+<blockquote>
+<p>这是因为Button默认是可以点击的，而TextView默认不可点击，只有设置了<code>setOnClickListener</code>后才可点击（或声明<code>android:clickable=true</code>），所以要想看到效果，可以设置点击事件或在xml布局文件中声明<code>android:clickable=true</code></p>
+</blockquote>
+</li>
+<li><p>ListView设置android:listSelector无效如何解决</p>
+<ul>
+<li><p>找到为什么无效</p>
+</li>
+<li><p>采用替代的方法</p>
+<p>首先，在自己实现的Adapter的getView()方法中进行如设置：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (position == selectItem) &#123;  </span><br><span class="line">	convertView.setBackgroundColor(Color.RED);  </span><br><span class="line">&#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">	convertView.setBackgroundColor(Color.TRANSPARENT);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后，在onItemClick()方法中，进行如下设置：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">adapter.setSelectedItem(position)</span><br><span class="line">adapter.notifyDatasetInvalidated();</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>如何对TextView的部分文字进行特定样式设置？</p>
+<ol>
+<li><p>采用strings.xml文件，即在该文件中利用相应的Html标签对要改变样式的问题进行更改</p>
+</li>
+<li><p>采用SpannableStringBuilder类，具体说明：</p>
+<blockquote>
+<p>该类提供了setSpan(Object what, int start, int end,int flags) 方法，其中的what可以为以下类的实例：<br>   URLSpan；<br>   ClickableSpan；<br>   BackgroundColorSpan；<br>   ForegroundColorSpan；<br>   MaskFilterSpan；<br>   AbsoluteSizeSpan；<br>   RelativeSizeSpan；<br>   ImageSpan；<br>   ScaleXSpan；<br>   StyleSpan；<br>   SubscriptSpan；<br>   SuperscriptSpan；<br>   TextAppearanceSpan；<br>   TypefaceSpan；<br>   RasterizerSpan；<br>   StrikethroughSpan；<br>   UnderlineSpan；</p>
+<p>使用方法：<br>   a、得到SpannableStringBuilder类的实例：builder；<br>   b、得到Span子类的实例，如ForegroundColorSpan的实例 forgroundColorSpan；<br>   c、调用setSpan方法，指定要进行样式修饰的起始位置，进行参数填充；<br>   d、调用TextView的setText(SpannableStringBuilder builder)方法；</p>
+</blockquote>
+</li>
+</ol>
+</li>
+<li><p>滑动控件嵌套问题（如ScrollView中嵌套ViewPager、ScrollView中嵌套RecycleView或ListView等）</p>
+<blockquote>
+<p>建议不要写这样的嵌套，但实在没办法的时候，我们要对嵌套的控件做处理（可以处理嵌套的控件，也可以处理处理被嵌套的控件）</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="编译配置问题"><a href="#编译配置问题" class="headerlink" title="编译配置问题"></a>编译配置问题</h2><ul>
+<li><p>Could not download support-compat.aar</p>
+<p>&gt;</p>
+</li>
+<li><p>Unable to open debugger port (localhost:8617): java.net.ConnectException “连接超时”</p>
+<blockquote>
+<p>很可能是localhost地址找不到的原因，在hosts中添加：</p>
+<p>127.0.0.1        localhost</p>
+<p>这一行即可</p>
+</blockquote>
+</li>
+<li><p>mac版eclipse导入Android项目里面的中文乱码问题如何解决？</p>
+<blockquote>
+<ol>
+<li>在Preference中找到Text File Encoding，选择Other，手动输入GBK即可；</li>
+<li>针对单个文件，选择乱码的文件，右键选择属性，在Text File Encoding中进行修改；</li>
+<li>针对所有的*.java文件，可采用在Eclipse的偏好设置中的General-&gt;Content Type-&gt;Text-&gt;Java Source Files-&gt;Default Encoding中进行设置。</li>
+</ol>
+</blockquote>
+</li>
+<li><p>Android Studio或者Eclipse编译项目时提示Error:java.lang.OutOfMemoryError: GC overhead limit exceeded如何解决？</p>
+<blockquote>
+<p>解决方法：</p>
+<ul>
+<li><p>Android Studio：在项目的build.gradle文件的android节点添加如下代码:</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;   dexOptions &#123;</span><br><span class="line">&gt;   	javaMaxHeapSize <span class="string">"2048m"</span></span><br><span class="line">&gt;       <span class="comment">// 以下为Android Studio默认值</span></span><br><span class="line">&gt;       <span class="comment">// javaMaxHeapSize "256m"</span></span><br><span class="line">&gt;   &#125; </span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</blockquote>
+<p>&gt;</p>
+<blockquote>
+<ul>
+<li><p>Eclipse: 方法同Android Studio，更改eclipse.ini文件的相关配置： </p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;   -Xms40m</span><br><span class="line">&gt;   -Xmx512m</span><br><span class="line">&gt;</span><br><span class="line">&gt;   修改为</span><br><span class="line">&gt;   -Xms512m</span><br><span class="line">&gt;   -Xmx1024m</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</blockquote>
+</li>
+<li><p>当打release包的时候，提示如下错误信息时，如何解决？</p>
+<blockquote>
+<p>Error:Execution failed for task ‘:loggertest:processDebugManifest’. Manifest merger failed : Attribute application@icon value=(@mipmap/iclauncher) from AndroidManifest.xml:7:9-43 is also present at [TuringOSLoggerAPI:app:unspecified] AndroidManifest.xml:16:9-45 value=(@drawable/iclauncher). Suggestion: add ‘tools:replace=”android:icon”‘ to element at AndroidManifest.xml:5:5-18:19 to override.</p>
+</blockquote>
+<p>解决方案：</p>
+<blockquote>
+<p>在提示信息中已经给出了，我们只要在主module的application节点添加tools:replace=”属性名”，同时在AndroidManifest.xml的根节点上添加对应的命名空间</p>
+<p><code>xmlns:tools=&quot;http://schemas.android.com/tools&quot;</code></p>
+<p><strong><em>注意：多个属性需要用’,’隔开。</em></strong></p>
+</blockquote>
+</li>
+<li><p>Android Studio修改apk文件名、修改apk文件输出路径之后，点击run或debug项目提示在app主module的build文件夹下找不到对应的apk文件，导致apk无法安装如何解决？</p>
+<p>解决方案:</p>
+<blockquote>
+<p>这是因为你当前的构建变体是不允许直接通过Android Studio来运行（或调试）的，此时你只需要在AS的菜单栏上点击<strong>Build-&gt;Edit Build Types-&gt;选择相应的BuildVariants，debuggable属性设置为true即可</strong>。</p>
+</blockquote>
+</li>
+<li><p>Android Studio多种构建变体添加applicationIdSuffix后，logcat找不到对应的包名，取而代之的时问号？</p>
+<p>解决方案：</p>
+<blockquote>
+<p>这同样是因为当前的构建变体是不允许直接通过Android Studio来运行（或调试）的，此时你只需要在AS的菜单栏上点击<strong>Build-&gt;Edit Build Types-&gt;选择相应的BuildVariants，debuggable属性设置为true即可</strong>。</p>
+</blockquote>
+</li>
+<li><p>某个类型的构建变体（BuildVariants）不能调试，提示如下：</p>
+<blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt; Error running app:</span><br><span class="line">&gt; Cannot debug application from module app on device xxx.</span><br><span class="line">&gt; This application does not have the debuggable attribute enabled in its manifest.</span><br><span class="line">&gt; If you have manually set it in the manifest, then remove it and let the IDE automatically assign it.</span><br><span class="line">&gt; If you are using Gradle, make sure that your current variant is debuggable.</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>解决方案：</p>
+<blockquote>
+<ul>
+<li>在Android Studio的BuildVariants选择以Debug结尾的BuildVariants即可（因为Debug结尾的默认是可以调试的）</li>
+<li>在Android Studio的build菜单选择Edit Build type，可以配置不同BuildVariants的相关属性</li>
+</ul>
+</blockquote>
+</li>
+<li><p>Android Studio开启instant run运行项目报如下错误：</p>
+<blockquote>
+<p>Error:java.io.IOException: Could not delete path ‘/Users/RandyZhang/AndroidStudioProjects/TRJ/app/build/intermediates/instant-run-support/sc-trj/yw/package_directories/dex-renamer-state.txt’</p>
+</blockquote>
+<p>解决方案：</p>
+<blockquote>
+<ul>
+<li>关闭instant run（不推荐，毕竟instant run还是很好用的）</li>
+<li>手动删除对应目录下对应的文件</li>
+<li>先debug运行，带run运行（很有效）</li>
+</ul>
+</blockquote>
+</li>
+<li><p>Android Studio中启动模拟器时提示<code>Emulator: WARNING: HAXM 6.0.1 is installed. Please install HAXM &gt;= 6.2.1 to fix compatibility issues on Mac.</code>如何解决？</p>
+<p>解决方法:</p>
+<blockquote>
+<ul>
+<li>首先查看Android Studio的SDK Manager，看看SDK Tool选项卡下面的Intel X86 Emulator Accelector（HAXM installer）的最新版本是否是installed的状态，如果是，看下一步</li>
+<li>在安装的Android SDK目录找到extra文件夹，找到Intel文件夹，点击Hardware_Accelerated_Execution_Manager，找到IntelHAXM_6.2.1.dmg进行手动安装，安装之后最好能重启Android Studio和已经开启的模拟器，即可解决问题</li>
+</ul>
+</blockquote>
+</li>
+<li><p>同步项目报错：Android - Gradle “xxx” project refresh failed 如何解决？</p>
+<p>解决方法：</p>
+<blockquote>
+<ul>
+<li><a href="http://blog.csdn.net/caroline_wendy/article/details/21187769" target="_blank" rel="noopener">http://blog.csdn.net/caroline_wendy/article/details/21187769</a></li>
+<li>重启Android Studio或重启电脑（我遇到这个问题的时候是通过重启电脑解决的）</li>
+</ul>
+</blockquote>
+</li>
+<li><p>遇到Manifest mergerfailed问题，如下：</p>
+<blockquote>
+<p>Error:Execution failed for task ‘:vitamio-sample:processDebugManifest’.Manifest merger         failed : uses-sdk:minSdkVersion 11 cannot be smaller than version 15 declared in         library [io.vov.vitamio:vitamio:4.2.0-SNAPSHOT] /Users/RandyZhang/        AndroidStudioProjects/VitamioBundle/vitamio-sample/build/intermediates/exploded-aar/        io.vov.vitamio/vitamio/4.2.0-SNAPSHOT/AndroidManifest.xml    </p>
+</blockquote>
+<p>解决方法：<br>在相应的AndroidManifest文件的manifest标签中加上如下内容：</p>
+<blockquote>
+<p><code>xmlns:tools=&quot;http://schemas.android.com/tools&quot;</code></p>
+</blockquote>
+<p>同时添加以下uses-sdk说明:</p>
+<blockquote>
+<p><code>&lt;uses-sdk tools:overrideLibrary=&quot;name&quot; /&gt;</code>    </p>
+</blockquote>
+</li>
+</ul>
+<h2 id="四大组件问题"><a href="#四大组件问题" class="headerlink" title="四大组件问题"></a>四大组件问题</h2><ul>
+<li><p>Activity中应用Fragment进行数据的加载与显示时，第一次进入正常，推出再次进入崩溃？</p>
+<blockquote>
+<p>出现这种情况的原因可能有以下几点：</p>
+<ol>
+<li>采用getInstance方法获取Fragment的实例，但推出时没有置空，导致Fragment里面的控件不为空，但数据为空，其他地方又没有很好的对这种情况进行处理，导致空指针；</li>
+<li>Fragment的生命周期没有管理好</li>
+</ol>
+</blockquote>
+</li>
+<li><p>Android启动时很长一段时间出现白屏（或黑屏）如何解决？</p>
+<blockquote>
+<p>to be answered…</p>
+</blockquote>
+</li>
+<li><p>Android 如何避免软键盘弹出时遮挡住用户交互界面？</p>
+<blockquote>
+<p>在AndroidManifest.xml中为对应的activity添加android:windowSoftInputMode=”adjustResize”</p>
+</blockquote>
+<p><strong><em>NOTE：</em></strong><code>android:windowSoftInputMode</code>属性说明：</p>
+<blockquote>
+<p>该属性一般使用在AndroidManifest.xml文件的<code>&lt;activity&gt;...&lt;/activity&gt;</code>标签上，可以设置成如下值：</p>
+<ul>
+<li><code>stateUnspecified</code></li>
+<li><code>stateUnchanged</code></li>
+<li><code>stateHidden</code></li>
+<li><code>stateAlwaysHidden</code></li>
+<li><code>stateVisible</code></li>
+<li><code>stateAlwaysVisible</code></li>
+<li><code>adjustUnspecified</code></li>
+<li><code>adjustResize</code></li>
+<li><code>adjustPan</code></li>
+</ul>
+<p>这个属性将会影响<strong><em>两件事情</em></strong>：</p>
+<ol>
+<li><strong>state</strong>，即软键盘的状态，软键盘是否显示；</li>
+<li><strong>adjust</strong>，即是否调整当前窗口。</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+<h2 id="WebView问题"><a href="#WebView问题" class="headerlink" title="WebView问题"></a>WebView问题</h2><ul>
+<li><p>App 的WebView加载使用了rem为单位的H5页面时，若改变了手机的系统字体大小，会导致央视错乱</p>
+<p>解决方法：</p>
+<blockquote>
+<p>调用WebView.getSettings().setTextZoom(100)即可。在固定大小的布局中，如果想文字大小不随系统字体改变而改变，应该采用dp为单位（而不是sp）</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="第三方库常见问题"><a href="#第三方库常见问题" class="headerlink" title="第三方库常见问题"></a>第三方库常见问题</h2><ul>
+<li><p>使用Glide报如下错误如何解决？</p>
+<blockquote>
+<p>java.lang.IllegalArgumentException: You cannot start a load for a destroyed activity<br>​    com.bumptech.glide.manager.k.b(Unknown Source)<br>​    com.bumptech.glide.manager.k.a(Unknown Source)<br>​    com.bumptech.glide.manager.k.a(Unknown Source)<br>​    com.bumptech.glide.e.b(Unknown Source)</p>
+<p>   …</p>
+<p>   …</p>
+</blockquote>
+<p>解决方案：</p>
+<blockquote>
+<p>先说明一下原因，上面的日志记录已经说得很清楚了，Glide加载图片是和Activity和Fragment的生命周期相关联的，如果Activity已经被销毁，Activity里面Glide加载任务仍在进行，就会抛出上述异常，可以</p>
+<p>参考这篇文章解决问题<a href="https://stackoverflow.com/questions/31964737/glide-image-loading-with-application-context/32887693#32887693" target="_blank" rel="noopener">https://stackoverflow.com/questions/31964737/glide-image-loading-with-application-context/32887693#32887693</a></p>
+</blockquote>
+</li>
+</ul>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ul>
+<li><p>Q：小米手机更改应用程序图标后，桌面上图标没有什么变化？</p>
+<blockquote>
+<p>重启后可解决问题；</p>
+</blockquote>
+</li>
+<li><p>不要轻易使用Android Studio的Removed unused resources</p>
+<blockquote>
+<p>因为你的项目中可能引用了一些第三方module，这些module中使用的资源文件可能在主module中声明了，执行该命令如果操作不慎可能会导致资源误删</p>
+</blockquote>
+</li>
+<li><p>异步任务成功回调中弹窗，出现BadTokenException？</p>
+<blockquote>
+<p>原因可能是Activity已经Finish了，但异步任务仍存活，导致BadTokenException发生，解决方式，异步任务中显示Dialog（PopupWindow等时，先判断当前Activity是否finish）</p>
+</blockquote>
+</li>
+<li><p>Fragment中使用getResources()方法，提示IllegalStateException？</p>
+<blockquote>
+<p>出现的原因是Fragment还没attach到Activity，就调用了Activity相关的getResource方法，导致IllegalStateException发生，解决方法即使提前判断Fragment是否attach成功，调用isAdded方法进行判断</p>
+</blockquote>
+</li>
+<li><p>提示<code>zsh: command not found</code></p>
+<blockquote>
+<p>先确定<code>.bash_profile</code>的PATH是否有相应的环境变量，如果有，看看<code>.zshrc</code>的配置文件的User Configuraion 是否包含了<code>source ~/.bash_profile</code>这个配置</p>
+</blockquote>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A180116.html" rel="next" title="Android Kotlin基础语法">
+                <i class="fa fa-chevron-left"></i> Android Kotlin基础语法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A180205.html" rel="prev" title="Android 浅谈Retrofit的封装">
+                Android 浅谈Retrofit的封装 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义模板"><span class="nav-number">1.</span> <span class="nav-text">自定义模板</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#权限适配问题"><span class="nav-number">2.</span> <span class="nav-text">权限适配问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#控件问题"><span class="nav-number">3.</span> <span class="nav-text">控件问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译配置问题"><span class="nav-number">4.</span> <span class="nav-text">编译配置问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四大组件问题"><span class="nav-number">5.</span> <span class="nav-text">四大组件问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WebView问题"><span class="nav-number">6.</span> <span class="nav-text">WebView问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第三方库常见问题"><span class="nav-number">7.</span> <span class="nav-text">第三方库常见问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-number">8.</span> <span class="nav-text">其他</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

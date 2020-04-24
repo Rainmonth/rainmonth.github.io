@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Android Launcher3分析——开篇简介Launcher就是一个Activity，Launcher的源码中也是继承的Activity。直观体现就是手机的桌面，当我们打开手机的时候，手机的桌面就是Launcher，一个Activity，只是这个Activity做的事情比较多：   View方面，可以左右滑动，可以响应长按操作； 逻辑方面，可以承载手机中所有应用的快捷方式，是其他程序的入口；">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Launcher3分析——开篇">
+<meta property="og:url" content="http://yoursite.com/posts/A180702.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="Android Launcher3分析——开篇简介Launcher就是一个Activity，Launcher的源码中也是继承的Activity。直观体现就是手机的桌面，当我们打开手机的时候，手机的桌面就是Launcher，一个Activity，只是这个Activity做的事情比较多：   View方面，可以左右滑动，可以响应长按操作； 逻辑方面，可以承载手机中所有应用的快捷方式，是其他程序的入口；">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.787Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android Launcher3分析——开篇">
+<meta name="twitter:description" content="Android Launcher3分析——开篇简介Launcher就是一个Activity，Launcher的源码中也是继承的Activity。直观体现就是手机的桌面，当我们打开手机的时候，手机的桌面就是Launcher，一个Activity，只是这个Activity做的事情比较多：   View方面，可以左右滑动，可以响应长按操作； 逻辑方面，可以承载手机中所有应用的快捷方式，是其他程序的入口；">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A180702.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android Launcher3分析——开篇 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A180702.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android Launcher3分析——开篇</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-02T00:00:00+08:00">2018-07-02</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/源码分析/" itemprop="url" rel="index"><span itemprop="name">源码分析</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android-Launcher3分析——开篇"><a href="#Android-Launcher3分析——开篇" class="headerlink" title="Android Launcher3分析——开篇"></a>Android Launcher3分析——开篇</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Launcher就是一个Activity，Launcher的源码中也是继承的Activity。直观体现就是手机的桌面，当我们打开手机的时候，手机的桌面就是Launcher，一个Activity，只是这个Activity做的事情比较多：</p>
+<blockquote>
+<ul>
+<li>View方面，可以左右滑动，可以响应长按操作；</li>
+<li>逻辑方面，可以承载手机中所有应用的快捷方式，是其他程序的入口；</li>
+</ul>
+</blockquote>
+<p>总的来说，<strong><em>Launcher就是一个包含了许多自定义控件的复杂Activity</em></strong>。</p>
+<h2 id="整体上看Launcher3"><a href="#整体上看Launcher3" class="headerlink" title="整体上看Launcher3"></a>整体上看Launcher3</h2><a id="more"></a>
+<p>Android四大组件一应俱全，可见Launcher3是一个综合性较强的项目</p>
+<h3 id="Activity（6个）"><a href="#Activity（6个）" class="headerlink" title="Activity（6个）"></a>Activity（6个）</h3><ul>
+<li>com.android.launcher3.Launcher（主要的Activity）</li>
+<li>com.android.launcher3.ToggleWeightWatcher</li>
+<li>com.android.launcher3.WallpaperPickerActivity</li>
+<li>com.android.launcher3.WallpaperCropActivity</li>
+<li>com.android.launcher3.SettingsActivity</li>
+<li>com.android.launcher3.MemoryDumpActivity</li>
+</ul>
+<h3 id="Service（1个）"><a href="#Service（1个）" class="headerlink" title="Service（1个）"></a>Service（1个）</h3><ul>
+<li>com.android.launcher3.MemoryTracker</li>
+</ul>
+<h3 id="BroadcastReceiver（4个）"><a href="#BroadcastReceiver（4个）" class="headerlink" title="BroadcastReceiver（4个）"></a>BroadcastReceiver（4个）</h3><ul>
+<li>com.android.launcher3.WallpaperChangedReceiver</li>
+<li>com.android.launcher3.InstallShortcutReceiver</li>
+<li>com.android.launcher3.AppWidgetsRestoredReceiver</li>
+<li>com.android.launcher3.StartupReceiver</li>
+</ul>
+<h3 id="ContentProvider（1个）"><a href="#ContentProvider（1个）" class="headerlink" title="ContentProvider（1个）"></a>ContentProvider（1个）</h3><ul>
+<li>com.android.launcher3.LauncherProvider</li>
+</ul>
+<h2 id="如何定义一个Launcher"><a href="#如何定义一个Launcher" class="headerlink" title="如何定义一个Launcher"></a>如何定义一个Launcher</h2><p>Android定义一个Launcher很简单，要定义成Launcher的Activity代码如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">activity</span></span></span><br><span class="line"><span class="tag">	<span class="attr">android:name</span>=<span class="string">"com.android.launcher3.Launcher"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:launchMode</span>=<span class="string">"singleTask"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:clearTaskOnLaunch</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:stateNotNeeded</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:theme</span>=<span class="string">"@style/Theme"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:windowSoftInputMode</span>=<span class="string">"adjustPan"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:screenOrientation</span>=<span class="string">"nosensor"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:resumeWhilePausing</span>=<span class="string">"true"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:taskAffinity</span>=<span class="string">""</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:enabled</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">  	<span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.MAIN"</span> /&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">"android.intent.category.HOME"</span> /&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">"android.intent.category.LAUNCHER"</span> /&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">"android.intent.category.DEFAULT"</span> /&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">"android.intent.category.MONKEY"</span>/&gt;</span></span><br><span class="line">  	<span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>注意，上面intent-filter的具体含义：</p>
+<ul>
+<li>android.intent.action.MAIN决定应用程序最先启动的Activity；</li>
+<li>android.intent.category.HOME决定设备启动后第一个启动的Activity（通常要更改framework层的设置才能使之生效，因为国内系统定制化严重，各家手机厂商的ROM都提供了自己的Launcher）</li>
+<li>android.intent.category.LAUNCHER决定应用程序是否显示在程序列表里；</li>
+<li>android.intent.category.DEFAULT，决定可以接受隐式intent的Activity在没有传递intent-filter时是否能匹配成功，添加了该项的能匹配成功，反之匹配失败（当然，如果Activity时应用最先启动的Activity就不需要这个了）</li>
+<li>android.intent.category.MONKEY，决定Activity是否能被monkey或其他自动化测试工具进行访问测试</li>
+</ul>
+<p>先看Launcher对应的布局文件launcher.xml，如下：</p>
+<p>launcher.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span><br><span class="line"><span class="comment">&lt;!-- Copyright (C) 2007 The Android Open Source Project</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">     Licensed under the Apache License, Version 2.0 (the "License");</span></span><br><span class="line"><span class="comment">     you may not use this file except in compliance with the License.</span></span><br><span class="line"><span class="comment">     You may obtain a copy of the License at</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">          http://www.apache.org/licenses/LICENSE-2.0</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">     Unless required by applicable law or agreed to in writing, software</span></span><br><span class="line"><span class="comment">     distributed under the License is distributed on an "AS IS" BASIS,</span></span><br><span class="line"><span class="comment">     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></span><br><span class="line"><span class="comment">     See the License for the specific language governing permissions and</span></span><br><span class="line"><span class="comment">     limitations under the License.</span></span><br><span class="line"><span class="comment">--&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- Full screen view projects under the status bar and contains the background --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">com.android.launcher3.LauncherRootView</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">xmlns:launcher</span>=<span class="string">"http://schemas.android.com/apk/res-auto"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:id</span>=<span class="string">"@+id/launcher"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:fitsSystemWindows</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.android.launcher3.DragLayer</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/drag_layer"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">com.android.launcher3.FocusIndicatorView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/focus_indicator"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"52dp"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"52dp"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">&lt;!-- The workspace contains 5 screens of cells --&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- DO NOT CHANGE THE ID --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">com.android.launcher3.Workspace</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/workspace"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_gravity</span>=<span class="string">"center"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">launcher:defaultScreen</span>=<span class="string">"@integer/config_workspaceDefaultScreen"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">&lt;!-- DO NOT CHANGE THE ID --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">include</span> <span class="attr">layout</span>=<span class="string">"@layout/hotseat"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/hotseat"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_gravity</span>=<span class="string">"right"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">include</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/search_drop_target_bar"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">layout</span>=<span class="string">"@layout/search_drop_target_bar"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">include</span> <span class="attr">layout</span>=<span class="string">"@layout/overview_panel"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/overview_panel"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:visibility</span>=<span class="string">"gone"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">include</span> <span class="attr">layout</span>=<span class="string">"@layout/widgets_view"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/widgets_view"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:visibility</span>=<span class="string">"invisible"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">include</span> <span class="attr">layout</span>=<span class="string">"@layout/all_apps"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">"@+id/apps_view"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:visibility</span>=<span class="string">"invisible"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">com.android.launcher3.DragLayer</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">ViewStub</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/launcher_overlay_stub"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:inflatedId</span>=<span class="string">"@+id/launcher_overlay"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout</span>=<span class="string">"@layout/launcher_overlay"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">com.android.launcher3.LauncherRootView</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>根布局层次结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">LauncherRootView extends InsettableFrameLayout</span><br><span class="line">|---DragLayer</span><br><span class="line">    |---FocusIndicatorView</span><br><span class="line">    |---Workspace</span><br><span class="line">    |---hotset.xml（层级如下）：</span><br><span class="line">        |---Hotseat extends FramLayout</span><br><span class="line">            |---CellLayout extends ViewGroup</span><br><span class="line">    |---search_drop_target_bar.xml</span><br><span class="line">        |---SearchDropTargetBar extends FrameLayout</span><br><span class="line">            |---LinearLayout(orientation:horizontal)</span><br><span class="line">                |---FrameLayout</span><br><span class="line">                    |---DeleteDropTarget extends ButtonDropTarget（删除应用快捷方式）</span><br><span class="line">                    FrameLayout</span><br><span class="line">                    |---InfoDropTarget extends ButtonDropTarget（查看应用信息）</span><br><span class="line">                    FrameLayout</span><br><span class="line">                    |---UninstallDropTarget extends ButtonDropTarget（卸载应用）</span><br><span class="line">    |---overview_panel.xml(长按屏幕显示，默认隐藏)</span><br><span class="line">        |---LinearLayout</span><br><span class="line">            |---TextView（壁纸按钮）：点击可设置壁纸</span><br><span class="line">            |---TextView（小部件按钮）：点击可添加小部件（widget）</span><br><span class="line">            |---TextView（设置按钮）：点击进入设置</span><br><span class="line">    |---widgets_view.xml（显示小部件的视图）</span><br><span class="line">        |---WidgetsContainerView extends BaseContainerView extends LinearLayout</span><br><span class="line">            |---FrameLayout</span><br><span class="line">                |---FrameLayout</span><br><span class="line">                |---WidgetsRecyclerView extends BaseRecyclerView extends RecyclerView</span><br><span class="line">    |---all_apps.xml（显示所有App的视图，里面的子控件都是通过AppAppsContainerView的实例获取的）</span><br><span class="line">        |---AllAppsContainerView extends BaseContainerView extends LinearLayout</span><br><span class="line">            |---FrameLayout（所有App时图顶部的搜索框）</span><br><span class="line">            |---FrameLayout</span><br><span class="line">                |---FrameLayout</span><br><span class="line">                |---all_apps_container.xml（承载所有App的视图（集列出所有安装的app的容器）</span><br><span class="line">                    |---AllAppsRecyclerViewContainerView</span><br><span class="line">                        |---AllAppsRecyclerView</span><br><span class="line">	|---ViewStub</span><br></pre></td></tr></table></figure>
+<h2 id="Launcher中核心类的简单说明"><a href="#Launcher中核心类的简单说明" class="headerlink" title="Launcher中核心类的简单说明"></a>Launcher中核心类的简单说明</h2><blockquote>
+<p>具体说明请点击相应连接</p>
+</blockquote>
+<ul>
+<li><a href="">Launcher</a>：主界面Activity，最核心且唯一的Activity；</li>
+<li><a href="">LauncherAppState</a>：单例对象，主要有如下作用：</li>
+</ul>
+<blockquote>
+<ol>
+<li>初始化<a href="">InvariantDeviceProfile</a>、<a href="">IconCache</a>、<a href="">WidgetPreviewLoader</a>、<a href="">LauncherModel</a>等；</li>
+<li>注册广播，用来处理本地配置变化、搜索数据库（global search provider）变化、应用的安装与卸载等；</li>
+</ol>
+</blockquote>
+<ul>
+<li><a href="">InvariantDeviceProfile</a>：一些不变的设备相关参数管理类，包含横竖屏的两种DeviceProfile；<ul>
+<li><a href="">IconCache</a>：应用程序图标缓存类，里面用数据库存储了应用的icon及title等的缓存信息；</li>
+<li><a href="">WidgetPreviewLoader</a>：加载Widget信息数据库，里面用数据库存储了Widget的信息</li>
+<li><a href="">LauncherModel</a>：在内存中保存Launcher的状态，提供读写数据库的API，其内部类LoaderTask用来加载Launcher的内容（包括workspace icons、widgets和all apps icons）<ul>
+<li>LauncherAppsCompat：兼容抽象基类，用来获取已安装的App列表；</li>
+<li>UserManagerCompat：兼容抽象基类，用来处理不通版本下的用户管理；</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>DragController：拖拽事件控制类，拖拽事件的处理逻辑在这里实现</li>
+<li>LauncherStateTransitionAnimation：Launcher的动画导演，负责安排不同状态切换之间的动画处理</li>
+<li>AppWidgetManagerCompat：兼容抽象基类，负责处理不通版本下应用和Widget管理</li>
+<li>LauncherAppWidgetHost：继承子AppWidgetHost，顾名思义，AppWidgetHost是桌面app、widget等的宿主，之所以继承是为了LauncherAppWidgetHostView能更好的处理长按事件；</li>
+<li>FocusIndicatorView：一个实现了View.OnFocusChangeListener的View（具体作用上不清楚）</li>
+<li>DragLayer：一个用来协调子View拖拽事件的ViewGroup，实际上事件的分发拦截等是在DragController，因为DragLayer持有DragController的实例，并调用了setup方法初始化了它；</li>
+<li>Workspace：一个包含了壁纸和有限数量的页面的较大空间</li>
+</ul>
+<h2 id="Launcher主流程"><a href="#Launcher主流程" class="headerlink" title="Launcher主流程"></a>Launcher主流程</h2><h3 id="先分析生命周期函数"><a href="#先分析生命周期函数" class="headerlink" title="先分析生命周期函数"></a>先分析生命周期函数</h3><h4 id="onCreate"><a href="#onCreate" class="headerlink" title="onCreate()"></a>onCreate()</h4><p>主要流程都在onCreate中，如下（采用代码中添加注释的方法说明，省略次要代码）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//省略掉严格模式相关代码...</span></span><br><span class="line">  <span class="keyword">if</span> (mLauncherCallbacks != <span class="keyword">null</span>) &#123;</span><br><span class="line">    mLauncherCallbacks.preOnCreate();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 各种变量初始化</span></span><br><span class="line">  LauncherAppState.setApplicationContext(getApplicationContext());</span><br><span class="line">  <span class="comment">// 初始化LauncherAppState对象</span></span><br><span class="line">  LauncherAppState app = LauncherAppState.getInstance();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 根据配置的orientation来初始化DeviceProfile对象</span></span><br><span class="line">  mDeviceProfile = getResources().getConfiguration().orientation</span><br><span class="line">    == Configuration.ORIENTATION_LANDSCAPE ?</span><br><span class="line">    app.getInvariantDeviceProfile().landscapeProfile</span><br><span class="line">    : app.getInvariantDeviceProfile().portraitProfile;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 初始化SharedPreference对象</span></span><br><span class="line">  mSharedPrefs = getSharedPreferences(LauncherAppState.getSharedPreferencesKey(),</span><br><span class="line">                                      Context.MODE_PRIVATE);</span><br><span class="line">  mIsSafeModeEnabled = getPackageManager().isSafeMode();</span><br><span class="line">  mModel = app.setLauncher(<span class="keyword">this</span>);</span><br><span class="line">  mIconCache = app.getIconCache();</span><br><span class="line"></span><br><span class="line">  mDragController = <span class="keyword">new</span> DragController(<span class="keyword">this</span>);</span><br><span class="line">  mInflater = getLayoutInflater();</span><br><span class="line">  mStateTransitionAnimation = <span class="keyword">new</span> LauncherStateTransitionAnimation(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">  mStats = <span class="keyword">new</span> Stats(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">  mAppWidgetManager = AppWidgetManagerCompat.getInstance(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">  mAppWidgetHost = <span class="keyword">new</span> LauncherAppWidgetHost(<span class="keyword">this</span>, APPWIDGET_HOST_ID);</span><br><span class="line">  mAppWidgetHost.startListening();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// If we are getting an onCreate, we can actually preempt onResume and unset mPaused here,</span></span><br><span class="line">  <span class="comment">// this also ensures that any synchronous binding below doesn't re-trigger another</span></span><br><span class="line">  <span class="comment">// LauncherModel load.</span></span><br><span class="line">  mPaused = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (PROFILE_STARTUP) &#123;</span><br><span class="line">    android.os.Debug.startMethodTracing(</span><br><span class="line">      Environment.getExternalStorageDirectory() + <span class="string">"/launcher"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 设置布局（注意，此时的布局是不包含布局参数的）</span></span><br><span class="line">  setContentView(R.layout.launcher);</span><br><span class="line">  <span class="comment">// 初始化View，进行各种View的初始化，事件绑定</span></span><br><span class="line">  setupViews();</span><br><span class="line">  <span class="comment">// 为布局中的View添加上布局参数</span></span><br><span class="line">  mDeviceProfile.layout(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">  lockAllApps();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 恢复保存的状态</span></span><br><span class="line">  mSavedState = savedInstanceState;</span><br><span class="line">  restoreState(mSavedState);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (PROFILE_STARTUP) &#123;</span><br><span class="line">    android.os.Debug.stopMethodTracing();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 数据加载核心部分，主要有LauncherModel的内部类LoaderTask来完成</span></span><br><span class="line">  <span class="keyword">if</span> (!mRestoring) &#123;</span><br><span class="line">    <span class="keyword">if</span> (DISABLE_SYNCHRONOUS_BINDING_CURRENT_PAGE) &#123;</span><br><span class="line">      <span class="comment">// If the user leaves launcher, then we should just load items asynchronously when</span></span><br><span class="line">      <span class="comment">// they return.</span></span><br><span class="line">      mModel.startLoader(PagedView.INVALID_RESTORE_PAGE);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 只有当launcher处于前台，且用户旋转屏幕活着触发方向配置上的改变时我们才同步加载数据</span></span><br><span class="line">      mModel.startLoader(mWorkspace.getRestorePage());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// For handling default keys</span></span><br><span class="line">  mDefaultKeySsb = <span class="keyword">new</span> SpannableStringBuilder();</span><br><span class="line">  Selection.setSelection(mDefaultKeySsb, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">  IntentFilter filter = <span class="keyword">new</span> IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);</span><br><span class="line">  registerReceiver(mCloseSystemDialogsReceiver, filter);</span><br><span class="line"></span><br><span class="line">  mRotationEnabled = Utilities.isRotationAllowedForDevice(getApplicationContext());</span><br><span class="line">  <span class="comment">// In case we are on a device with locked rotation, we should look at preferences to check</span></span><br><span class="line">  <span class="comment">// if the user has specifically allowed rotation.</span></span><br><span class="line">  <span class="keyword">if</span> (!mRotationEnabled) &#123;</span><br><span class="line">    mRotationEnabled = Utilities.isAllowRotationPrefEnabled(getApplicationContext(), <span class="keyword">false</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// On large interfaces, or on devices that a user has specifically enabled screen rotation,</span></span><br><span class="line">  <span class="comment">// we want the screen to auto-rotate based on the current orientation</span></span><br><span class="line">  setOrientation();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (mLauncherCallbacks != <span class="keyword">null</span>) &#123;</span><br><span class="line">    mLauncherCallbacks.onCreate(savedInstanceState);</span><br><span class="line">    <span class="keyword">if</span> (mLauncherCallbacks.hasLauncherOverlay()) &#123;</span><br><span class="line">      ViewStub stub = (ViewStub) findViewById(R.id.launcher_overlay_stub);</span><br><span class="line">      mLauncherOverlayContainer = (InsettableFrameLayout) stub.inflate();</span><br><span class="line">      mLauncherOverlay = mLauncherCallbacks.setLauncherOverlayView(</span><br><span class="line">        mLauncherOverlayContainer, mLauncherOverlayCallbacks);</span><br><span class="line">      mWorkspace.setLauncherOverlay(mLauncherOverlay);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 是否显示欢迎说明</span></span><br><span class="line">  <span class="keyword">if</span> (shouldShowIntroScreen()) &#123;</span><br><span class="line">    showIntroScreen();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    showFirstRunActivity();</span><br><span class="line">    showFirstRunClings();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，在设置布局之后，进行了View的初始化、View的事件绑定等，然后根据DeviceProfile（设备描述类，定义了Launcher在不同设备、不公状态下的以下常量等）的layout方法为初始化的View添加上布局参数。参数设置完成后，就进入了数据加载阶段，数据加载是通过<a href="">LauncherModel</a>的内部类LoaderTask来完成的（根据当前的配置，来选择时同步加载数据还是异步加载数据）。接下来就是控制Launcher Intro Screen的显示与否了，显示的话，就显示Intro Screen，不显示就进入else部分，显示Launcher Clings（其实就是首次运行Launcher时的一些关于Launcher用途的说明）</p>
+<blockquote>
+<p>Launcher 代码中关于mLauncherCallbacks部分，由于mLauncherCallbacks的赋值操作必须调用setLauncherCallbacks来完成，但该函数只在LauncherExtension中才调用，所以如果要对Launcher做扩展，需要了解这部分代码，否则，可以忽略。</p>
+</blockquote>
+<h4 id="onResume"><a href="#onResume" class="headerlink" title="onResume()"></a>onResume()</h4><p>onResume()中主要进行的是视图显示状态的恢复、依次执行Runnable任务（包括BindAllApplicationRunnable、BindPackagesUpdatesRunnable以及UpdateOrientationRunnable）、恢复App或App Shortcut的状态，必要的时候还会重新生成workspace上的Widget和QSB等。</p>
+<p>Launcher中有一个waitUntilResume函数，字面意思“直到onResume执行才。。。。”，先看看其具体代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Thunk</span></span><br><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">waitUntilResume</span><span class="params">(Runnable run, <span class="keyword">boolean</span> deletePreviousRunnables)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (mPaused) &#123;</span><br><span class="line">    <span class="keyword">if</span> (LOGD) Log.d(TAG, <span class="string">"Deferring update until onResume"</span>);</span><br><span class="line">    <span class="keyword">if</span> (deletePreviousRunnables) &#123;</span><br><span class="line">      <span class="keyword">while</span> (mBindOnResumeCallbacks.remove(run)) &#123;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    mBindOnResumeCallbacks.add(run);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>还有一个重载方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">waitUntilResume</span><span class="params">(Runnable run)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> waitUntilResume(run, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在如下几个地方调用了：</p>
+<ul>
+<li>Launcher(直接调用的地方)<ul>
+<li>bindAllApplications(final ArrayList<appinfo> apps)</appinfo></li>
+<li>bindAllPackages(final WidgetsModel model)</li>
+<li>onSettingsChanged(String settings, boolean value)</li>
+</ul>
+</li>
+<li>Launcher（间接调用的地方，调用的是重载的方法）<ul>
+<li>bindAppsAdded</li>
+<li>bindAppsUpdated</li>
+<li>bindAppWidget</li>
+<li>bindComponentsRemoved</li>
+<li>bindFolders</li>
+<li>bindItems</li>
+<li>bindRestoreItemsChange</li>
+<li>bindShortcutsChanged</li>
+<li>bindWidgetsRestored</li>
+<li>finishBindingItems</li>
+</ul>
+</li>
+</ul>
+<p>可见，与绑定有关的runnable都是在onResume的时候执行的，那么在这些runnable到底都做了什么，有什么功能，如何实现这些功能的呢？这里先提如下几个问题，我们带着问题读代码，马上就能得到答案：</p>
+<ol>
+<li>在这些runnable执行之前，又做了什么了？</li>
+<li>我们都要绑定写什么对象？</li>
+<li>我们要绑定的这些对象怎么得到的？</li>
+<li>我们要把这些对象绑定到哪去？</li>
+</ol>
+<p>现在依次解答上面的个问题，其实在onResume之前就已经被LauncherModel（数据处理的核心类）安排好了，现在来答上面的问题：</p>
+<ol>
+<li><p>在这些runnable执行之前，做了些什么？</p>
+<blockquote>
+<p>onCreate里面调用了Launcher的startLoader方法，开方法会开启其内部类LoaderTask的run方法来进行如下操作：</p>
+<ul>
+<li>loadAndBindWorkspace，即加载并绑定workspace；<ul>
+<li>loadWrokspace</li>
+<li>bindWorkspace</li>
+</ul>
+</li>
+<li>loadAndBindAllApps，即加载并绑定All apps；</li>
+</ul>
+</blockquote>
+</li>
+<li><p>我们都要绑定写什么对象？</p>
+<blockquote>
+<p>想想Launcher上都有什么，显然App、AppShortcut、widget、Folder等都可能有，所以要绑定的当然是这些对象。</p>
+</blockquote>
+</li>
+<li><p>我们要绑定的这些对象怎么得到的？</p>
+<blockquote>
+<p>通过LauncherModel的内部类LoaderTask来得到这些对象</p>
+</blockquote>
+</li>
+<li><p>我们要把这些对象绑定到哪去？</p>
+<blockquote>
+<p>该放哪儿去放哪儿去。由于Launcher中的对象（App、AppShortcut、Widget、Folder等）无论是在Desktop（即桌面）或Hotseat（即底部的图标栏）都有相应的坐标点（cellX，cellY）及占地面积（spanX、spanY），我们只要将其按对应坐标对号入座即可。当然特需情况（如图标遮挡什么的）需要特殊处理。</p>
+</blockquote>
+</li>
+</ol>
+<p>其实，2、3、4里面要做的任务都是在1里面完成的，可见数据处理核心还是LauncherModel里面。接下来的文章会对LauncherModel做详细分析。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A180510.html" rel="next" title="Android中动画的深入分析">
+                <i class="fa fa-chevron-left"></i> Android中动画的深入分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A180705.html" rel="prev" title="Android Launcher3分析——自定义控件之Workspace">
+                Android Launcher3分析——自定义控件之Workspace <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-Launcher3分析——开篇"><span class="nav-number">1.</span> <span class="nav-text">Android Launcher3分析——开篇</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#整体上看Launcher3"><span class="nav-number">1.2.</span> <span class="nav-text">整体上看Launcher3</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity（6个）"><span class="nav-number">1.2.1.</span> <span class="nav-text">Activity（6个）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Service（1个）"><span class="nav-number">1.2.2.</span> <span class="nav-text">Service（1个）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BroadcastReceiver（4个）"><span class="nav-number">1.2.3.</span> <span class="nav-text">BroadcastReceiver（4个）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ContentProvider（1个）"><span class="nav-number">1.2.4.</span> <span class="nav-text">ContentProvider（1个）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何定义一个Launcher"><span class="nav-number">1.3.</span> <span class="nav-text">如何定义一个Launcher</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Launcher中核心类的简单说明"><span class="nav-number">1.4.</span> <span class="nav-text">Launcher中核心类的简单说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Launcher主流程"><span class="nav-number">1.5.</span> <span class="nav-text">Launcher主流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#先分析生命周期函数"><span class="nav-number">1.5.1.</span> <span class="nav-text">先分析生命周期函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#onCreate"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">onCreate()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#onResume"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">onResume()</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="结合KaDa故事谈谈Android 性能优化稳，运行要稳 我们的目标，不是没有蛀牙，而是无泄漏，低crash  内存泄漏与溢出 属性动画导致的内存泄漏（归根结底是匿名类持有外部类引用导致的） 第三方支付导致的内存泄漏（几个PayController采用了静态的HashMap做缓存） WebView导致的内存泄漏">
+<meta property="og:type" content="article">
+<meta property="og:title" content="结合KaDa故事谈谈Android 性能优化">
+<meta property="og:url" content="http://yoursite.com/posts/A190514.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="结合KaDa故事谈谈Android 性能优化稳，运行要稳 我们的目标，不是没有蛀牙，而是无泄漏，低crash  内存泄漏与溢出 属性动画导致的内存泄漏（归根结底是匿名类持有外部类引用导致的） 第三方支付导致的内存泄漏（几个PayController采用了静态的HashMap做缓存） WebView导致的内存泄漏">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.796Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="结合KaDa故事谈谈Android 性能优化">
+<meta name="twitter:description" content="结合KaDa故事谈谈Android 性能优化稳，运行要稳 我们的目标，不是没有蛀牙，而是无泄漏，低crash  内存泄漏与溢出 属性动画导致的内存泄漏（归根结底是匿名类持有外部类引用导致的） 第三方支付导致的内存泄漏（几个PayController采用了静态的HashMap做缓存） WebView导致的内存泄漏">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A190514.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>结合KaDa故事谈谈Android 性能优化 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A190514.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">结合KaDa故事谈谈Android 性能优化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-14T00:00:00+08:00">2019-05-14</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/性能优化/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="结合KaDa故事谈谈Android-性能优化"><a href="#结合KaDa故事谈谈Android-性能优化" class="headerlink" title="结合KaDa故事谈谈Android 性能优化"></a>结合KaDa故事谈谈Android 性能优化</h1><h2 id="稳，运行要稳"><a href="#稳，运行要稳" class="headerlink" title="稳，运行要稳"></a>稳，运行要稳</h2><blockquote>
+<p>我们的目标，不是没有蛀牙，而是无泄漏，低crash</p>
+</blockquote>
+<h3 id="内存泄漏与溢出"><a href="#内存泄漏与溢出" class="headerlink" title="内存泄漏与溢出"></a>内存泄漏与溢出</h3><ul>
+<li>属性动画导致的内存泄漏（归根结底是匿名类持有外部类引用导致的）</li>
+<li>第三方支付导致的内存泄漏（几个PayController采用了静态的HashMap做缓存）</li>
+<li>WebView导致的内存泄漏</li>
+</ul>
+<a id="more"></a>
+<h3 id="降低Crash率"><a href="#降低Crash率" class="headerlink" title="降低Crash率"></a>降低Crash率</h3><ul>
+<li><p><code>NullPointerException</code>保护</p>
+</li>
+<li><p>系统提供的API关键方法进行<code>try catch</code>保护</p>
+</li>
+<li>第三方库的API关键方法进行 <code>try catch</code>保护</li>
+<li>(X)RecyclerView使用问题（坑点）<ul>
+<li>默认动画</li>
+<li>下拉刷新</li>
+<li>onDetachView() 类路径名报名不一样导致找不到</li>
+<li>下拉刷新动画造成内存泄漏</li>
+<li>不足一屏会出问题</li>
+</ul>
+</li>
+</ul>
+<h1 id="监测指标及工具方法"><a href="#监测指标及工具方法" class="headerlink" title="监测指标及工具方法"></a>监测指标及工具方法</h1><h4 id="指标"><a href="#指标" class="headerlink" title="指标"></a>指标</h4><ul>
+<li>从启动到MainActivity的内存（天猫精灵）</li>
+<li>内存抖动（内存抖动离谱的话，会导致OOM发生）</li>
+<li>内存回收（操作一定时间后回到初始页面内存的使用情况（天猫精灵））</li>
+</ul>
+<h4 id="工具方法"><a href="#工具方法" class="headerlink" title="工具方法"></a>工具方法</h4><ul>
+<li>用我们那锐利的双眼</li>
+<li>LeakCanary（已经使用）</li>
+<li>Android Studio Profile的使用</li>
+<li>adb shell dumpsys 命令（神器）</li>
+</ul>
+<h2 id="快，运行要快"><a href="#快，运行要快" class="headerlink" title="快，运行要快"></a>快，运行要快</h2><blockquote>
+<p>让用户体验丝般顺滑</p>
+</blockquote>
+<h3 id="降低ANR"><a href="#降低ANR" class="headerlink" title="降低ANR"></a>降低ANR</h3><p>首当其冲的时降低ANR的发生</p>
+<h3 id="UI优化"><a href="#UI优化" class="headerlink" title="UI优化"></a>UI优化</h3><h4 id="监测工具"><a href="#监测工具" class="headerlink" title="监测工具"></a>监测工具</h4><ul>
+<li><p>Android Studio-&gt;Tools-&gt;Layout Inspector</p>
+</li>
+<li><p>开发者选项中的Overdraw</p>
+</li>
+<li><p>开发者选项中的GPU呈现模式分析，或如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys gfxinfo com.hhdd.kada</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="布局优化"><a href="#布局优化" class="headerlink" title="布局优化"></a>布局优化</h4><ul>
+<li>尽量避免RelativeLayout的使用<ul>
+<li>RelativeLayout会让子View调用2次onMeasure，LinearLayout 在有weight时，也会调用子View2次onMeasure（区分下weight=0的情况）</li>
+<li>RelativeLayout的子View如果高度和RelativeLayout不同，则会引发效率问题，当子View很复杂时，这个问题会更加严重。如果可以，尽量使用padding代替margin</li>
+</ul>
+</li>
+<li>选择性使用ViewStub</li>
+<li>ImageView的中的<code>src</code>在xml中能不设置就不设置，如果可以请动态设置</li>
+<li>merge和include的使用</li>
+<li>ConstraintLayout用起来<ul>
+<li>结合了LinearLayout和RelativeLayout的优点</li>
+<li>圆形相对定位</li>
+<li>可见性行为约束（不至于View一被设置成Gone这个UI就垮掉）</li>
+<li>宽高比约束</li>
+<li>Chain（实现LinearLayout <code>layout_weight</code>能达到的效果，有过之而无不及）</li>
+<li>提供了虚拟视图（为什么叫虚拟视图，自行查看源码）<ul>
+<li>GuideLine，参考线，解决对齐问题神器</li>
+<li>Barrier，解决对齐问题，特别是一些输入表单</li>
+<li>Group，顾名思义，对View进行分组，统一设置其可见性（之前需要把他们放在一个ViewGroup中来进行可见性管理，无形中增加了布局层级）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="绘制优化"><a href="#绘制优化" class="headerlink" title="绘制优化"></a>绘制优化</h4><blockquote>
+<p>主要是自定义View</p>
+</blockquote>
+<p>主要注意以下两点：</p>
+<ol>
+<li>避免onDraw中局部变量的创建；(onDraw函数执行会比较频繁，会造成内存抖动，内存抖动就加剧了GC的发生，会造成卡顿)</li>
+<li>避免onDraw中循环的使用</li>
+</ol>
+<h3 id="Fragment懒加载用起来"><a href="#Fragment懒加载用起来" class="headerlink" title="Fragment懒加载用起来"></a>Fragment懒加载用起来</h3><p>目前KaDa故事App主页面好像没有利用Fragment的懒加载，带来的问题（一打开页面，三大模块的网络请求齐头并进），对App的<code>流畅性</code>以及<code>启动内存</code>都有影响</p>
+<h3 id="加快启动速度"><a href="#加快启动速度" class="headerlink" title="加快启动速度"></a>加快启动速度</h3><blockquote>
+<p>主要是<strong><em>冷启动</em></strong>的速度，因为与<strong><em>暖启动</em></strong>和<strong><em>热启动</em></strong>相比，冷启动的时间确实有点久</p>
+</blockquote>
+<p>冷启动主要分两个部分：</p>
+<ul>
+<li><p>应用的创建（Application）</p>
+<ol>
+<li>加载并启动应用程序 </li>
+<li>启动后立即显示应用程序的空白启动窗口 </li>
+<li>创建应用程序进程</li>
+</ol>
+</li>
+<li><p>主Activity的创建：</p>
+<ol>
+<li>启动主线程 </li>
+<li>创建主Activity （这里指的是LaunchActivity）</li>
+<li>加载布局 </li>
+<li>屏幕布局 </li>
+<li>执行初始绘制</li>
+<li>应用程序进程完成第一次绘制后，系统进程会交换当前显示的背景窗口，将其替换为主活动</li>
+</ol>
+</li>
+</ul>
+<h2 id="小，身材苗条"><a href="#小，身材苗条" class="headerlink" title="小，身材苗条"></a>小，身材苗条</h2><blockquote>
+<p>包体小百分之五，可能新增就增加百分之五（引用自网络，不知道是不是真的）</p>
+</blockquote>
+<h4 id="apk构成"><a href="#apk构成" class="headerlink" title="apk构成"></a>apk构成</h4><ul>
+<li><p>AndroidManifest.xml文件</p>
+</li>
+<li><p>assets目录，里面的资源原封不动的打包到apk的，能压缩压缩</p>
+</li>
+<li><p>.dex文件，降低方法数，有可能减少.dex文件的个数</p>
+</li>
+<li><p>libs，so文件的选择性支持</p>
+</li>
+<li><p>res，无用资源的即时清除，Android Studio -&gt;Refactor-&gt;Remove unused resources</p>
+</li>
+<li><p>混淆配置</p>
+<blockquote>
+<p>这个过程中涉及到第三方库资源的时候需谨慎删除</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="降低方法数"><a href="#降低方法数" class="headerlink" title="降低方法数"></a>降低方法数</h4><blockquote>
+<p>方法数查看方法，利用dexCount</p>
+</blockquote>
+<ul>
+<li>减少不必要的第三方库引用</li>
+<li>避免重复的功能库引用</li>
+<li>Android studio -&gt;Analyze 用起来</li>
+</ul>
+<h2 id="省，省电、省流量、省心"><a href="#省，省电、省流量、省心" class="headerlink" title="省，省电、省流量、省心"></a>省，省电、省流量、省心</h2><blockquote>
+<p>流量已经很廉价，主要是省电和省心</p>
+</blockquote>
+<p>耗电量过大，可能回导致用户卸载App</p>
+<ul>
+<li>需要进行网络请求时，我们需先判断网络当前的状态。</li>
+<li>在多网络请求的情况下，最好进行批量处理，尽量避免频繁的间隔网络请求。</li>
+<li>在同时有wifi和移动数据的情况下，我们应该直接屏幕移动数据的网络请求，只有当wifi断开时在调用，因为，wifi请求的耗电量远比移动数据的耗电量低的低。</li>
+<li>后台任务要尽可能少的唤醒CPU。（比方说，锁屏时，QQ的消息提示行就是唤醒了CPU。但是它的提示只有在你打开锁屏或者进行充电时才会进行提示。）</li>
+</ul>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>编写高效代码的两个基本原则（摘自网络）：</p>
+<ol>
+<li>不要做你不需要做的工作</li>
+<li>如果可以避免，请不要分配内存</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A181208.html" rel="next" title="Android RxJava深入理解篇">
+                <i class="fa fa-chevron-left"></i> Android RxJava深入理解篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A190917.html" rel="prev" title="Android Gradle配置问题">
+                Android Gradle配置问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#结合KaDa故事谈谈Android-性能优化"><span class="nav-number">1.</span> <span class="nav-text">结合KaDa故事谈谈Android 性能优化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#稳，运行要稳"><span class="nav-number">1.1.</span> <span class="nav-text">稳，运行要稳</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存泄漏与溢出"><span class="nav-number">1.1.1.</span> <span class="nav-text">内存泄漏与溢出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#降低Crash率"><span class="nav-number">1.1.2.</span> <span class="nav-text">降低Crash率</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#监测指标及工具方法"><span class="nav-number">2.</span> <span class="nav-text">监测指标及工具方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#指标"><span class="nav-number">2.0.0.1.</span> <span class="nav-text">指标</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#工具方法"><span class="nav-number">2.0.0.2.</span> <span class="nav-text">工具方法</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#快，运行要快"><span class="nav-number">2.1.</span> <span class="nav-text">快，运行要快</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#降低ANR"><span class="nav-number">2.1.1.</span> <span class="nav-text">降低ANR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UI优化"><span class="nav-number">2.1.2.</span> <span class="nav-text">UI优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#监测工具"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">监测工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#布局优化"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">布局优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#绘制优化"><span class="nav-number">2.1.2.3.</span> <span class="nav-text">绘制优化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fragment懒加载用起来"><span class="nav-number">2.1.3.</span> <span class="nav-text">Fragment懒加载用起来</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#加快启动速度"><span class="nav-number">2.1.4.</span> <span class="nav-text">加快启动速度</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小，身材苗条"><span class="nav-number">2.2.</span> <span class="nav-text">小，身材苗条</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#apk构成"><span class="nav-number">2.2.0.1.</span> <span class="nav-text">apk构成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#降低方法数"><span class="nav-number">2.2.0.2.</span> <span class="nav-text">降低方法数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#省，省电、省流量、省心"><span class="nav-number">2.3.</span> <span class="nav-text">省，省电、省流量、省心</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-number">2.4.</span> <span class="nav-text">其他</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

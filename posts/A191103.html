@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要本文分析的是API 24版本的SurfaceView（即Android N版本）通常情况下程序的View和用户响应都是在同一个线程（即主线程）中处理的，这就要求一些耗时操作（如网络请求、数据库查询）需要放在非UI线程中造作，否则就会造成ANR。View是通过刷新来重绘视图，系统通过发送VSSYNC信号来进行屏幕的重绘，这个信号的发送间隔是16ms，如果我们16ms内不能完成了绘制，就会表现出U">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android SurfaceView详解">
+<meta property="og:url" content="http://yoursite.com/posts/A191103.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要本文分析的是API 24版本的SurfaceView（即Android N版本）通常情况下程序的View和用户响应都是在同一个线程（即主线程）中处理的，这就要求一些耗时操作（如网络请求、数据库查询）需要放在非UI线程中造作，否则就会造成ANR。View是通过刷新来重绘视图，系统通过发送VSSYNC信号来进行屏幕的重绘，这个信号的发送间隔是16ms，如果我们16ms内不能完成了绘制，就会表现出U">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.789Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android SurfaceView详解">
+<meta name="twitter:description" content="摘要本文分析的是API 24版本的SurfaceView（即Android N版本）通常情况下程序的View和用户响应都是在同一个线程（即主线程）中处理的，这就要求一些耗时操作（如网络请求、数据库查询）需要放在非UI线程中造作，否则就会造成ANR。View是通过刷新来重绘视图，系统通过发送VSSYNC信号来进行屏幕的重绘，这个信号的发送间隔是16ms，如果我们16ms内不能完成了绘制，就会表现出U">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A191103.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android SurfaceView详解 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A191103.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android SurfaceView详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-03T00:00:00+08:00">2019-11-03</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/SurfaceView/" itemprop="url" rel="index"><span itemprop="name">SurfaceView</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>本文分析的是API 24版本的SurfaceView（即Android N版本）通常情况下程序的View和用户响应都是在同一个线程（即主线程）中处理的，这就要求一些耗时操作（如网络请求、数据库查询）需要放在非UI线程中造作，否则就会造成ANR。View是通过刷新来重绘视图，系统通过发送VSSYNC信号来进行屏幕的重绘，这个信号的发送间隔是16ms，如果我们16ms内不能完成了绘制，就会表现出UI上的卡段。这就使得在一些逻辑很复杂或频繁更新的视图绘制方面显得比较吃力。那么到底能不能在非UI线程中进行绘制、更新、渲染UI的操作呢？怎么应对那种复杂层级或者频繁更新的UI绘制呢？关于这两个问题，接下来的SurfaceView会给我们答案。<br><a id="more"></a><br>SurfaceView在底层实现了游戏的双缓冲技术，这就可以很轻松的应对频繁更新这种场景下的视图绘制；其持有的Surface对象会开启一个独立线程去进行UI的渲染绘制，这就说明SurfaceView可以在非UI线程中进行UI的绘制操作。<br>与其说是SurfaceView可以在非UI线程中进行UI相关操作，不如说是其持有的surface对象提供了这种能力。SurfaceView的官方注释（我看的是API 24版本的)已将说明的很清楚了。</p>
+<blockquote>
+<p>Provides a dedicated drawing surface embedded inside of a view hierarchy.<br>  You can control the format of this surface and, if you like, its size; the<br>  SurfaceView takes care of placing the surface at the correct location on the<br>  screen</p>
+</blockquote>
+<p>简单翻译一下就是：提供了一个嵌入在View层级中的专门用来绘图的Surface。你可以控制这个Surface的格式甚至是大小，而我们的SurfaceView只关心如何将这个Surface放在正确的位置。</p>
+<h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><ul>
+<li>Surface是Z序的，其持有者SurfaceView位于当前视图树上（即SurfaceView位于当前的Window上），那么Surface就位于当前的Window下面；按道理他应该是被覆盖的，但SurfaceView会在当前视图树所在的窗口上”挖个洞“让其显示出来。至于SurfaceView的兄弟View（即同层级的View），有View Hierarchy来控制他们的中确显示；</li>
+<li>SurfaceView上面的同层级的View如果应用了post-layout变换属性的话，会导致其不能和SurfaceView的surface很好的融合在一起；</li>
+<li>可以通过SurfaceView的SurfaceHolder接口来获取surface（先调用getHolder()方法来获取SurfaceHolder的实现，在进行Surface相关操作）；</li>
+<li>当SurfaceView的Window可见时surface就被创建了。通过实现在SurfaceHolder.Callback的surfaceCreated和surfaceDestroyed来获取Surface的穿件与销毁时机；</li>
+<li>由于surface的绘制发送在另一个线程，所以在使用的时候要注意以下几个方面的线程同步：<ul>
+<li>所有的SurfaceView和SurfaceHolder.Callback方法都是在应用主线程中被调用的，所以需要控制好线程间的状态同步；</li>
+<li>只有在SurfaceHolder.Callback的surfaceCreated和surfaceDestroyed期间获取的surface才是合法的状态；</li>
+</ul>
+</li>
+<li>在Android N 之后（包括Android N），SurfaceView的Window的位置是随着其他视图的渲染而同步更新的，所以对SurfaceView应用动画时没啥影响的；但在这之前是有影响的，因为SurfaceView的位置是异步更新的。</li>
+</ul>
+<h2 id="具体分析"><a href="#具体分析" class="headerlink" title="具体分析"></a>具体分析</h2><p>SurfaceView的构造同普通View的构造，没什么好分析的，主要看看它的以下关键成员变量和关键方法；</p>
+<h3 id="关键变量"><a href="#关键变量" class="headerlink" title="关键变量"></a>关键变量</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> ArrayList&lt;SurfaceHolder.Callback&gt; mCallbacks</span><br><span class="line">            = <span class="keyword">new</span> ArrayList&lt;SurfaceHolder.Callback&gt;();</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">int</span>[] mLocation = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 一个可重入锁（在updateSurface和lockCanvas时使用）</span></span><br><span class="line"><span class="keyword">final</span> ReentrantLock mSurfaceLock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line"><span class="keyword">final</span> Surface mSurface = <span class="keyword">new</span> Surface();       <span class="comment">// Current surface in use</span></span><br><span class="line"><span class="keyword">boolean</span> mDrawingStopped = <span class="keyword">true</span>;</span><br><span class="line"><span class="comment">// We use this to track if the application has produced a frame</span></span><br><span class="line"><span class="comment">// in to the Surface. Up until that point, we should be careful not to punch</span></span><br><span class="line"><span class="comment">// holes.</span></span><br><span class="line"><span class="keyword">boolean</span> mDrawFinished = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Rect mScreenRect = <span class="keyword">new</span> Rect();</span><br><span class="line"><span class="comment">// 连接SurfaceView和SurfaceFlinger的桥梁，后者提供了创建销毁Surface的方法</span></span><br><span class="line">SurfaceSession mSurfaceSession;</span><br><span class="line"><span class="comment">// 提供Surface的控制</span></span><br><span class="line">SurfaceControl mSurfaceControl;</span><br><span class="line"><span class="comment">// In the case of format changes we switch out the surface in-place</span></span><br><span class="line"><span class="comment">// we need to preserve the old one until the new one has drawn.</span></span><br><span class="line">SurfaceControl mDeferredDestroySurfaceControl;</span><br><span class="line"><span class="comment">// SurfaceView的surface的持有者，外界通过调用getHolder来获取mSurfaceHolder从而操作surface</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> SurfaceHolder mSurfaceHolder</span><br></pre></td></tr></table></figure>
+<h3 id="关键方法"><a href="#关键方法" class="headerlink" title="关键方法"></a>关键方法</h3><p>updateSurface()<br>该方法主要就是更新surface，分析部分都在注释里<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">updateSurface</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!mHaveFrame) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ViewRootImpl viewRoot = getViewRootImpl();</span><br><span class="line">    <span class="keyword">if</span> (viewRoot == <span class="keyword">null</span> || viewRoot.mSurface == <span class="keyword">null</span> || !viewRoot.mSurface.isValid()) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mTranslator = viewRoot.mTranslator;</span><br><span class="line">    <span class="keyword">if</span> (mTranslator != <span class="keyword">null</span>) &#123;</span><br><span class="line">        mSurface.setCompatibilityTranslator(mTranslator);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> myWidth = mRequestedWidth;</span><br><span class="line">    <span class="keyword">if</span> (myWidth &lt;= <span class="number">0</span>) myWidth = getWidth();</span><br><span class="line">    <span class="keyword">int</span> myHeight = mRequestedHeight;</span><br><span class="line">    <span class="keyword">if</span> (myHeight &lt;= <span class="number">0</span>) myHeight = getHeight();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">boolean</span> formatChanged = mFormat != mRequestedFormat;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">boolean</span> visibleChanged = mVisible != mRequestedVisible;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">boolean</span> creating = (mSurfaceControl == <span class="keyword">null</span> || formatChanged || visibleChanged)</span><br><span class="line">            &amp;&amp; mRequestedVisible;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">boolean</span> sizeChanged = mSurfaceWidth != myWidth || mSurfaceHeight != myHeight;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">boolean</span> windowVisibleChanged = mWindowVisibility != mLastWindowVisibility;</span><br><span class="line">    <span class="keyword">boolean</span> redrawNeeded = <span class="keyword">false</span>;</span><br><span class="line">    <span class="comment">// 处于以下状态中的任何一种，都要进行更新</span></span><br><span class="line">    <span class="keyword">if</span> (creating || formatChanged || sizeChanged || visibleChanged || windowVisibleChanged) &#123;</span><br><span class="line">        getLocationInWindow(mLocation);</span><br><span class="line">        。。。</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 计算出要在屏幕中绘制的矩形区域</span></span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">boolean</span> visible = mVisible = mRequestedVisible;</span><br><span class="line">            mWindowSpaceLeft = mLocation[<span class="number">0</span>];</span><br><span class="line">            mWindowSpaceTop = mLocation[<span class="number">1</span>];</span><br><span class="line">            mSurfaceWidth = myWidth;</span><br><span class="line">            mSurfaceHeight = myHeight;</span><br><span class="line">            mFormat = mRequestedFormat;</span><br><span class="line">            mLastWindowVisibility = mWindowVisibility;</span><br><span class="line"></span><br><span class="line">            mScreenRect.left = mWindowSpaceLeft;</span><br><span class="line">            mScreenRect.top = mWindowSpaceTop;</span><br><span class="line">            mScreenRect.right = mWindowSpaceLeft + getWidth();</span><br><span class="line">            mScreenRect.bottom = mWindowSpaceTop + getHeight();</span><br><span class="line">            <span class="keyword">if</span> (mTranslator != <span class="keyword">null</span>) &#123; <span class="comment">// 类似于移动画布操作</span></span><br><span class="line">                mTranslator.translateRectInAppWindowToScreen(mScreenRect);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">final</span> Rect surfaceInsets = getParentSurfaceInsets();</span><br><span class="line">            mScreenRect.offset(surfaceInsets.left, surfaceInsets.top);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (creating) &#123; <span class="comment">// 通过SurfaceSession来链接SurfaceFlinger，其构造函数中会调用nativeCreate方法创建surface</span></span><br><span class="line">                mSurfaceSession = <span class="keyword">new</span> SurfaceSession(viewRoot.mSurface);</span><br><span class="line">                mDeferredDestroySurfaceControl = mSurfaceControl;</span><br><span class="line"></span><br><span class="line">                updateOpaqueFlag();</span><br><span class="line">                <span class="comment">// 创建SurfaceControl</span></span><br><span class="line">                mSurfaceControl = <span class="keyword">new</span> SurfaceControlWithBackground(mSurfaceSession,</span><br><span class="line">                        <span class="string">"SurfaceView - "</span> + viewRoot.getTitle().toString(),</span><br><span class="line">                        mSurfaceWidth, mSurfaceHeight, mFormat,</span><br><span class="line">                        mSurfaceFlags);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mSurfaceControl == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">boolean</span> realSizeChanged = <span class="keyword">false</span>;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 获取锁，同步操作</span></span><br><span class="line">            mSurfaceLock.lock();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                mDrawingStopped = !visible;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (DEBUG) Log.i(TAG, System.identityHashCode(<span class="keyword">this</span>) + <span class="string">" "</span></span><br><span class="line">                        + <span class="string">"Cur surface: "</span> + mSurface);</span><br><span class="line"></span><br><span class="line">                SurfaceControl.openTransaction();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    mSurfaceControl.setLayer(mSubLayer);</span><br><span class="line">                    <span class="keyword">if</span> (mViewVisibility) &#123;</span><br><span class="line">                        mSurfaceControl.show();</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        mSurfaceControl.hide();</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// While creating the surface, we will set it's initial</span></span><br><span class="line">                    <span class="comment">// geometry. Outside of that though, we should generally</span></span><br><span class="line">                    <span class="comment">// leave it to the RenderThread.</span></span><br><span class="line">                    <span class="comment">//</span></span><br><span class="line">                    <span class="comment">// There is one more case when the buffer size changes we aren't yet</span></span><br><span class="line">                    <span class="comment">// prepared to sync (as even following the transaction applying</span></span><br><span class="line">                    <span class="comment">// we still need to latch a buffer).</span></span><br><span class="line">                    <span class="comment">// b/28866173</span></span><br><span class="line">                    <span class="keyword">if</span> (sizeChanged || creating || !mRtHandlingPositionUpdates) &#123;</span><br><span class="line">                        mSurfaceControl.setPosition(mScreenRect.left, mScreenRect.top);</span><br><span class="line">                        mSurfaceControl.setMatrix(mScreenRect.width() / (<span class="keyword">float</span>) mSurfaceWidth,</span><br><span class="line">                                <span class="number">0.0f</span>, <span class="number">0.0f</span>,</span><br><span class="line">                                mScreenRect.height() / (<span class="keyword">float</span>) mSurfaceHeight);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (sizeChanged) &#123;</span><br><span class="line">                        mSurfaceControl.setSize(mSurfaceWidth, mSurfaceHeight);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    SurfaceControl.closeTransaction();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (sizeChanged || creating) &#123;</span><br><span class="line">                    redrawNeeded = <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                mSurfaceFrame.left = <span class="number">0</span>;</span><br><span class="line">                mSurfaceFrame.top = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">if</span> (mTranslator == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    mSurfaceFrame.right = mSurfaceWidth;</span><br><span class="line">                    mSurfaceFrame.bottom = mSurfaceHeight;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">float</span> appInvertedScale = mTranslator.applicationInvertedScale;</span><br><span class="line">                    mSurfaceFrame.right = (<span class="keyword">int</span>) (mSurfaceWidth * appInvertedScale + <span class="number">0.5f</span>);</span><br><span class="line">                    mSurfaceFrame.bottom = (<span class="keyword">int</span>) (mSurfaceHeight * appInvertedScale + <span class="number">0.5f</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">final</span> <span class="keyword">int</span> surfaceWidth = mSurfaceFrame.right;</span><br><span class="line">                <span class="keyword">final</span> <span class="keyword">int</span> surfaceHeight = mSurfaceFrame.bottom;</span><br><span class="line">                realSizeChanged = mLastSurfaceWidth != surfaceWidth</span><br><span class="line">                        || mLastSurfaceHeight != surfaceHeight;</span><br><span class="line">                mLastSurfaceWidth = surfaceWidth;</span><br><span class="line">                mLastSurfaceHeight = surfaceHeight;</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                mSurfaceLock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                redrawNeeded |= visible &amp;&amp; !mDrawFinished;</span><br><span class="line"></span><br><span class="line">                SurfaceHolder.Callback callbacks[] = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">final</span> <span class="keyword">boolean</span> surfaceChanged = creating;</span><br><span class="line">                <span class="comment">// 已将创建了但surfaceChanged且有可见变为不可见时，需要先销毁surface</span></span><br><span class="line">                <span class="keyword">if</span> (mSurfaceCreated &amp;&amp; (surfaceChanged || (!visible &amp;&amp; visibleChanged))) &#123;</span><br><span class="line">                    mSurfaceCreated = <span class="keyword">false</span>;</span><br><span class="line">                    <span class="keyword">if</span> (mSurface.isValid()) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (DEBUG) Log.i(TAG, System.identityHashCode(<span class="keyword">this</span>) + <span class="string">" "</span></span><br><span class="line">                                + <span class="string">"visibleChanged -- surfaceDestroyed"</span>);</span><br><span class="line">                        <span class="comment">// 获取到SurfaceView的订阅者列表</span></span><br><span class="line">                        callbacks = getSurfaceCallbacks();</span><br><span class="line">                        <span class="comment">// 通知surfaceDestroyed</span></span><br><span class="line">                        <span class="keyword">for</span> (SurfaceHolder.Callback c : callbacks) &#123;</span><br><span class="line">                            <span class="comment">// 发布surfaceDestroyed</span></span><br><span class="line">                            c.surfaceDestroyed(mSurfaceHolder);</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="comment">// Since Android N the same surface may be reused and given to us</span></span><br><span class="line">                        <span class="comment">// again by the system server at a later point. However</span></span><br><span class="line">                        <span class="comment">// as we didn't do this in previous releases, clients weren't</span></span><br><span class="line">                        <span class="comment">// necessarily required to clean up properly in</span></span><br><span class="line">                        <span class="comment">// surfaceDestroyed. This leads to problems for example when</span></span><br><span class="line">                        <span class="comment">// clients don't destroy their EGL context, and try</span></span><br><span class="line">                        <span class="comment">// and create a new one on the same surface following reuse.</span></span><br><span class="line">                        <span class="comment">// Since there is no valid use of the surface in-between</span></span><br><span class="line">                        <span class="comment">// surfaceDestroyed and surfaceCreated, we force a disconnect,</span></span><br><span class="line">                        <span class="comment">// so the next connect will always work if we end up reusing</span></span><br><span class="line">                        <span class="comment">// the surface.</span></span><br><span class="line">                        <span class="keyword">if</span> (mSurface.isValid()) &#123;</span><br><span class="line">                            mSurface.forceScopedDisconnect();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (creating) &#123;</span><br><span class="line">                    mSurface.copyFrom(mSurfaceControl);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (sizeChanged &amp;&amp; getContext().getApplicationInfo().targetSdkVersion</span><br><span class="line">                        &lt; Build.VERSION_CODES.O) &#123;</span><br><span class="line">                    <span class="comment">// Some legacy applications use the underlying native &#123;@link Surface&#125; object</span></span><br><span class="line">                    <span class="comment">// as a key to whether anything has changed. In these cases, updates to the</span></span><br><span class="line">                    <span class="comment">// existing &#123;@link Surface&#125; will be ignored when the size changes.</span></span><br><span class="line">                    <span class="comment">// Therefore, we must explicitly recreate the &#123;@link Surface&#125; in these</span></span><br><span class="line">                    <span class="comment">// cases.</span></span><br><span class="line">                    mSurface.createFrom(mSurfaceControl);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (visible &amp;&amp; mSurface.isValid()) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (!mSurfaceCreated &amp;&amp; (surfaceChanged || visibleChanged)) &#123;</span><br><span class="line">                        mSurfaceCreated = <span class="keyword">true</span>;</span><br><span class="line">                        mIsCreating = <span class="keyword">true</span>;</span><br><span class="line">                        <span class="keyword">if</span> (DEBUG) Log.i(TAG, System.identityHashCode(<span class="keyword">this</span>) + <span class="string">" "</span></span><br><span class="line">                                + <span class="string">"visibleChanged -- surfaceCreated"</span>);</span><br><span class="line">                        <span class="keyword">if</span> (callbacks == <span class="keyword">null</span>) &#123;</span><br><span class="line">                            callbacks = getSurfaceCallbacks();</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="comment">// 通知surfaceCreated</span></span><br><span class="line">                        <span class="keyword">for</span> (SurfaceHolder.Callback c : callbacks) &#123;</span><br><span class="line">                            c.surfaceCreated(mSurfaceHolder);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (creating || formatChanged || sizeChanged</span><br><span class="line">                            || visibleChanged || realSizeChanged) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (DEBUG) Log.i(TAG, System.identityHashCode(<span class="keyword">this</span>) + <span class="string">" "</span></span><br><span class="line">                                + <span class="string">"surfaceChanged -- format="</span> + mFormat</span><br><span class="line">                                + <span class="string">" w="</span> + myWidth + <span class="string">" h="</span> + myHeight);</span><br><span class="line">                        <span class="keyword">if</span> (callbacks == <span class="keyword">null</span>) &#123;</span><br><span class="line">                            callbacks = getSurfaceCallbacks();</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="comment">// 通知surfaceChanged</span></span><br><span class="line">                        <span class="keyword">for</span> (SurfaceHolder.Callback c : callbacks) &#123;</span><br><span class="line">                            c.surfaceChanged(mSurfaceHolder, mFormat, myWidth, myHeight);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (redrawNeeded) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (DEBUG) Log.i(TAG, System.identityHashCode(<span class="keyword">this</span>) + <span class="string">" "</span></span><br><span class="line">                                + <span class="string">"surfaceRedrawNeeded"</span>);</span><br><span class="line">                        <span class="keyword">if</span> (callbacks == <span class="keyword">null</span>) &#123;</span><br><span class="line">                            callbacks = getSurfaceCallbacks();</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                        mPendingReportDraws++;</span><br><span class="line">                        viewRoot.drawPending();</span><br><span class="line">                        SurfaceCallbackHelper sch =</span><br><span class="line">                                <span class="keyword">new</span> SurfaceCallbackHelper(<span class="keyword">this</span>::onDrawFinished);</span><br><span class="line">                        sch.dispatchSurfaceRedrawNeededAsync(mSurfaceHolder, callbacks);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                mIsCreating = <span class="keyword">false</span>;</span><br><span class="line">                <span class="keyword">if</span> (mSurfaceControl != <span class="keyword">null</span> &amp;&amp; !mSurfaceCreated) &#123;</span><br><span class="line">                    mSurface.release();</span><br><span class="line">                    <span class="comment">// If we are not in the stopped state, then the destruction of the Surface</span></span><br><span class="line">                    <span class="comment">// represents a visual change we need to display, and we should go ahead</span></span><br><span class="line">                    <span class="comment">// and destroy the SurfaceControl. However if we are in the stopped state,</span></span><br><span class="line">                    <span class="comment">// we can just leave the Surface around so it can be a part of animations,</span></span><br><span class="line">                    <span class="comment">// and we let the life-time be tied to the parent surface.</span></span><br><span class="line">                    <span class="keyword">if</span> (!mWindowStopped) &#123;</span><br><span class="line">                        mSurfaceControl.destroy();</span><br><span class="line">                        mSurfaceControl = <span class="keyword">null</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">            Log.e(TAG, <span class="string">"Exception configuring surface"</span>, ex);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (DEBUG) Log.v(</span><br><span class="line">            TAG, <span class="string">"Layout: x="</span> + mScreenRect.left + <span class="string">" y="</span> + mScreenRect.top</span><br><span class="line">            + <span class="string">" w="</span> + mScreenRect.width() + <span class="string">" h="</span> + mScreenRect.height()</span><br><span class="line">            + <span class="string">", frame="</span> + mSurfaceFrame);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Calculate the window position in case RT loses the window</span></span><br><span class="line">        <span class="comment">// and we need to fallback to a UI-thread driven position update</span></span><br><span class="line">        getLocationInSurface(mLocation);</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">boolean</span> positionChanged = mWindowSpaceLeft != mLocation[<span class="number">0</span>]</span><br><span class="line">                || mWindowSpaceTop != mLocation[<span class="number">1</span>];</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">boolean</span> layoutSizeChanged = getWidth() != mScreenRect.width()</span><br><span class="line">                || getHeight() != mScreenRect.height();</span><br><span class="line">        <span class="keyword">if</span> (positionChanged || layoutSizeChanged) &#123; <span class="comment">// Only the position has changed</span></span><br><span class="line">            mWindowSpaceLeft = mLocation[<span class="number">0</span>];</span><br><span class="line">            mWindowSpaceTop = mLocation[<span class="number">1</span>];</span><br><span class="line">            <span class="comment">// For our size changed check, we keep mScreenRect.width() and mScreenRect.height()</span></span><br><span class="line">            <span class="comment">// in view local space.</span></span><br><span class="line">            mLocation[<span class="number">0</span>] = getWidth();</span><br><span class="line">            mLocation[<span class="number">1</span>] = getHeight();</span><br><span class="line"></span><br><span class="line">            mScreenRect.set(mWindowSpaceLeft, mWindowSpaceTop,</span><br><span class="line">                    mWindowSpaceLeft + mLocation[<span class="number">0</span>], mWindowSpaceTop + mLocation[<span class="number">1</span>]);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (mTranslator != <span class="keyword">null</span>) &#123;</span><br><span class="line">                mTranslator.translateRectInAppWindowToScreen(mScreenRect);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (mSurfaceControl == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!isHardwareAccelerated() || !mRtHandlingPositionUpdates) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">if</span> (DEBUG) Log.d(TAG, String.format(<span class="string">"%d updateSurfacePosition UI, "</span> +</span><br><span class="line">                            <span class="string">"postion = [%d, %d, %d, %d]"</span>, System.identityHashCode(<span class="keyword">this</span>),</span><br><span class="line">                            mScreenRect.left, mScreenRect.top,</span><br><span class="line">                            mScreenRect.right, mScreenRect.bottom));</span><br><span class="line">                    setParentSpaceRectangle(mScreenRect, -<span class="number">1</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">                    Log.e(TAG, <span class="string">"Exception configuring surface"</span>, ex);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从上面的代码可以看出，SurfaceHolder.Callback定义的方法都在<code>updateSurface</code>中被调用。</p>
+<h2 id="具体使用"><a href="#具体使用" class="headerlink" title="具体使用"></a>具体使用</h2><p>SurfaceView在Android上有两个系统实现，分别是GLSurfaceView和VideoView，前者专门负责OpenGL渲染的，后者负责视频渲染的。当然我们也可以自定义SurfaceView。</p>
+<h3 id="GLSurfaceView"><a href="#GLSurfaceView" class="headerlink" title="GLSurfaceView"></a>GLSurfaceView</h3><p>GLSurfaceView 通常在游戏中使用，更详细的使用可以参见OpenGL 开发指南。</p>
+<h4 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>管理一个surface对象，该surface是一块能被组装到Android视图系统的特殊内存；</li>
+<li>管理一个EGL display对象，该对象可以把OpenGL内容渲染到surface中；</li>
+<li>接收一个用户自定义的渲染器来完成真正的渲染工作；</li>
+<li>在一个专门的线程中渲染内容</li>
+<li>支持按序（on-demand）渲染和持续（continuous）渲染；</li>
+<li>支持调试OpenGL的调用<h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4></li>
+</ul>
+<ol>
+<li>创建GLSurfaceView对象（没有特需要求的话，直接使用GLSurfaceView，然后通过其提供的set方法来配置GLSurfaceView，如setReanderer()）;<ol>
+<li>初始化GLSurfaceView，在调用setRenderer之前，先进行GLSurfaceView的配置，可参见其他set方法；</li>
+<li>指定Surface，默认提供的是RGB_888格式的Surface，可以通过SurfaceHolder的setFormat来更改；</li>
+<li>在开始渲染之前要指定EGLConfig（因为Android设备支持不同的渲染配置，且不同的配置表现不同）；</li>
+<li>指定调试模式，通过调用setDebugFlags来更改要调试的选项；</li>
+<li>设置渲染器；</li>
+</ol>
+</li>
+<li>设置渲染模式，是按需渲染还是持续渲染；<h4 id="生命周期相关"><a href="#生命周期相关" class="headerlink" title="生命周期相关"></a>生命周期相关</h4>在Activity stops时请调用GLSurfaceView的onPause，在Activity starts时请调用GLSurfaceView的onResume，这样GLSurfaceView就能正确的通知渲染线程的工作状态，同时更好的管理OpenGL display这个对象。<h4 id="事件处理"><a href="#事件处理" class="headerlink" title="事件处理"></a>事件处理</h4>可以采用经典的时间处理模式来处理（即继承重写相关方法），但要利用线程同步机制来处理好UI线程（姑且说是主线程）和渲染线程（暂时称作子线程）之间的通信。<h3 id="VideoView"><a href="#VideoView" class="headerlink" title="VideoView"></a>VideoView</h3>用来展示视频的一个SurfaceView的实现，之所以姚勇SurfaceView，是因为视频流在短时间内存在复杂的渲染计算，SurfaceView很适合干这个工作。<br>VideoView内部持有一个MediaPlayer，同时实现了MediaPlayerControl接口，可以提供基本的视频播放控制操作（如播放、暂停、拖动等）<br>使用VideoView时应注意：</li>
+<li>只要处理好VideoView的测量工作，它可以被使用在任意的布局管理器中，并且提供了不同的展示模式；</li>
+<li>VideoView进入后台后并不会保存它的全部状态，如播放状态、播放位置、播放轨道，需要我们在Activity的onSaveInstanceState和onRestoreInstanceState来手动管理；<h3 id="自定义SurfaceView"><a href="#自定义SurfaceView" class="headerlink" title="自定义SurfaceView"></a>自定义SurfaceView</h3>要自定义SurfaceView，需要满足以下条件：</li>
+</ol>
+<ul>
+<li>继承SurfaceView</li>
+<li>实现SurfaceHolder中的Callback接口；</li>
+</ul>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ol>
+<li>在单个页面中不宜有过多SurfaceView实例，毕竟单独开始一个线程去完成绘制操作时非常消耗系统资源的；</li>
+<li>一定要注意访问SurfaceView的surface时机的合法性（即在SurfaceHolder.Callback的surfaceCreated和surfaceDestroyed之间）；</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A191101.html" rel="next" title="Android ExoPlayer使用与分析">
+                <i class="fa fa-chevron-left"></i> Android ExoPlayer使用与分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A191106.html" rel="prev" title="Gradle学习day2——Android项目里面的gradle配置解析">
+                Gradle学习day2——Android项目里面的gradle配置解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#特点"><span class="nav-number">2.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体分析"><span class="nav-number">3.</span> <span class="nav-text">具体分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#关键变量"><span class="nav-number">3.1.</span> <span class="nav-text">关键变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关键方法"><span class="nav-number">3.2.</span> <span class="nav-text">关键方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体使用"><span class="nav-number">4.</span> <span class="nav-text">具体使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GLSurfaceView"><span class="nav-number">4.1.</span> <span class="nav-text">GLSurfaceView</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#特点-1"><span class="nav-number">4.1.1.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基本使用"><span class="nav-number">4.1.2.</span> <span class="nav-text">基本使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#生命周期相关"><span class="nav-number">4.1.3.</span> <span class="nav-text">生命周期相关</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#事件处理"><span class="nav-number">4.1.4.</span> <span class="nav-text">事件处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VideoView"><span class="nav-number">4.2.</span> <span class="nav-text">VideoView</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义SurfaceView"><span class="nav-number">4.3.</span> <span class="nav-text">自定义SurfaceView</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意事项"><span class="nav-number">5.</span> <span class="nav-text">注意事项</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

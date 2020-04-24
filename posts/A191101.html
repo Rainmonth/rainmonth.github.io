@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要主要根据谷歌官方提供的demo，来了解ExoPlayer的基本使用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android ExoPlayer使用与分析">
+<meta property="og:url" content="http://yoursite.com/posts/A191101.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要主要根据谷歌官方提供的demo，来了解ExoPlayer的基本使用。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.785Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android ExoPlayer使用与分析">
+<meta name="twitter:description" content="摘要主要根据谷歌官方提供的demo，来了解ExoPlayer的基本使用。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A191101.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android ExoPlayer使用与分析 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A191101.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android ExoPlayer使用与分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-01T00:00:00+08:00">2019-11-01</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/源码分析/" itemprop="url" rel="index"><span itemprop="name">源码分析</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>主要根据谷歌官方提供的demo，来了解ExoPlayer的基本使用。</p>
+<a id="more"></a>
+<p>[toc]</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>在介绍ExoPlayer之前，先介绍几个基本概念：</p>
+<ul>
+<li>流媒体通信协议<ul>
+<li><a href="https://baike.baidu.com/item/DASH/3510902#viewPageContent" target="_blank" rel="noopener">DASH</a>，Dynamic Adaptive Streaming over HTTP的缩写，即基于HTTP的动态自适应流，国际标准组MPEG制定的技术标准；</li>
+<li><a href="https://baike.baidu.com/item/HLS" target="_blank" rel="noopener">HLS</a>，HTTP Live Streaming的缩写，即动态码率自适应技术；</li>
+</ul>
+</li>
+<li>ExoPlayer中自交重要的概念<ul>
+<li>Timeline，用来指代媒体数据的灵活数据结构，本质上是一种数据的描述，由媒体片段（Period）和Window（由一个或多个Period组成）组成；</li>
+<li>MediaPeriod，用来加载与Timeline.Period对应的Media，并是这段Media可读；</li>
+</ul>
+</li>
+</ul>
+<h2 id="基本使用流程"><a href="#基本使用流程" class="headerlink" title="基本使用流程"></a>基本使用流程</h2><ol>
+<li>添加ExoPlayer依赖，或者clone ExoPlayer到本地然后倒入module作为依赖；</li>
+</ol>
+<ul>
+<li><p>在项目根目录下的<code>build.gradle</code>中添加如下repositories:</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">repositories &#123;</span><br><span class="line">    google()</span><br><span class="line">    jcenter()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在项目的主module（app）的<code>build.gradle</code>文件中添加ExoPlayer依赖：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 添加全部依赖</span><br><span class="line">implementation <span class="string">'com.google.android.exoplayer:exoplayer:2.X.X'</span></span><br><span class="line"># 添加部分依赖</span><br><span class="line">implementation <span class="string">'com.google.android.exoplayer:exoplayer-core:2.X.X'</span></span><br><span class="line">implementation <span class="string">'com.google.android.exoplayer:exoplayer-dash:2.X.X'</span></span><br><span class="line">implementation <span class="string">'com.google.android.exoplayer:exoplayer-ui:2.X.X'</span></span><br></pre></td></tr></table></figure>
+<p>可以添加的依赖如下：</p>
+<ul>
+<li><code>exoplayer-core</code>： ExoPlayer的核心库，必须添加；</li>
+<li><code>exoplayer-dash</code>： DASH内容支持；</li>
+<li><code>exoplayer-hls</code>： HLS内容支持；</li>
+<li><code>exoplayer-smoothstreaming</code>： SmoothStreaming内容支持；</li>
+<li><code>exoplayer-ui</code>： ExoPlayer提供的UI组件；</li>
+</ul>
+</li>
+<li>在依赖ExoPlayer的Moudle都添加Java 8支持，在build.gradle的android闭包中添加：<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">compileOptions &#123;</span><br><span class="line">  targetCompatibility JavaVersion.VERSION_1_8</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ol>
+<li><p>创建Player实例<br>ExoPlayer库提供了一个工厂方法来获取播放器实例，即<code>ExoPlayerFactory.newInstance(...)和ExoPlayerFactory.newSimpleInstance(...)</code>方法，最终都是通过<code>ExoPlayerImpl</code>(ExoPlayer接口的实现类)的构造方法来创建的，该类只有一个构造函数，最终的处理是通过内部实现类<code>ExoPlayerImplInternal</code>来实现的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ExoPlayerImpl</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    Renderer[] renderers,</span></span></span><br><span class="line"><span class="function"><span class="params">    TrackSelector trackSelector,</span></span></span><br><span class="line"><span class="function"><span class="params">    LoadControl loadControl,</span></span></span><br><span class="line"><span class="function"><span class="params">    BandwidthMeter bandwidthMeter,</span></span></span><br><span class="line"><span class="function"><span class="params">    Clock clock,</span></span></span><br><span class="line"><span class="function"><span class="params">    Looper looper)</span> </span>&#123;</span><br><span class="line">  Log.i(TAG, <span class="string">"Init "</span> + Integer.toHexString(System.identityHashCode(<span class="keyword">this</span>)) + <span class="string">" ["</span></span><br><span class="line">      + ExoPlayerLibraryInfo.VERSION_SLASHY + <span class="string">"] ["</span> + Util.DEVICE_DEBUG_INFO + <span class="string">"]"</span>);</span><br><span class="line">  Assertions.checkState(renderers.length &gt; <span class="number">0</span>);</span><br><span class="line">  <span class="keyword">this</span>.renderers = Assertions.checkNotNull(renderers);</span><br><span class="line">  <span class="keyword">this</span>.trackSelector = Assertions.checkNotNull(trackSelector);</span><br><span class="line">  <span class="keyword">this</span>.playWhenReady = <span class="keyword">false</span>;</span><br><span class="line">  <span class="keyword">this</span>.repeatMode = Player.REPEAT_MODE_OFF;</span><br><span class="line">  <span class="keyword">this</span>.shuffleModeEnabled = <span class="keyword">false</span>;</span><br><span class="line">  <span class="keyword">this</span>.listeners = <span class="keyword">new</span> CopyOnWriteArrayList&lt;&gt;();</span><br><span class="line">  emptyTrackSelectorResult =</span><br><span class="line">      <span class="keyword">new</span> TrackSelectorResult(</span><br><span class="line">          <span class="keyword">new</span> RendererConfiguration[renderers.length],</span><br><span class="line">          <span class="keyword">new</span> TrackSelection[renderers.length],  </span><br><span class="line">          <span class="keyword">null</span>);</span><br><span class="line">  period = <span class="keyword">new</span> Timeline.Period();</span><br><span class="line">  playbackParameters = PlaybackParameters.DEFAULT;</span><br><span class="line">  seekParameters = SeekParameters.DEFAULT;</span><br><span class="line">  playbackSuppressionReason = PLAYBACK_SUPPRESSION_REASON_NONE;</span><br><span class="line">  eventHandler =</span><br><span class="line">      <span class="keyword">new</span> Handler(looper) &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</span><br><span class="line">          ExoPlayerImpl.<span class="keyword">this</span>.handleEvent(msg);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;;</span><br><span class="line">  playbackInfo = PlaybackInfo.createDummy(<span class="comment">/* startPositionUs= */</span> <span class="number">0</span>, emptyTrackSelectorResult);</span><br><span class="line">  pendingListenerNotifications = <span class="keyword">new</span> ArrayDeque&lt;&gt;();</span><br><span class="line">  internalPlayer =</span><br><span class="line">      <span class="keyword">new</span> ExoPlayerImplInternal(</span><br><span class="line">          renderers,</span><br><span class="line">          trackSelector,</span><br><span class="line">          emptyTrackSelectorResult,</span><br><span class="line">          loadControl,</span><br><span class="line">          bandwidthMeter,</span><br><span class="line">          playWhenReady,</span><br><span class="line">          repeatMode,</span><br><span class="line">          shuffleModeEnabled,</span><br><span class="line">          eventHandler,</span><br><span class="line">          clock);</span><br><span class="line">  internalPlayerHandler = <span class="keyword">new</span> Handler(internalPlayer.getPlaybackLooper());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面是最终调用的地方，在真正使用的时候很方便，使用ExoPlayer封装好的方法即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">  <span class="comment">// 是否需要根据扩展名来选择合适的解码器</span></span><br><span class="line"><span class="keyword">boolean</span> preferExtensionDecoder = <span class="keyword">false</span>;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 初始化Player</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initPlayer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (player == <span class="keyword">null</span>) &#123;</span><br><span class="line">        TrackSelection.Factory trackSelectionFactory = <span class="keyword">new</span> RandomTrackSelection.Factory();</span><br><span class="line">        trackSelector = <span class="keyword">new</span> DefaultTrackSelector(trackSelectionFactory);</span><br><span class="line"></span><br><span class="line">        RenderersFactory renderersFactory =</span><br><span class="line">                buildRenderersFactory(preferExtensionDecoder);</span><br><span class="line">        player = ExoPlayerFactory.newSimpleInstance(</span><br><span class="line">                <span class="comment">/* context= */</span> <span class="keyword">this</span>, renderersFactory, trackSelector);</span><br><span class="line">        player.addListener(<span class="keyword">new</span> PlayerEventListener());</span><br><span class="line">        player.setPlayWhenReady(startAutoPlay);</span><br><span class="line">        player.addAnalyticsListener(<span class="keyword">new</span> EventLogger(trackSelector));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 创建RendererFactory 以获取Renderer</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> RenderersFactory <span class="title">buildRenderersFactory</span><span class="params">(<span class="keyword">boolean</span> preferExtensionDecoders)</span> </span>&#123;</span><br><span class="line">    <span class="meta">@DefaultRenderersFactory</span>.ExtensionRendererMode</span><br><span class="line">    <span class="keyword">int</span> extensionRendererMode = preferExtensionDecoders</span><br><span class="line">            ? DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER</span><br><span class="line">            : DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> DefaultRenderersFactory(<span class="comment">/* context= */</span> <span class="keyword">this</span>)</span><br><span class="line">            .setExtensionRendererMode(extensionRendererMode);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>与PlayerView绑定<br>ExoPlayer已经封装好了对应的PlayerView（com.google.android.exoplayer2.ui.PlayerView），在布局文件声明好后，可以直接使用，具体代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 3. Player与PlayerView绑定</span></span><br><span class="line">playerView = findViewById(R.id.player_view);</span><br><span class="line">playerView.setControllerVisibilityListener(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">playerView.setPlayer(player);</span><br><span class="line">playerView.setPlaybackPreparer(<span class="keyword">this</span>);<span class="comment">// this为实现了com.google.android.exoplayer2.PlaybackPrepare接口的Activity</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>上面的代码就完成了Player和PlayerView的绑定操作。</p>
+<ol>
+<li>准备播放源(MediaSource)<br>接下来就是播放的设置了，如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 4. 准备MediaSource</span></span><br><span class="line">MediaSource mediaSource = getMediaSource();</span><br><span class="line">player.prepare(mediaSource);</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>getMediaSource()代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> MediaSource <span class="title">getMediaSource</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  List&lt;String&gt; mediaList = Arrays.asList(getResources().getStringArray(R.array.music_media_source_list));</span><br><span class="line"><span class="comment">//        Uri uri = Uri.parse("https://storage.googleapis.com/exoplayer-test-media-1/gen-3/screens/dash-vod-single-segment/audio-141.mp4");</span></span><br><span class="line">  Uri uri = Uri.parse(<span class="string">"https://storage.googleapis.com/exoplayer-test-media-1/gen-3/screens/dash-vod-single-segment/video-137.mp4"</span>);</span><br><span class="line">  DataSource.Factory dataSource = <span class="keyword">new</span> DefaultDataSourceFactory(mContext, Util.getUserAgent(mContext, mContext.getPackageName()));</span><br><span class="line">  MediaSource mediaSource = <span class="keyword">new</span> ProgressiveMediaSource.Factory(dataSource).createMediaSource(uri);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> mediaSource;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>播放控制<br>封装的PlayerView中包含了控制播放的View实现，也可以自行封装，这里不做详述</li>
+<li>资源释放<br>调用ExoPlayer的release()方法进行资源的释放</li>
+</ol>
+<h2 id="基本结构"><a href="#基本结构" class="headerlink" title="基本结构"></a>基本结构</h2><p>先看核心库的目录结构</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── analytics       # 分析模块，里面的AnalyticsCollector实现了ExoPlayer的各种listener</span><br><span class="line">├── audio           # 音频处理模块</span><br><span class="line">├── decoder         # 解码模块</span><br><span class="line">├── drm             # 数字版权管理模块</span><br><span class="line">├── extractor       # 从特定格式的容器中提取相应的媒体数据，支持amr、flv、mkv、mp3、mp4、ogg、rawcc、ts和wav等格式的提取</span><br><span class="line">│   ├── amr</span><br><span class="line">│   ├── flv</span><br><span class="line">│   ├── mkv</span><br><span class="line">│   ├── mp3</span><br><span class="line">│   ├── mp4</span><br><span class="line">│   ├── ogg</span><br><span class="line">│   ├── rawcc</span><br><span class="line">│   ├── ts          # MPEG-2 TS</span><br><span class="line">│   └── wav</span><br><span class="line">├── mediacodec      # 多媒体编解码模块，主要是对MediaCodec的封装操作</span><br><span class="line">├── metadata        # 元数据处理模块</span><br><span class="line">│   ├── emsg        # Event Message处理</span><br><span class="line">│   ├── id3       </span><br><span class="line">│   └── scte35</span><br><span class="line">├── offline         # 离线播放支持模块（主要包含下载功能的封装）</span><br><span class="line">├── scheduler       # 服务调度模块</span><br><span class="line">├── source          # 多媒体源处理模块</span><br><span class="line">│   ├── ads</span><br><span class="line">│   └── chunk</span><br><span class="line">├── text            # 字幕模块，支持的字母格式：cea、dvb、pgs、ssa等</span><br><span class="line">│   ├── cea</span><br><span class="line">│   ├── dvb</span><br><span class="line">│   ├── pgs</span><br><span class="line">│   ├── ssa</span><br><span class="line">│   ├── subrip</span><br><span class="line">│   ├── ttml</span><br><span class="line">│   ├── tx3g</span><br><span class="line">│   └── webvtt</span><br><span class="line">├── trackselection  #  轨道选择模块</span><br><span class="line">├── upstream        # 数据流</span><br><span class="line">│   ├── cache       # 缓存</span><br><span class="line">│   └── crypto      # 加密处理</span><br><span class="line">├── util            # 辅助模块（包括工具类、辅助数据结构）</span><br><span class="line">└── video           # 视频模块</span><br><span class="line">    └── spherical</span><br></pre></td></tr></table></figure>
+<p>几个比较重要的接口</p>
+<ul>
+<li><code>Player</code>，定义了5个子接口如下，同时还提供了所有播放操作API；<ul>
+<li><code>AudioComponent</code>，音频控件，提供音频监听设置、属性设置、Aux效果设置、声音设置等API；</li>
+<li><code>VideoComponent</code>，视频控件，提供视频监听设置、缩放模式设置、帧元数据监听设置以及Surface相关设置等API；</li>
+<li><code>TextComponent</code>，字幕控件，提供添加和移除字幕输出的设置API；</li>
+<li><code>MetadataComponent</code>，元数据控件，提供音视频基本信息输出控制API；</li>
+<li><code>EventListener</code>，事件监听，提供基本的播放状态改变监听API；</li>
+</ul>
+</li>
+<li><code>ExoPlayer</code>，继承自<code>Player</code>，同时额外扩展出了一些方法（如prepare、retry、setSeekParameters等），对要播放的对象没有做过多额外的处理，而是通过播放组件来实现。<ul>
+<li>常用四个组件介绍<ul>
+<li><code>MediaSource</code>，定义多媒体数据源，该类的功能是从Uri中读取多媒体文件二进制数据，MediaSource对象在ExoPlayer的prepare方法中传入；</li>
+<li><code>TrackSelector</code>，轨道提取器，从MediaSource提取各个轨道的二进制数据，交给Renderer渲染；</li>
+<li><code>Renderer</code>，对多媒体中的各个轨道（音轨、视频轨、字幕轨等）数据进行渲染，即将二进制文件渲染成声音、画面播放出来。其对象在创建ExoPlayer时注入；</li>
+<li><code>LoadControl</code>，字面意思就是加载控制，可以对MediaSource进行控制，如什么时候缓存，缓存多少。（如果需要修改缓存策略，可以从这里入手）其对象也是在创建ExoPlayer时注入；<blockquote>
+<p>上面这四种组件ExoPlayer都提供了默认的实现，能满足大部分需求，当然也能很方便的扩展。比如，可以自定义LoadControl来更改播放器的缓冲策略，或自定义Renderer来渲染Android本身不支持的编解码器。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>ExoPlayer线程模型<br>ExoPlayer的线程主要分为以下几种<ul>
+<li>Application Tread，通常指的是主线程，主要进行Player实例的获取、监听器的绑定；</li>
+<li>Playback Tread，播放线程，注入ExpPlayer的组件在该线程中被调用</li>
+<li>Background Tread，组件的一些初始化操作如数据加载（MediaSource）、轨道提取（TrackSelector）、渲染（Renderer）</li>
+<li>Playback Tread和Application Thread通过Handler进行通信</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>几个比较重要的类</p>
+<ul>
+<li><code>BasePlayer</code>，实现Player接口部分方法，即提供部分操作的通用实现，后面的ExoPlayerImpl和SimpleExoPlayer都继承该类</li>
+<li><code>SimpleExoPlayer</code>，ExoPlayerImpl的一层包装，内部持有ExoPlayerImpl实例，其实就是ExoPlayerImpl的一层包装；</li>
+<li><code>ExoPlayerImpl</code>,ExoPlayer的实现类，提供Player和ExoPlayer各种API的具体实现；</li>
+<li><code>ExoPlayerImplInternal</code>，ExoPlayerImpl内部行为的实现类，ExoPlayerImpl的大多数操作最终通过该类来实现的。</li>
+</ul>
+<h3 id="MediaSource"><a href="#MediaSource" class="headerlink" title="MediaSource"></a>MediaSource</h3><p>定义并提供可供ExoPlayer播放的数据源，有两大职责：</p>
+<ol>
+<li>在<strong>开始播放</strong>和<strong>播放源内容有改变</strong>时提供定义Media结构的TimeLine，主要通过调用在prepareSource传入的<code>SourceInfoRefreshListener</code>实例的<code>onSourceInfoRefreshed</code>来实现；</li>
+<li>为当前时间线上的某段时间提供<code>MediaPeriod</code>实例，并提供读取媒体数据的方式<br>其继承关系如下：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">MediaSource #接口定义</span><br><span class="line">BaseMediaSource #接口的基本实现，类实例的复用处理，并维护MediaSourceEventListener类表</span><br><span class="line">    HlsMediaSource #Hls类型的MediaSource实现</span><br><span class="line">    SilenceMediaSource </span><br><span class="line">    ProgressiveMediaSource </span><br><span class="line">    SingleSampleMediaSource </span><br><span class="line">    DummyMediaSource in ConcatenatingMediaSource </span><br><span class="line">    ExtractorMediaSource </span><br><span class="line">    DashMediaSource #Dash类型的MediaSource实现</span><br><span class="line">    SsMediaSource #Ss类型MediaSource实现</span><br><span class="line">    CompositeMediaSource </span><br><span class="line">        MergingMediaSource </span><br><span class="line">        AdsMediaSource </span><br><span class="line">        ConcatenatingMediaSource </span><br><span class="line">            DynamicConcatenatingMediaSource </span><br><span class="line">        LoopingMediaSource #支持循环的MediaSource</span><br><span class="line">        ClippingMediaSource</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="TrackSelector"><a href="#TrackSelector" class="headerlink" title="TrackSelector"></a>TrackSelector</h3><p>为播放器的渲染器（Renderer）选择合适的渲染轨道，ExoPlayer提供的默认实现（DefaultTrackSelector）能满足大多数情形。播放器（ExoPlayer）和轨道选择器（TrackSelector）之间的交互如下：</p>
+<ul>
+<li>播放器创建的时候，会调用TrackSelector的init方法来初始化TrackSelector的轨道失效监听器（InvalidationListener)和带宽监听器（BandwidthMeter）；</li>
+<li>播放器需要选择轨道时会调用TrackSelector的selectTracks方法（通常发生在播放开始阶段以及监听失效时）；</li>
+<li>在进行Media合并操作之前，也可能发生轨道选择的操作；</li>
+<li>TrackSelector通过调用初始化时传递进来的InvalidationListener的回调方法来通知ExoPlayer轨道选择失效；<h3 id="Renderer"><a href="#Renderer" class="headerlink" title="Renderer"></a>Renderer</h3>将从SampleStream中读取的内容渲染出来，提供Renderer的状态控制，SampleStream的操作相关的API。其继承关系如下：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Renderer #接口定义</span><br><span class="line">BaseRenderer #提供了Renderer和RendererCapabilities两个接口的基本实现，同时提供了一系列的on开头的毁掉方法</span><br><span class="line">    SimpleDecoderAudioRenderer  # 采用SimpleDecoder作为解码器解码渲染音频</span><br><span class="line">        FfmpegAudioRenderer     # 基于Ffmpeg解码器的实现</span><br><span class="line">        LibflacAudioRenderer    # 基于Flac解码器的实现</span><br><span class="line">        LibopusAudioRenderer    # 基于Opus解码器的实现</span><br><span class="line">    MediaCodecRenderer          # 采用MediaCodec进行解码渲染</span><br><span class="line">        MediaCodecAudioRenderer # 采用MediaCodec进行音频的解码渲染</span><br><span class="line">        MediaCodecVideoRenderer # 采用MediaCodec进行视频的解码渲染</span><br><span class="line">    LibvpxVideoRenderer         # 基于Vp9实现的视频渲染器</span><br><span class="line">    CameraMotionRenderer        # 解析运动追踪的渲染器</span><br><span class="line">    MetadataRenderer            # 元数据渲染器</span><br><span class="line">    TextRenderer                # 字幕渲染器</span><br><span class="line">NoSampleRenderer</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="LoadControl"><a href="#LoadControl" class="headerlink" title="LoadControl"></a>LoadControl</h3><p>主要职责是进行媒体资源的缓存控制，提供了基本的回调方法和缓存控制方法。ExoPlayer提供了一个默认实现（DefaultLoadControl，该类采用建造者模式实现），可以通过Builder.build() 来获取其实力</p>
+<h2 id="优点和不足"><a href="#优点和不足" class="headerlink" title="优点和不足"></a>优点和不足</h2><ul>
+<li>优点<ul>
+<li>默认支持提供倍速播放支持，通过设置给ExoPlayer设置<code>PlaybackParameters</code>即可；</li>
+<li>TrackSelector提供了多种配置参数，具体参见<code>DefaultTrackSelector#Parameters</code>；</li>
+</ul>
+</li>
+<li>不足<ul>
+<li>比较耗电</li>
+</ul>
+</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>ExoPlayer充分利用了组件化的思想，将多媒体播放流程中一些常用常见的概念抽象成组件，提供了组件的默认实现，同时也支持个性化扩展。</p>
+<h2 id="相关控件"><a href="#相关控件" class="headerlink" title="相关控件"></a>相关控件</h2><h3 id="TextureView"><a href="#TextureView" class="headerlink" title="TextureView"></a>TextureView</h3><p>官方解释如下：<br>  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">* A TextureView can be used to display a content stream. Such a content</span><br><span class="line">* stream can <span class="keyword">for</span> instance be a video or an OpenGL scene. The content stream</span><br><span class="line">* can come from the application<span class="string">'s process as well as a remote process.</span></span><br></pre></td></tr></table></figure></p>
+<p>大致意思就是，一个用来展示流内容（比如视频或者OpenGL的场景的View，流内容既可以由应用进程提供，也可以通过远程获取。值得注意的地方：</p>
+<ol>
+<li>只能被用在硬件加速的窗口中，否则将啥都不绘制；</li>
+<li>与<code>SurfaceView</code>不同的是，TextureView并不会单独开辟一个窗口，你可以像操作一个普通的View那样操作它；</li>
+<li>使用非常简单，它内部依靠<code>SurfaceTexture</code>来进行内容的渲染，</li>
+</ol>
+<h3 id="SurfaceView"><a href="#SurfaceView" class="headerlink" title="SurfaceView"></a>SurfaceView</h3><p>关于SurfaceView，将在<a href="https://rainmonth.github.io/posts/A191103.html" target="_blank" rel="noopener">Android SurfaceView详解</a>中详细介绍</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a href="https://github.com/google/ExoPlayer.git" target="_blank" rel="noopener">谷歌官方ExoPlayer Demo</a></li>
+<li><a href="https://www.cnblogs.com/roger-yu/p/5635494.html" target="_blank" rel="noopener">Android多媒体——MediaCodec中文API文档</a></li>
+<li><a href="https://blog.csdn.net/MRYZJ/article/details/98657228" target="_blank" rel="noopener">ExoPlayer详解——入门（官方文档）</a></li>
+<li><a href="https://blog.csdn.net/MRYZJ/article/details/98759532" target="_blank" rel="noopener">ExoPlayer详解——媒体类型（官方文档）</a></li>
+<li><a href="https://blog.csdn.net/MRYZJ/article/details/98853258" target="_blank" rel="noopener">ExoPlayer详解——高级主题（官方文档）</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A191027.html" rel="next" title="Android组件化开发实践">
+                <i class="fa fa-chevron-left"></i> Android组件化开发实践
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A191103.html" rel="prev" title="Android SurfaceView详解">
+                Android SurfaceView详解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本概念"><span class="nav-number">2.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本使用流程"><span class="nav-number">3.</span> <span class="nav-text">基本使用流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本结构"><span class="nav-number">4.</span> <span class="nav-text">基本结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaSource"><span class="nav-number">4.1.</span> <span class="nav-text">MediaSource</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TrackSelector"><span class="nav-number">4.2.</span> <span class="nav-text">TrackSelector</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Renderer"><span class="nav-number">4.3.</span> <span class="nav-text">Renderer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LoadControl"><span class="nav-number">4.4.</span> <span class="nav-text">LoadControl</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优点和不足"><span class="nav-number">5.</span> <span class="nav-text">优点和不足</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关控件"><span class="nav-number">7.</span> <span class="nav-text">相关控件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TextureView"><span class="nav-number">7.1.</span> <span class="nav-text">TextureView</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SurfaceView"><span class="nav-number">7.2.</span> <span class="nav-text">SurfaceView</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考链接"><span class="nav-number">8.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

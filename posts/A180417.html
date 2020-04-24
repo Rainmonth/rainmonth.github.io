@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要 本文从一个简单的弹框，引出Android弹窗的不同实现方式，并比较各种弹窗方式的异同及优缺点。同时还对Activity、Window及View三者的做了分别说明与比较。">
+<meta name="keywords" content="Dialog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 从一个简单的弹窗说起">
+<meta property="og:url" content="http://yoursite.com/posts/A180417.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要 本文从一个简单的弹框，引出Android弹窗的不同实现方式，并比较各种弹窗方式的异同及优缺点。同时还对Activity、Window及View三者的做了分别说明与比较。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.793Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 从一个简单的弹窗说起">
+<meta name="twitter:description" content="摘要 本文从一个简单的弹框，引出Android弹窗的不同实现方式，并比较各种弹窗方式的异同及优缺点。同时还对Activity、Window及View三者的做了分别说明与比较。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A180417.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android 从一个简单的弹窗说起 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A180417.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 从一个简单的弹窗说起</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-17T23:10:31+08:00">2018-04-17</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/源码分析/" itemprop="url" rel="index"><span itemprop="name">源码分析</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><blockquote>
+<p>本文从一个简单的弹框，引出Android弹窗的不同实现方式，并比较各种弹窗方式的异同及优缺点。同时还对Activity、Window及View三者的做了分别说明与比较。</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="具体实现方式"><a href="#具体实现方式" class="headerlink" title="具体实现方式"></a>具体实现方式</h2><h3 id="Dialog"><a href="#Dialog" class="headerlink" title="Dialog"></a>Dialog</h3><blockquote>
+<p>Dialog 包含mContext，mWindowManager，mDecor等成员，可见其和Activity、WindowManager以及DecorView之间肯定有着密切联系，Dialog的显示的本质其实就是通过相关的WindowManager将一个继承自FrameLayout的DecorView添加到Dialog所属的Window中</p>
+</blockquote>
+<p>创建并显示一个弹窗：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Dialog dialog = <span class="keyword">new</span> Dialog(mContext);<span class="comment">// mContext 为上下文对象</span></span><br><span class="line">dialog.show();</span><br></pre></td></tr></table></figure>
+<p>这时会显示一个没有内容的弹窗</p>
+<h4 id="构造函数"><a href="#构造函数" class="headerlink" title="构造函数"></a>构造函数</h4><p>最终都会走到这个构造方法：</p>
+<p>方法代码（基于API19）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Dialog(Context context, <span class="keyword">int</span> theme, <span class="keyword">boolean</span> createContextThemeWrapper) &#123;</span><br><span class="line">        <span class="keyword">if</span> (createContextThemeWrapper) &#123;<span class="comment">// 根据当前的Theme值，来装饰传递过来的Context对象</span></span><br><span class="line">            <span class="keyword">if</span> (theme == <span class="number">0</span>) &#123;</span><br><span class="line">                TypedValue outValue = <span class="keyword">new</span> TypedValue();</span><br><span class="line">              context.getTheme().resolveAttribute(com.android.internal.R.attr.dialogTheme,</span><br><span class="line">                        outValue, <span class="keyword">true</span>);</span><br><span class="line">                theme = outValue.resourceId;</span><br><span class="line">            &#125;</span><br><span class="line">            mContext = <span class="keyword">new</span> ContextThemeWrapper(context, theme);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            mContext = context;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);</span><br><span class="line">        Window w = PolicyManager.makeNewWindow(mContext);</span><br><span class="line">        mWindow = w;</span><br><span class="line">        w.setCallback(<span class="keyword">this</span>);<span class="comment">// 设置回调</span></span><br><span class="line">        w.setWindowManager(mWindowManager, <span class="keyword">null</span>, <span class="keyword">null</span>);<span class="comment">// 设置WindowManager</span></span><br><span class="line">        w.setGravity(Gravity.CENTER);<span class="comment">// 设置显示位置</span></span><br><span class="line">        mListenersHandler = <span class="keyword">new</span> ListenersHandler(<span class="keyword">this</span>);<span class="comment">// 监听设置</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：</p>
+<ol>
+<li><p><code>Window w = PolicyManager.makeNewWindow(mContext);</code>这句代码很关键，可以查看PolicyManager源代码并跟踪，你会发现这里采用的是<strong>工厂模式加动态加载</strong>来创建<code>Window</code>、<code>LayoutInflater</code>和<code>WindowManager</code>的，这里不作具体分析。</p>
+</li>
+<li><p>当传递的theme不为0时，你可以自定义弹出的Dialog的主题</p>
+</li>
+</ol>
+</blockquote>
+<p>看了这个构造函数之后，可以确定一点的就是Dialog应该拥有Window大多数的特性。</p>
+<h4 id="show-方法-显示Dialog"><a href="#show-方法-显示Dialog" class="headerlink" title="show()方法(显示Dialog)"></a>show()方法(显示Dialog)</h4><p>方法代码（基于API19）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mShowing) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mDecor != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) &#123;</span><br><span class="line">                    mWindow.invalidatePanelMenu(Window.FEATURE_ACTION_BAR);</span><br><span class="line">                &#125;</span><br><span class="line">                mDecor.setVisibility(View.VISIBLE);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        mCanceled = <span class="keyword">false</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (!mCreated) &#123;</span><br><span class="line">            dispatchOnCreate(<span class="keyword">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        onStart();</span><br><span class="line">        mDecor = mWindow.getDecorView();<span class="comment">// 初始化DecorView</span></span><br><span class="line"></span><br><span class="line">    	<span class="comment">//如果有ActionBar，则初始化ActionBar</span></span><br><span class="line">        <span class="keyword">if</span> (mActionBar == <span class="keyword">null</span> &amp;&amp; mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) &#123;</span><br><span class="line">            <span class="keyword">final</span> ApplicationInfo info = mContext.getApplicationInfo();</span><br><span class="line">            mWindow.setDefaultIcon(info.icon);</span><br><span class="line">            mWindow.setDefaultLogo(info.logo);</span><br><span class="line">            mActionBar = <span class="keyword">new</span> ActionBarImpl(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    	<span class="comment">// 处理Window的布局参数</span></span><br><span class="line">        WindowManager.LayoutParams l = mWindow.getAttributes();</span><br><span class="line">        <span class="keyword">if</span> ((l.softInputMode</span><br><span class="line">                &amp; WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) == <span class="number">0</span>) &#123;</span><br><span class="line">            WindowManager.LayoutParams nl = <span class="keyword">new</span> WindowManager.LayoutParams();</span><br><span class="line">            nl.copyFrom(l);</span><br><span class="line">            nl.softInputMode |=</span><br><span class="line">                    WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;</span><br><span class="line">            l = nl;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            mWindowManager.addView(mDecor, l);</span><br><span class="line">            mShowing = <span class="keyword">true</span>;</span><br><span class="line">    </span><br><span class="line">            sendShowMessage();<span class="comment">// 发送显示消息(消息有HandlerListener实例（继承Handler）处理)</span></span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="定制Dialog"><a href="#定制Dialog" class="headerlink" title="定制Dialog"></a>定制Dialog</h4><p>可以作如下定制：</p>
+<ul>
+<li>改变大小</li>
+<li>改变现实位置</li>
+<li>改变背景</li>
+<li>自定义ContentView</li>
+</ul>
+<h5 id="改变大小"><a href="#改变大小" class="headerlink" title="改变大小"></a>改变大小</h5><p>从上面代码可以看出，要定制Dialog（如改变Dialog的宽高，需要先拿到Dialog的Window实例，然后获取到其布局参数，对布局参数进行配置即可</p>
+<blockquote>
+<p>如果遇到Dialog左右上下总有默认间隔的问题，请设置Window的backgroundDrawable为null</p>
+</blockquote>
+<h5 id="改变显示位置"><a href="#改变显示位置" class="headerlink" title="改变显示位置"></a>改变显示位置</h5><p>在构造函数中有如下代码片段：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);</span><br><span class="line">        Window w = PolicyManager.makeNewWindow(mContext);</span><br><span class="line">        mWindow = w;</span><br><span class="line">        w.setCallback(<span class="keyword">this</span>);</span><br><span class="line">        w.setOnWindowDismissedCallback(<span class="keyword">this</span>);</span><br><span class="line">        w.setWindowManager(mWindowManager, <span class="keyword">null</span>, <span class="keyword">null</span>);</span><br><span class="line">        w.setGravity(Gravity.CENTER);</span><br><span class="line">        mListenersHandler = <span class="keyword">new</span> ListenersHandler(<span class="keyword">this</span>);</span><br></pre></td></tr></table></figure>
+<p>其中<code>w.setGravity(Gravity.CENTER)</code>就是设置Dialog位置的，具体设置方式同上。</p>
+<h5 id="改变背景"><a href="#改变背景" class="headerlink" title="改变背景"></a>改变背景</h5><p>改变背景需要通过定义Dialog入手，具体如下所示：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">"TransparentDialog"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowFrame"</span>&gt;</span>@null<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowBackground"</span>&gt;</span>@android:color/transparent<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowNoTitle"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowIsFloating"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowContentOverlay"</span>&gt;</span>@null<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowIsTranslucent"</span>&gt;</span>false<span class="tag">&lt;/<span class="name">item</span>&gt;</span><span class="comment">&lt;!--半透明--&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:backgroundDimEnabled"</span>&gt;</span>false<span class="tag">&lt;/<span class="name">item</span>&gt;</span><span class="comment">&lt;!--模糊--&gt;</span></span></span><br><span class="line"><span class="undefined">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，如果调用Dialog.setTitle()设置标题无效，请确保Dialog的样式中的<code>android:windowNoTitle=false</code>，如果没有使用Dialog样式，请确保App Theme中的该值为false。</p>
+</blockquote>
+<h4 id="dismiss-方法（隐藏并销毁Dialog）"><a href="#dismiss-方法（隐藏并销毁Dialog）" class="headerlink" title="dismiss()方法（隐藏并销毁Dialog）"></a>dismiss()方法（隐藏并销毁Dialog）</h4><p>该方法可以在<strong><em>任何线程</em></strong>中安全的调用，之所以安全是通过Handler机制保证的，具体看源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">dismiss</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Looper.myLooper() == mHandler.getLooper()) &#123;<span class="comment">// 如果是UI线程，直接调用</span></span><br><span class="line">            dismissDialog();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;<span class="comment">// 不是，通过Handler的post方法交由mDismissAction这个Runnable对象处理</span></span><br><span class="line">            mHandler.post(mDismissAction);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Runnable mDismissAction = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            dismissDialog();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：dismiss()方法和hide()方法都可以隐藏Dialog，但二者有本质上的区别：调用dismiss会销毁Dialog，释放资源，而调用hide不会，Activity销毁之前，如果页面存在Dialog，一定要调用dismiss()方法，不然会有惊喜哦！</p>
+</blockquote>
+<h4 id="Dialog里面的消息处理"><a href="#Dialog里面的消息处理" class="headerlink" title="Dialog里面的消息处理"></a>Dialog里面的消息处理</h4><p>Dialog的显示、消失、取消等消息的处理也是通过Handler机制来完成的，具体是这个Handler实例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ListenersHandler</span> <span class="keyword">extends</span> <span class="title">Handler</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> WeakReference&lt;DialogInterface&gt; mDialog;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">ListenersHandler</span><span class="params">(Dialog dialog)</span> </span>&#123;</span><br><span class="line">            mDialog = <span class="keyword">new</span> WeakReference&lt;DialogInterface&gt;(dialog);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">switch</span> (msg.what) &#123;</span><br><span class="line">                <span class="keyword">case</span> DISMISS:</span><br><span class="line">                    ((OnDismissListener) msg.obj).onDismiss(mDialog.get());</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> CANCEL:</span><br><span class="line">                    ((OnCancelListener) msg.obj).onCancel(mDialog.get());</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> SHOW:</span><br><span class="line">                    ((OnShowListener) msg.obj).onShow(mDialog.get());</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>持有一个Dialog对象的弱引用（避免内存泄漏），然后处理发送过来的消息。</p>
+<h4 id="特殊的子类AlertDialog"><a href="#特殊的子类AlertDialog" class="headerlink" title="特殊的子类AlertDialog"></a>特殊的子类AlertDialog</h4><p>Dialog有一个特殊的子类AlertDialog，它采用建造者模式实现（这种代码的书写方式很舒服）。创建一个AlertDialog很简单：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">createAlertDialog</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Dialog alertDialog = <span class="keyword">new</span> AlertDialog.Builder(<span class="keyword">this</span>)</span><br><span class="line">                .setTitle(<span class="string">"标题"</span>)</span><br><span class="line">                .setMessage(<span class="string">"AlertDialog测试"</span>)</span><br><span class="line">                .setNegativeButton(<span class="string">"取消"</span>, <span class="keyword">null</span>)</span><br><span class="line">                .setPositiveButton(<span class="string">"确定"</span>, <span class="keyword">null</span>)</span><br><span class="line">                .setCancelable(<span class="keyword">true</span>)</span><br><span class="line">                .create();</span><br><span class="line">        alertDialog.show();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：AlertDialog不提供主题相关设置，它默认采用应用的主题。</p>
+</blockquote>
+<p>Dialog就先分析到此，后面如果实际开发中遇到新问题会慢慢补充。</p>
+<h3 id="PopupWindow"><a href="#PopupWindow" class="headerlink" title="PopupWindow"></a>PopupWindow</h3><blockquote>
+<p>本质是将一个FrameLayout通过WindowManager添加到Window上显示出来。特性：</p>
+<ul>
+<li>可以显示任意的View</li>
+<li>悬浮在当前的Activity之上</li>
+</ul>
+</blockquote>
+<h4 id="重要函数"><a href="#重要函数" class="headerlink" title="重要函数"></a>重要函数</h4><h5 id="构造函数-1"><a href="#构造函数-1" class="headerlink" title="构造函数"></a>构造函数</h5><p>值得关注的构造函数有两个：</p>
+<ol>
+<li><p><code>public PopupWindow(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)</code>，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">PopupWindow</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr, <span class="keyword">int</span> defStyleRes)</span> </span>&#123;</span><br><span class="line">        mContext = context;</span><br><span class="line">        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);</span><br><span class="line">		<span class="comment">// 属性获取</span></span><br><span class="line">        <span class="keyword">final</span> TypedArray a = context.obtainStyledAttributes(</span><br><span class="line">                attrs, R.styleable.PopupWindow, defStyleAttr, defStyleRes);</span><br><span class="line">        <span class="keyword">final</span> Drawable bg = a.getDrawable(R.styleable.PopupWindow_popupBackground);</span><br><span class="line">        mElevation = a.getDimension(R.styleable.PopupWindow_popupElevation, <span class="number">0</span>);</span><br><span class="line">        mOverlapAnchor = a.getBoolean(R.styleable.PopupWindow_overlapAnchor, <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Preserve default behavior from Gingerbread. If the animation is</span></span><br><span class="line">        <span class="comment">// undefined or explicitly specifies the Gingerbread animation style,</span></span><br><span class="line">        <span class="comment">// use a sentinel value.</span></span><br><span class="line">        <span class="keyword">if</span> (a.hasValueOrEmpty(R.styleable.PopupWindow_popupAnimationStyle)) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> animStyle = a.getResourceId(R.styleable.PopupWindow_popupAnimationStyle, <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">if</span> (animStyle == R.style.Animation_PopupWindow) &#123;</span><br><span class="line">                mAnimationStyle = ANIMATION_STYLE_DEFAULT;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mAnimationStyle = animStyle;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            mAnimationStyle = ANIMATION_STYLE_DEFAULT;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    	<span class="comment">// 动画设置</span></span><br><span class="line">        <span class="keyword">final</span> Transition enterTransition = getTransition(a.getResourceId(</span><br><span class="line">                R.styleable.PopupWindow_popupEnterTransition, <span class="number">0</span>));</span><br><span class="line">        <span class="keyword">final</span> Transition exitTransition;</span><br><span class="line">        <span class="keyword">if</span> (a.hasValueOrEmpty(R.styleable.PopupWindow_popupExitTransition)) &#123;</span><br><span class="line">            exitTransition = getTransition(a.getResourceId(</span><br><span class="line">                    R.styleable.PopupWindow_popupExitTransition, <span class="number">0</span>));</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            exitTransition = enterTransition == <span class="keyword">null</span> ? <span class="keyword">null</span> : enterTransition.clone();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        a.recycle();</span><br><span class="line"></span><br><span class="line">        setEnterTransition(enterTransition);</span><br><span class="line">        setExitTransition(exitTransition);</span><br><span class="line">        setBackgroundDrawable(bg);<span class="comment">// 设置背景</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>public PopupWindow(View contentView, int width, int height, boolean focusable)</code>，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">PopupWindow</span><span class="params">(View contentView, <span class="keyword">int</span> width, <span class="keyword">int</span> height, <span class="keyword">boolean</span> focusable)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (contentView != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mContext = contentView.getContext();</span><br><span class="line">            mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        setContentView(contentView);</span><br><span class="line">        setWidth(width);</span><br><span class="line">        setHeight(height);</span><br><span class="line">        setFocusable(focusable);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>第一个构造函数支持通过xml文件来配置PopupWindow的属性（如mElevation、mOverlapAnchor和进入退出动画等），调用构造函数后，还需要调用setContentView才能为PopupWindow填充内容（否则没有内容显示出来的）</p>
+<p>第二个构造函数，直接填充PopupWindow内容，设置其宽、高及是否可获取焦点等（更常用）</p>
+<h5 id="showAtLocation"><a href="#showAtLocation" class="headerlink" title="showAtLocation()"></a>showAtLocation()</h5><p>需要指定一个View作为Parent View用来获取WindowToken（实现IBinder接口的类的实例）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">showAtLocation</span><span class="params">(IBinder token, <span class="keyword">int</span> gravity, <span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">    	<span class="comment">// 如果已经处于显示状态或内容为空，直接返回</span></span><br><span class="line">        <span class="keyword">if</span> (isShowing() || mContentView == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        TransitionManager.endTransitions(mDecorView);</span><br><span class="line">		<span class="comment">// 从之前的锚点断开，移除相关的监听</span></span><br><span class="line">        detachFromAnchor();</span><br><span class="line"></span><br><span class="line">        mIsShowing = <span class="keyword">true</span>;</span><br><span class="line">        mIsDropdown = <span class="keyword">false</span>;</span><br><span class="line">        mGravity = gravity;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> WindowManager.LayoutParams p = createPopupLayoutParams(token);</span><br><span class="line">    	<span class="comment">// 显示之前的准备，将PopupWindow的内容嵌入到ViewGroup(即FrameLayout)中</span></span><br><span class="line">        preparePopup(p);</span><br><span class="line"></span><br><span class="line">        p.x = x;</span><br><span class="line">        p.y = y;</span><br><span class="line">		<span class="comment">// 正式开始显示</span></span><br><span class="line">        invokePopup(p);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="showAsDropDown"><a href="#showAsDropDown" class="headerlink" title="showAsDropDown()"></a>showAsDropDown()</h5><p>需指定一个锚点View来作为PopupWindow的锚点View。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">showAsDropDown</span><span class="params">(View anchor, <span class="keyword">int</span> xoff, <span class="keyword">int</span> yoff, <span class="keyword">int</span> gravity)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 如果已经处于显示状态或内容为空，直接返回</span></span><br><span class="line">        <span class="keyword">if</span> (isShowing() || !hasContentView()) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        TransitionManager.endTransitions(mDecorView);</span><br><span class="line">		<span class="comment">// 将PopupWindow和锚点关联起来</span></span><br><span class="line">        attachToAnchor(anchor, xoff, yoff, gravity);</span><br><span class="line"></span><br><span class="line">        mIsShowing = <span class="keyword">true</span>;</span><br><span class="line">        mIsDropdown = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> WindowManager.LayoutParams p =</span><br><span class="line">                createPopupLayoutParams(anchor.getApplicationWindowToken());</span><br><span class="line">        preparePopup(p);</span><br><span class="line">		<span class="comment">// 判断是否因为PopupWindow过大而需要覆盖锚点View(先判断是否允许滚动，如果允许，则通过滚动来自适应；否则通过覆盖锚点View，函数实现比较复杂，这里不做具体分析)</span></span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">boolean</span> aboveAnchor = findDropDownPosition(anchor, p, xoff, yoff,</span><br><span class="line">                p.width, p.height, gravity, mAllowScrollingAnchorParent);</span><br><span class="line">        updateAboveAnchor(aboveAnchor);</span><br><span class="line">        p.accessibilityIdOfAnchor = (anchor != <span class="keyword">null</span>) ? anchor.getAccessibilityViewId() : -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        invokePopup(p);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="attachToAnchor"><a href="#attachToAnchor" class="headerlink" title="attachToAnchor()"></a>attachToAnchor()</h5><p>将PopupWindow和锚点View关联起来。</p>
+<h5 id="preparePopup"><a href="#preparePopup" class="headerlink" title="preparePopup()"></a>preparePopup()</h5><p>包装显示的内容。</p>
+<h5 id="invokePopup"><a href="#invokePopup" class="headerlink" title="invokePopup()"></a>invokePopup()</h5><p>将包装好的内容添加到Window的具体实施方法</p>
+<h5 id="update"><a href="#update" class="headerlink" title="update()"></a>update()</h5><p>从意思上看，就是更新PopupWindow信息的，哪些信息改变了需要调用update以及时更新PopupWindow呢，具体有如下这些：</p>
+<ul>
+<li>setClippingEnabled(boolean)</li>
+<li>setFocusable(boolean)</li>
+<li>setIgnoreCheekPress()</li>
+<li>setInputMethodMode(int)</li>
+<li>setTouchable(boolean)</li>
+<li>setAnimationStyle(int)</li>
+</ul>
+<blockquote>
+<p><strong><em>注意：在弹出的PopupWindow中再显示一个PopupWindow</em></strong>，如在一个PopupWindow中使用自定义键盘，如果键盘开启了Preview，则点击预览的时候会crash。</p>
+</blockquote>
+<h3 id="Activity（采用Dialog-style）"><a href="#Activity（采用Dialog-style）" class="headerlink" title="Activity（采用Dialog style）"></a>Activity（采用Dialog style）</h3><p>采用Activity来实现弹框操作起来比较简单，只要将Dialog style样式应用到对应的Activity即可。</p>
+<p>具体的样式设置一般如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">"Activity.Dialog"</span> <span class="attr">parent</span>=<span class="string">"Theme.AppCompat.Dialog.Alert"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="xml">        <span class="comment">&lt;!--无ActionBar、无标题--&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"windowActionBar"</span>&gt;</span>false<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"windowNoTitle"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="comment">&lt;!--边框--&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="comment">&lt;!--&lt;item name="android:windowFrame"&gt;@android:color/transparent&lt;/item&gt;--&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowFrame"</span>&gt;</span>@null<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="comment">&lt;!--是否浮现在activity之上--&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowIsFloating"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="comment">&lt;!--半透明--&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowIsTranslucent"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowNoTitle"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">item</span>&gt;</span><span class="comment">&lt;!--无标题--&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowBackground"</span>&gt;</span>@android:color/transparent<span class="tag">&lt;/<span class="name">item</span>&gt;</span><span class="comment">&lt;!--背景透明--&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:backgroundDimAmount"</span>&gt;</span>0.3<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowAnimationStyle"</span>&gt;</span>@null<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="undefined">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>当然具体可更具自己项目需要进行定制了。</p>
+<h2 id="各种实现方式的优缺点"><a href="#各种实现方式的优缺点" class="headerlink" title="各种实现方式的优缺点"></a>各种实现方式的优缺点</h2><h3 id="Dialog-1"><a href="#Dialog-1" class="headerlink" title="Dialog"></a>Dialog</h3><p>优点：</p>
+<ul>
+<li>实现简单，尤其是AlertDialog显示更是方便</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>定制起来麻烦，通常需要重写部分方法</li>
+<li>DropDown效果需要自己实现</li>
+</ul>
+<h3 id="PopupWindow-1"><a href="#PopupWindow-1" class="headerlink" title="PopupWindow"></a>PopupWindow</h3><p>优点：</p>
+<ul>
+<li>实现起来简单</li>
+<li>定制容易</li>
+<li>可自由控制显示位置</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>管理起来没有Dialog方便</li>
+</ul>
+<h3 id="Activity（采用Dialog-style）-1"><a href="#Activity（采用Dialog-style）-1" class="headerlink" title="Activity（采用Dialog style）"></a>Activity（采用Dialog style）</h3><p>优点：</p>
+<ul>
+<li>具有Activity的生命周期</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>同样存在Activity可能存在的问题</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在本质上，弹窗都是通过WindowManager向Window添加View的过程。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Dialog/" rel="tag"># Dialog</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A180415.html" rel="next" title="Android 原生与H5交互">
+                <i class="fa fa-chevron-left"></i> Android 原生与H5交互
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A180418.html" rel="prev" title="Android 性能优化之布局优化">
+                Android 性能优化之布局优化 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体实现方式"><span class="nav-number">2.</span> <span class="nav-text">具体实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dialog"><span class="nav-number">2.1.</span> <span class="nav-text">Dialog</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#构造函数"><span class="nav-number">2.1.1.</span> <span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#show-方法-显示Dialog"><span class="nav-number">2.1.2.</span> <span class="nav-text">show()方法(显示Dialog)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#定制Dialog"><span class="nav-number">2.1.3.</span> <span class="nav-text">定制Dialog</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#改变大小"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">改变大小</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#改变显示位置"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">改变显示位置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#改变背景"><span class="nav-number">2.1.3.3.</span> <span class="nav-text">改变背景</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#dismiss-方法（隐藏并销毁Dialog）"><span class="nav-number">2.1.4.</span> <span class="nav-text">dismiss()方法（隐藏并销毁Dialog）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Dialog里面的消息处理"><span class="nav-number">2.1.5.</span> <span class="nav-text">Dialog里面的消息处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#特殊的子类AlertDialog"><span class="nav-number">2.1.6.</span> <span class="nav-text">特殊的子类AlertDialog</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PopupWindow"><span class="nav-number">2.2.</span> <span class="nav-text">PopupWindow</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#重要函数"><span class="nav-number">2.2.1.</span> <span class="nav-text">重要函数</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#构造函数-1"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#showAtLocation"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">showAtLocation()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#showAsDropDown"><span class="nav-number">2.2.1.3.</span> <span class="nav-text">showAsDropDown()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#attachToAnchor"><span class="nav-number">2.2.1.4.</span> <span class="nav-text">attachToAnchor()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#preparePopup"><span class="nav-number">2.2.1.5.</span> <span class="nav-text">preparePopup()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#invokePopup"><span class="nav-number">2.2.1.6.</span> <span class="nav-text">invokePopup()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#update"><span class="nav-number">2.2.1.7.</span> <span class="nav-text">update()</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity（采用Dialog-style）"><span class="nav-number">2.3.</span> <span class="nav-text">Activity（采用Dialog style）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#各种实现方式的优缺点"><span class="nav-number">3.</span> <span class="nav-text">各种实现方式的优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dialog-1"><span class="nav-number">3.1.</span> <span class="nav-text">Dialog</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PopupWindow-1"><span class="nav-number">3.2.</span> <span class="nav-text">PopupWindow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity（采用Dialog-style）-1"><span class="nav-number">3.3.</span> <span class="nav-text">Activity（采用Dialog style）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Android ViewPager的无限循环与自动滚动实现前言关于ViewPager时Android开发时经常要用到的控件，但系统提供的ViewPager往往总有一些功能限制，如不能无限循环，不能自动滚动，今天就介绍ViewPager无限循环和自动滚动的不同实现。 实现思路实现方式有很多种，具体如下，后面会分析各种实现方式的优缺点。">
+<meta name="keywords" content="ViewPager">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android ViewPager的无限循环与自动滚动实现">
+<meta property="og:url" content="http://yoursite.com/posts/A181005.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="Android ViewPager的无限循环与自动滚动实现前言关于ViewPager时Android开发时经常要用到的控件，但系统提供的ViewPager往往总有一些功能限制，如不能无限循环，不能自动滚动，今天就介绍ViewPager无限循环和自动滚动的不同实现。 实现思路实现方式有很多种，具体如下，后面会分析各种实现方式的优缺点。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.789Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android ViewPager的无限循环与自动滚动实现">
+<meta name="twitter:description" content="Android ViewPager的无限循环与自动滚动实现前言关于ViewPager时Android开发时经常要用到的控件，但系统提供的ViewPager往往总有一些功能限制，如不能无限循环，不能自动滚动，今天就介绍ViewPager无限循环和自动滚动的不同实现。 实现思路实现方式有很多种，具体如下，后面会分析各种实现方式的优缺点。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A181005.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android ViewPager的无限循环与自动滚动实现 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A181005.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android ViewPager的无限循环与自动滚动实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-05T00:00:00+08:00">2018-10-05</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/控件/" itemprop="url" rel="index"><span itemprop="name">控件</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android-ViewPager的无限循环与自动滚动实现"><a href="#Android-ViewPager的无限循环与自动滚动实现" class="headerlink" title="Android ViewPager的无限循环与自动滚动实现"></a>Android ViewPager的无限循环与自动滚动实现</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>关于ViewPager时Android开发时经常要用到的控件，但系统提供的ViewPager往往总有一些功能限制，如不能无限循环，不能自动滚动，今天就介绍ViewPager无限循环和自动滚动的不同实现。</p>
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><p>实现方式有很多种，具体如下，后面会分析各种实现方式的优缺点。</p>
+<a id="more"></a>
+<h3 id="无限循环方式"><a href="#无限循环方式" class="headerlink" title="无限循环方式"></a>无限循环方式</h3><h4 id="更改Adapter实现方式"><a href="#更改Adapter实现方式" class="headerlink" title="更改Adapter实现方式"></a>更改Adapter实现方式</h4><blockquote>
+<p>即getCount返回Integer.MAX_VALUE</p>
+</blockquote>
+<p>核心代码（这种方式其实是一种伪无限循环）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> MyPageAdapter extends PageAdapter &#123;</span><br><span class="line">  	<span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> Integer.MAX_VALUE;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isViewFromObject</span><span class="params">(View view, Object object)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> view == object;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="处理数据源"><a href="#处理数据源" class="headerlink" title="处理数据源"></a>处理数据源</h4><blockquote>
+<p>即让ViewPager绑定的数据源模拟出一个循环效果即可，真实数据源唯0123，将其变为301230）；</p>
+</blockquote>
+<p>核心代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 绑定到ViewPager的数据源</span></span><br><span class="line"><span class="keyword">private</span> List&lt;T&gt; datas = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"><span class="comment">// 真实数据源</span></span><br><span class="line"><span class="keyword">private</span> List&lt;T&gt; realDatas = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"><span class="comment">// handler</span></span><br><span class="line"><span class="keyword">private</span> Handler handler = <span class="keyword">new</span> Handler();</span><br><span class="line"><span class="comment">// 要无限循环的ViewPager</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initDatas</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  	<span class="comment">// 先加入真实数据的最后一个</span></span><br><span class="line">  	datas.add(realDatas.get(realDatas.size() - <span class="number">1</span>));</span><br><span class="line">  	<span class="keyword">for</span>(T t : realDatas) &#123;</span><br><span class="line">		datas.add(T);</span><br><span class="line">    &#125;</span><br><span class="line">  	<span class="comment">// 最后加入真实数据第一个</span></span><br><span class="line">  	datas.add(realDatas.get(<span class="number">0</span>));</span><br><span class="line">  	</span><br><span class="line">  	<span class="comment">// 绑定数据的操作</span></span><br><span class="line">  	...</span><br><span class="line">    viewPager.addOnPageChangeListener(<span class="keyword">new</span> ViewPager.OnPageChangeListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageScrolled</span><span class="params">(<span class="keyword">int</span> position, <span class="keyword">float</span> positionOffset,</span></span></span><br><span class="line"><span class="function"><span class="params">                                       <span class="keyword">int</span> positionOffsetPixels)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageSelected</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">				<span class="keyword">if</span>(position == <span class="number">0</span> || position == datas.size() -<span class="number">1</span>) &#123;</span><br><span class="line">                    handler.postDelayed(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                        <span class="meta">@Override</span></span><br><span class="line">                      	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                            viewPager.setCurrentItem(Math.abs(datas.size() - position -<span class="number">2</span>), <span class="keyword">false</span>);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;)</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageScrollStateChanged</span><span class="params">(<span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">  	</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="从OnPageChangeListener入手"><a href="#从OnPageChangeListener入手" class="headerlink" title="从OnPageChangeListener入手"></a>从OnPageChangeListener入手</h4><blockquote>
+<p>当滑动到临界值时，主动调用ViewPager的setCurrentItem方法；</p>
+</blockquote>
+<p>具体实现思路如下（只是我的思路尚未代码验证）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 数据源</span></span><br><span class="line"><span class="keyword">private</span> List&lt;T&gt; datas;</span><br><span class="line"><span class="comment">// 要无限循环的ViewPager</span></span><br><span class="line"><span class="keyword">private</span> ViewPager viewPager;</span><br><span class="line"><span class="comment">// 上次展示的页面</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> lastItem;</span><br><span class="line"><span class="comment">// 当前ViewPager展示页</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> currentItem;</span><br><span class="line"><span class="comment">// 是否正在向左滑</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">boolean</span> isDraggingToLeft = <span class="keyword">false</span>;</span><br><span class="line"><span class="comment">// handler</span></span><br><span class="line"><span class="keyword">private</span> Handler handler = <span class="keyword">new</span> Handler();</span><br><span class="line">viewPager.addOnPageChangeListener(<span class="keyword">new</span> ViewPager.OnPageChangeListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageScrolled</span><span class="params">(<span class="keyword">int</span> position, <span class="keyword">float</span> positionOffset,</span></span></span><br><span class="line"><span class="function"><span class="params">                                       <span class="keyword">int</span> positionOffsetPixels)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageSelected</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">                lastItem = currentItem;</span><br><span class="line">                currentItem = position;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageScrollStateChanged</span><span class="params">(<span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">switch</span> (state) &#123;</span><br><span class="line">                    <span class="keyword">case</span> ViewPager.SCROLL_STATE_DRAGGING:</span><br><span class="line"></span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> ViewPager.SCROLL_STATE_SETTLING:</span><br><span class="line"></span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="keyword">case</span> ViewPager.SCROLL_STATE_IDLE:</span><br><span class="line">                        <span class="keyword">if</span> (lastItem &gt; currentItem) &#123;</span><br><span class="line">                            isDraggingToLeft = <span class="keyword">true</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">if</span> (isDraggingToLeft) &#123;<span class="comment">//左滑滑到0</span></span><br><span class="line">                            <span class="keyword">if</span> (currentItem == <span class="number">0</span>) &#123;</span><br><span class="line">                                currentItem = datas.size() - <span class="number">1</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;<span class="comment">//右滑滑到datas.size() -1</span></span><br><span class="line">                            <span class="keyword">if</span> (currentItem == datas.size() - <span class="number">1</span>) &#123;</span><br><span class="line">                                currentItem = <span class="number">0</span>;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="comment">// 展示一段时间，在通过ViewPager的setCurrentItem来设置到第0页</span></span><br><span class="line">                        <span class="comment">// sleep(bannerShowTime),这里只是模拟，可以用handler实现</span></span><br><span class="line">                        handler.postDelayed(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                            <span class="meta">@Override</span></span><br><span class="line">                            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                                viewPager.setCurrentItem(currentItem);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;, <span class="number">200</span>);</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<p>不足之处：</p>
+<p>采用方法1时，当调用ViewPager的setCurrentItem方法时会造成ANR（只有在onCreate中调用不回出现），解决方法，可设置一个比较大的值，而不采用Integer.MAX_VALUE；</p>
+<p>采用方法2和3时，</p>
+<ul>
+<li>需要解决最后一个到第一个的闪屏问题，我的思路是采用handler来延时处理；</li>
+<li>需要解决手动滑动时如何处理</li>
+</ul>
+<h3 id="自动滚动实现方式"><a href="#自动滚动实现方式" class="headerlink" title="自动滚动实现方式"></a>自动滚动实现方式</h3><h4 id="自动滚动逻辑功能要求"><a href="#自动滚动逻辑功能要求" class="headerlink" title="自动滚动逻辑功能要求"></a>自动滚动逻辑功能要求</h4><ol>
+<li>手动滚动开始时，自动滚动暂停；</li>
+<li>手动滚动结束时，自动滚动开始；</li>
+</ol>
+<blockquote>
+<p>上面两个是通用处理，也就是说，不管哪种实现方式，都要考虑。</p>
+</blockquote>
+<h4 id="自动滚动实现方式-1"><a href="#自动滚动实现方式-1" class="headerlink" title="自动滚动实现方式"></a>自动滚动实现方式</h4><ol>
+<li><p>利用Handler来实现自动滚动</p>
+<p>代码实现如下（核心代码如下）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 要自动滚动的ViewPager</span></span><br><span class="line"><span class="keyword">private</span> ViewPager viewPager;</span><br><span class="line"><span class="comment">// 定义是否开启自动滚动，默认开启</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">boolean</span> isAutoPlay = <span class="keyword">true</span>;</span><br><span class="line"><span class="comment">// 默认自动滚动任务延时两秒执行</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> delayTime = <span class="number">2000</span>;</span><br><span class="line"><span class="comment">// 定义处理自动滚动的handler</span></span><br><span class="line"><span class="keyword">private</span> Handler handler = <span class="keyword">new</span> Handler();</span><br><span class="line"><span class="comment">// 当前ViewPager展示页</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> currentItem;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *	开启自动滚动的方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startAutoPlay</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	isAutoPlay = <span class="keyword">true</span>;</span><br><span class="line">	handler.removeCallbacks(task);</span><br><span class="line">	handler.postDelayed(task, delayTime)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 暂停自动滚动</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">pauseAutoPlay</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    isAutoPlay = <span class="keyword">false</span>;</span><br><span class="line">	handler.removeCallbacks(task);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 自动滚动核心代码</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Runnable task = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">  	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    	<span class="keyword">if</span> (isAutoPlay) &#123;</span><br><span class="line">          <span class="comment">// 自动滚动逻辑处理</span></span><br><span class="line">			currentItem = viewPager.getCurrentItem();</span><br><span class="line">          	currentItem++;</span><br><span class="line">            <span class="keyword">if</span>(currentItem == randyPagerAdapter.getCount() -<span class="number">1</span>) &#123;</span><br><span class="line">            	currentItem = <span class="number">0</span>;</span><br><span class="line">	            viewPager.setCurrentItem(currentItem);</span><br><span class="line">           		handler.postDelayed(<span class="keyword">this</span>, delayTime);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                viewPager.setCurrentItem(currentItem);</span><br><span class="line">                handler.postDelayed(<span class="keyword">this</span>, delayTime);	</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            handler.postDelayed(<span class="keyword">this</span>, delayTime);</span><br><span class="line">        &#125;</span><br><span class="line">  	&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>​</p>
+</li>
+<li><p>利用定时任务（Timer和TimerTask)来实现</p>
+<p>代码实现（核心代码如下）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DISPLAY_TIME = <span class="number">3000</span>;</span><br><span class="line"><span class="keyword">private</span> Handler hander = <span class="keyword">new</span> Handler();</span><br><span class="line"><span class="keyword">private</span> Timer timer = <span class="keyword">new</span> Timer();</span><br><span class="line"><span class="keyword">private</span> TimerTask timerTask;</span><br><span class="line"><span class="keyword">private</span> ViewPager mViewPager;</span><br><span class="line"><span class="keyword">private</span> Runnable runable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//true表示平滑滚动</span></span><br><span class="line">        mViewPager.setCurrentItem(mViewPager.getCurrentItem() + <span class="number">1</span>, <span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startScroll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    timerTask = <span class="keyword">new</span> TimerTask() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            hander.post(runable);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    timer.schedule(timerTask, DISPLAY_TIME, DISPLAY_TIME);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stopScroll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    timerTask.cancel();</span><br><span class="line">    timerTask = <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>在处理无限循环时，核心思路就是对临界值的处理，当然也可以通过方法1来绕过这种处理，但要注意一点就是怎么设置getCount的返回值以达到最优的性能；</li>
+<li>在处理自动滚动时，无非就是通过handler的postDelayed方法的特性以及Android定义的定时器进行处理。</li>
+</ul>
+<p>​</p>
+<p>​</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ViewPager/" rel="tag"># ViewPager</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A181003.html" rel="next" title="Android Studio 升级到3.0运行项目指北">
+                <i class="fa fa-chevron-left"></i> Android Studio 升级到3.0运行项目指北
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A181025.html" rel="prev" title="Android中MVP模式、MVC模式">
+                Android中MVP模式、MVC模式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-ViewPager的无限循环与自动滚动实现"><span class="nav-number">1.</span> <span class="nav-text">Android ViewPager的无限循环与自动滚动实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实现思路"><span class="nav-number">1.2.</span> <span class="nav-text">实现思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#无限循环方式"><span class="nav-number">1.2.1.</span> <span class="nav-text">无限循环方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#更改Adapter实现方式"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">更改Adapter实现方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#处理数据源"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">处理数据源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从OnPageChangeListener入手"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">从OnPageChangeListener入手</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自动滚动实现方式"><span class="nav-number">1.2.2.</span> <span class="nav-text">自动滚动实现方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#自动滚动逻辑功能要求"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">自动滚动逻辑功能要求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自动滚动实现方式-1"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">自动滚动实现方式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

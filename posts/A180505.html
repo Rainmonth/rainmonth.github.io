@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="#Android Activity启动模式详解 四种启动模式分别是 standard signleTop singleTask singleInstance">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Activity启动模式详解">
+<meta property="og:url" content="http://yoursite.com/posts/A180505.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="#Android Activity启动模式详解 四种启动模式分别是 standard signleTop singleTask singleInstance">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.785Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android Activity启动模式详解">
+<meta name="twitter:description" content="#Android Activity启动模式详解 四种启动模式分别是 standard signleTop singleTask singleInstance">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A180505.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android Activity启动模式详解 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A180505.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android Activity启动模式详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-05T00:00:00+08:00">2018-05-05</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>#Android Activity启动模式详解</p>
+<h2 id="四种启动模式分别是"><a href="#四种启动模式分别是" class="headerlink" title="四种启动模式分别是"></a>四种启动模式分别是</h2><ul>
+<li>standard</li>
+<li>signleTop</li>
+<li>singleTask</li>
+<li>singleInstance</li>
+</ul>
+<a id="more"></a>
+<h2 id="设置方式"><a href="#设置方式" class="headerlink" title="设置方式"></a>设置方式</h2><ol>
+<li><p>在AndroidManifest.xml文件中配置，设置示例：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">activity</span> </span></span><br><span class="line"><span class="tag">   		<span class="attr">android:name</span>=<span class="string">"com.rainmonth.MainActivity"</span></span></span><br><span class="line"><span class="tag">   		<span class="attr">android:launchMode</span>=<span class="string">"singleInstance"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>​    </p>
+</li>
+<li><p>在代码中动态的设置，相关的Activity Flag有：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 设置后，不会记录在Activity Stack，离开就finish()掉了</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Intent.FLAG_ACTIVITY_NO_HISTORY;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 设置后，如果该Activity在栈顶，则该Activity不再重新启动</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Inent.FLAG_ACTIVITY_SINGLE_TOP;	</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 比较复杂，后面会详细说明</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Intent.FLAG_ACTIVITY_NEW_TASK;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 设置后，会创建一个Task，并在这个Task中启动一个Activity,该Flag要配置</span></span><br><span class="line"><span class="comment"> * NEW_TASK或者NEW_DOCUMENT，来使用单独使用会被忽略，该Flag要慎用（除非</span></span><br><span class="line"><span class="comment"> * 你实现了应用层Launcher）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Intent.FLAG_ACTIVITY_MULTIPLE_TASK;		</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 设置后，且该Activity已经运行于当前task中，那么Activity栈中位于该</span></span><br><span class="line"><span class="comment"> * Activity之上的都将关闭，该Activity将视传递过来的启动自己的intent为</span></span><br><span class="line"><span class="comment"> * 新的intent，接受的方法为onNewIntent()，通常配</span></span><br><span class="line"><span class="comment"> * Intent.FLAG_ACTIVITY_NEW_TASK来用于通知的管理中</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Intent.FLAG_ACTIVITY_CLEAR_TOP;	</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 设置后，且该Intent是用于启动一个已经有实例存在与Activity栈的</span></span><br><span class="line"><span class="comment"> * Activity新实例，那么接受该Activity返回结果的目标将会被传递到这个</span></span><br><span class="line"><span class="comment"> * Activity新实例，也就是说这个Activity可以通过setResult()方法来将结果</span></span><br><span class="line"><span class="comment"> * 返回到之前接受返回结果的目标，通俗讲就是新来的也可以和老的上级交互</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Intent.FLAG_ACTIVITY_FORWARD_RESULT;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_NEW_DOCUMENT;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_NO_USER_ACTION;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 设置后，防止在Activity上应用动画</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Intent.FLAG_ACTIVITY_NO_ANIMATION;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_CLEAR_TASK;</span><br><span class="line"></span><br><span class="line">Intent.FLAG_ACTIVITY_TASK_ON_HOME;</span><br></pre></td></tr></table></figure>
+<p>设置示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent(<span class="keyword">this</span>, XxxActivity.class);</span><br><span class="line">   intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</span><br><span class="line">   intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);</span><br><span class="line">   intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);</span><br><span class="line">   ...</span><br><span class="line">   startActivity(intent)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>##四种模式的作用</p>
+<p>###standard<br>默认模式，可以不用写配置。在这个模式下，都会默认创建一个新的实例。因此，在这种<br>模式下，可以有多个相同的实例，也允许多个相同Activity叠加。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">若我有一个Activity名为A1, 上面有一个按钮可跳转到A1。那么如果我点击按钮，</span><br><span class="line">便会新启一个Activity A1叠在刚才的A1之上，再点击，又会再新启一个在它之上……</span><br><span class="line">点back键会依照栈顺序依次退出。</span><br></pre></td></tr></table></figure>
+<p>###singleTop<br>可以有多个实例，但是不允许多个相同Activity叠加。即，如果Activity在栈顶的时候，<br>启动相同的Activity，不会创建新的实例，而会调用其onNewIntent方法。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">若我有两个Activity名为B1,B2,两个Activity内容功能完全相同，都有两个按钮可</span><br><span class="line">以跳到B1或者B2，唯一不同的是B1为standard，B2为singleTop。</span><br><span class="line"></span><br><span class="line">若我意图打开的顺序为B1-&gt;B2-&gt;B2，则实际打开的顺序为B1-&gt;B2（</span><br><span class="line">后一次意图打开B2，实际只调用了前一个的onNewIntent方法）；</span><br><span class="line"></span><br><span class="line">若我意图打开的顺序为B1-&gt;B2-&gt;B1-&gt;B2，则实际打开的顺序与意图的一致，</span><br><span class="line">为B1-&gt;B2-&gt;B1-&gt;B2。</span><br></pre></td></tr></table></figure>
+<p>###singleTask<br>只有一个实例。在同一个应用程序中启动他的时候，若Activity不存在，则会在当前task<br>创建一个新的实例，若存在，则会把task中在其之上的其它Activity destroy掉并调用<br>它的onNewIntent方法。如果是在别的应用程序中启动它，则会新建一个task，并在该<br>task中启动这个Activity，singleTask允许别的Activity与其在一个task中共存，<br>也就是说，如果我在这个singleTask的实例中再打开新的Activity，这个新的<br>Activity还是会在singleTask的实例的task中。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">若我的应用程序中有三个Activity,C1,C2,C3，三个Activity可互相启动，其中</span><br><span class="line">C2为singleTask模式，那么，无论我在这个程序中如何点击启动，如：</span><br><span class="line">C1-&gt;C2-&gt;C3-&gt;C2-&gt;C3-&gt;C1-C2，C1,C3可能存在多个实例，但是C2只会存在</span><br><span class="line">一个，并且这三个Activity都在同一个task里面。</span><br><span class="line">但是C1-&gt;C2-&gt;C3-&gt;C2-&gt;C3-&gt;C1-C2，这样的操作过程实际应该是如下这样的，</span><br><span class="line">因为singleTask会把task中在其之上的其它Activity destory掉。</span><br><span class="line">操作：</span><br><span class="line">	C1-&gt;C2          </span><br><span class="line">	C1-&gt;C2-&gt;C3          </span><br><span class="line">	C1-&gt;C2-&gt;C3-&gt;C2            </span><br><span class="line">	C1-&gt;C2-&gt;C3-&gt;C2-&gt;C3-&gt;C1             </span><br><span class="line">	C1-&gt;C2-&gt;C3-&gt;C2-&gt;C3-&gt;C1-C2</span><br><span class="line">实际：</span><br><span class="line">	C1-&gt;C2          </span><br><span class="line">	C1-&gt;C2-&gt;C3          </span><br><span class="line">	C1-&gt;C2                              </span><br><span class="line">	C1-&gt;C2-&gt;C3-&gt;C1                               </span><br><span class="line">	C1-&gt;C2</span><br><span class="line"></span><br><span class="line">若是别的应用程序打开C2，则会新启一个task。如别的应用Other中有一个</span><br><span class="line">activity，taskId为200，从它打开C2，则C2的taskIdI不会为200，例如C2的</span><br><span class="line">taskId	为201，那么再从C2打开C1、C3，则C2、C3的taskId仍为201。</span><br><span class="line"></span><br><span class="line">注意：</span><br><span class="line">	如果此时你点击home，然后再打开Other，发现这时显示的肯定会是Other应用</span><br><span class="line">	中的内容，而不会是我们应用中的C1 C2 C3中的其中一个。</span><br></pre></td></tr></table></figure>
+<p>###singleInstance<br>只有一个实例，并且这个实例独立运行在一个task中，这个task只有这个实例，不允许有<br>别的Activity存在。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">程序有三个Activity:D1,D2,D3，三个Activity可互相启动，其中D2为</span><br><span class="line">singleInstance模式。那么程序从</span><br><span class="line">D1开始运行，假设D1的taskId为200，那么从D1启动D2时，</span><br><span class="line">D2会新启动一个task，即D2与D1不在一个task中</span><br><span class="line">运行。假设D2的taskId为201，再从D2启动D3时，</span><br><span class="line">D3的taskId为200，也就是说它被压到了D1启动的任务栈中。</span><br><span class="line"></span><br><span class="line">若是在别的应用程序打开D2，假设Other的taskId为200，</span><br><span class="line">打开D2，D2会新建一个task运行，假设它的taskId为</span><br><span class="line">201，那么如果这时再从D2启动D1或者D3，则又会再创建</span><br><span class="line">一个task，因此，若操作步骤为other-&gt;D2-&gt;D1，这过</span><br><span class="line">程就涉及到了3个task了。</span><br></pre></td></tr></table></figure>
+<h3 id="TaskAffinity属性"><a href="#TaskAffinity属性" class="headerlink" title="TaskAffinity属性"></a>TaskAffinity属性</h3><p>可以为Activity指定一个Task，然后配合<code>Intent.FLAG_ACTIVITY_NEW_TASK</code>来使用。这样Activity就在指定的Task中运行了。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A180504.html" rel="next" title="Android中View的事件体系">
+                <i class="fa fa-chevron-left"></i> Android中View的事件体系
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A180507.html" rel="prev" title="Activity与Fragment的通信方式">
+                Activity与Fragment的通信方式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#四种启动模式分别是"><span class="nav-number">1.</span> <span class="nav-text">四种启动模式分别是</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设置方式"><span class="nav-number">2.</span> <span class="nav-text">设置方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TaskAffinity属性"><span class="nav-number">2.1.</span> <span class="nav-text">TaskAffinity属性</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

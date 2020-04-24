@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Android Launcher3分析——自定义控件之Workspace绘制方面可以参考文章Android View的绘制流程分析 onMeasureWorkspace 并没有进行什么测量工作，测量工作都交给其父类PagedView处理，看看PagedView的onMeasure如何处理的。">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Launcher3分析——自定义控件之Workspace">
+<meta property="og:url" content="http://yoursite.com/posts/A180705.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="Android Launcher3分析——自定义控件之Workspace绘制方面可以参考文章Android View的绘制流程分析 onMeasureWorkspace 并没有进行什么测量工作，测量工作都交给其父类PagedView处理，看看PagedView的onMeasure如何处理的。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.787Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android Launcher3分析——自定义控件之Workspace">
+<meta name="twitter:description" content="Android Launcher3分析——自定义控件之Workspace绘制方面可以参考文章Android View的绘制流程分析 onMeasureWorkspace 并没有进行什么测量工作，测量工作都交给其父类PagedView处理，看看PagedView的onMeasure如何处理的。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A180705.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android Launcher3分析——自定义控件之Workspace | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A180705.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android Launcher3分析——自定义控件之Workspace</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-05T00:00:00+08:00">2018-07-05</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/源码分析/" itemprop="url" rel="index"><span itemprop="name">源码分析</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android-Launcher3分析——自定义控件之Workspace"><a href="#Android-Launcher3分析——自定义控件之Workspace" class="headerlink" title="Android Launcher3分析——自定义控件之Workspace"></a>Android Launcher3分析——自定义控件之Workspace</h1><h2 id="绘制方面"><a href="#绘制方面" class="headerlink" title="绘制方面"></a>绘制方面</h2><p>可以参考文章<a href="http://blog.csdn.net/rainmonth/article/details/50937272" target="_blank" rel="noopener">Android View的绘制流程分析</a></p>
+<h3 id="onMeasure"><a href="#onMeasure" class="headerlink" title="onMeasure"></a>onMeasure</h3><p>Workspace 并没有进行什么测量工作，测量工作都交给其父类PagedView处理，看看PagedView的onMeasure如何处理的。</p>
+<a id="more"></a>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 没有子View直接调用View的onMeasure方法，退出</span></span><br><span class="line">  <span class="keyword">if</span> (getChildCount() == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// We measure the dimensions of the PagedView to be larger than the pages so that when we</span></span><br><span class="line">  <span class="comment">// zoom out (and scale down), the view is still contained in the parent</span></span><br><span class="line">  <span class="keyword">int</span> widthMode = MeasureSpec.getMode(widthMeasureSpec);</span><br><span class="line">  <span class="keyword">int</span> widthSize = MeasureSpec.getSize(widthMeasureSpec);</span><br><span class="line">  <span class="keyword">int</span> heightMode = MeasureSpec.getMode(heightMeasureSpec);</span><br><span class="line">  <span class="keyword">int</span> heightSize = MeasureSpec.getSize(heightMeasureSpec);</span><br><span class="line">  <span class="comment">// <span class="doctag">NOTE:</span> We multiply by 2f to account for the fact that depending on the offset of the</span></span><br><span class="line">  <span class="comment">// viewport, we can be at most one and a half screens offset once we scale down</span></span><br><span class="line">  DisplayMetrics dm = getResources().getDisplayMetrics();</span><br><span class="line">  <span class="keyword">int</span> maxSize = Math.max(dm.widthPixels + mInsets.left + mInsets.right,</span><br><span class="line">                         dm.heightPixels + mInsets.top + mInsets.bottom);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> parentWidthSize = (<span class="keyword">int</span>) (<span class="number">2f</span> * maxSize);</span><br><span class="line">  <span class="keyword">int</span> parentHeightSize = (<span class="keyword">int</span>) (<span class="number">2f</span> * maxSize);</span><br><span class="line">  <span class="keyword">int</span> scaledWidthSize, scaledHeightSize;</span><br><span class="line">  <span class="keyword">if</span> (mUseMinScale) &#123;</span><br><span class="line">    scaledWidthSize = (<span class="keyword">int</span>) (parentWidthSize / mMinScale);</span><br><span class="line">    scaledHeightSize = (<span class="keyword">int</span>) (parentHeightSize / mMinScale);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    scaledWidthSize = widthSize;</span><br><span class="line">    scaledHeightSize = heightSize;</span><br><span class="line">  &#125;</span><br><span class="line">  mViewport.set(<span class="number">0</span>, <span class="number">0</span>, widthSize, heightSize);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (widthMode == MeasureSpec.UNSPECIFIED || heightMode == MeasureSpec.UNSPECIFIED) &#123;</span><br><span class="line">    <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return early if we aren't given a proper dimension</span></span><br><span class="line">  <span class="keyword">if</span> (widthSize &lt;= <span class="number">0</span> || heightSize &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Allow the height to be set as WRAP_CONTENT. This allows the particular case</span></span><br><span class="line"><span class="comment">   * of the All apps view on XLarge displays to not take up more space then it needs. Width</span></span><br><span class="line"><span class="comment">   * is still not allowed to be set as WRAP_CONTENT since many parts of the code expect</span></span><br><span class="line"><span class="comment">   * each page to have the same width.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">final</span> <span class="keyword">int</span> verticalPadding = getPaddingTop() + getPaddingBottom();</span><br><span class="line">  <span class="keyword">final</span> <span class="keyword">int</span> horizontalPadding = getPaddingLeft() + getPaddingRight();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> referenceChildWidth = <span class="number">0</span>;</span><br><span class="line">  <span class="comment">// The children are given the same width and height as the workspace</span></span><br><span class="line">  <span class="comment">// unless they were set to WRAP_CONTENT</span></span><br><span class="line">  <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"PagedView.onMeasure(): "</span> + widthSize + <span class="string">", "</span> + heightSize);</span><br><span class="line">  <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"PagedView.scaledSize: "</span> + scaledWidthSize + <span class="string">", "</span> + scaledHeightSize);</span><br><span class="line">  <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"PagedView.parentSize: "</span> + parentWidthSize + <span class="string">", "</span> + parentHeightSize);</span><br><span class="line">  <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"PagedView.horizontalPadding: "</span> + horizontalPadding);</span><br><span class="line">  <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"PagedView.verticalPadding: "</span> + verticalPadding);</span><br><span class="line">  <span class="keyword">final</span> <span class="keyword">int</span> childCount = getChildCount();</span><br><span class="line">  <span class="comment">// 遍历子View（只处理可见的子View）</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</span><br><span class="line">    <span class="comment">// disallowing padding in paged view (just pass 0)</span></span><br><span class="line">    <span class="keyword">final</span> View child = getPageAt(i);</span><br><span class="line">    <span class="comment">// 处理可见子View</span></span><br><span class="line">    <span class="keyword">if</span> (child.getVisibility() != GONE) &#123;</span><br><span class="line">      <span class="comment">// 获取子布局的布局参数</span></span><br><span class="line">      <span class="keyword">final</span> LayoutParams lp = (LayoutParams) child.getLayoutParams();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">int</span> childWidthMode;<span class="comment">// 子View的宽度测量规范</span></span><br><span class="line">      <span class="keyword">int</span> childHeightMode;<span class="comment">// 子View的高度测量规范</span></span><br><span class="line">      <span class="keyword">int</span> childWidth;<span class="comment">// 子View的宽</span></span><br><span class="line">      <span class="keyword">int</span> childHeight;<span class="comment">// 子View的高</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">// 根据布局参数来设置子View的宽、高以及宽高规范</span></span><br><span class="line">      <span class="keyword">if</span> (!lp.isFullScreenPage) &#123;</span><br><span class="line">        <span class="keyword">if</span> (lp.width == LayoutParams.WRAP_CONTENT) &#123;</span><br><span class="line">          childWidthMode = MeasureSpec.AT_MOST;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          childWidthMode = MeasureSpec.EXACTLY;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (lp.height == LayoutParams.WRAP_CONTENT) &#123;</span><br><span class="line">          childHeightMode = MeasureSpec.AT_MOST;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          childHeightMode = MeasureSpec.EXACTLY;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        childWidth = getViewportWidth() - horizontalPadding</span><br><span class="line">          - mInsets.left - mInsets.right;</span><br><span class="line">        childHeight = getViewportHeight() - verticalPadding</span><br><span class="line">          - mInsets.top - mInsets.bottom;</span><br><span class="line">        mNormalChildHeight = childHeight;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        childWidthMode = MeasureSpec.EXACTLY;</span><br><span class="line">        childHeightMode = MeasureSpec.EXACTLY;</span><br><span class="line"></span><br><span class="line">        childWidth = getViewportWidth() - mInsets.left - mInsets.right;</span><br><span class="line">        childHeight = getViewportHeight();</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (referenceChildWidth == <span class="number">0</span>) &#123;</span><br><span class="line">        referenceChildWidth = childWidth;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 获取子View的宽高测量规范</span></span><br><span class="line">      <span class="keyword">final</span> <span class="keyword">int</span> childWidthMeasureSpec =</span><br><span class="line">        MeasureSpec.makeMeasureSpec(childWidth, childWidthMode);</span><br><span class="line">      <span class="keyword">final</span> <span class="keyword">int</span> childHeightMeasureSpec =</span><br><span class="line">        MeasureSpec.makeMeasureSpec(childHeight, childHeightMode);</span><br><span class="line">      <span class="comment">// 根据获取到的测量规范测量每个子View</span></span><br><span class="line">      child.measure(childWidthMeasureSpec, childHeightMeasureSpec);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  setMeasuredDimension(scaledWidthSize, scaledHeightSize);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="onLayout"><a href="#onLayout" class="headerlink" title="onLayout"></a>onLayout</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onLayout</span><span class="params">(<span class="keyword">boolean</span> changed, <span class="keyword">int</span> left, <span class="keyword">int</span> top, <span class="keyword">int</span> right, <span class="keyword">int</span> bottom)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (mFirstLayout &amp;&amp; mCurrentPage &gt;= <span class="number">0</span> &amp;&amp; mCurrentPage &lt; getChildCount()) &#123;</span><br><span class="line">    mWallpaperOffset.syncWithScroll();</span><br><span class="line">    mWallpaperOffset.jumpToFinal();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">super</span>.onLayout(changed, left, top, right, bottom);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>主要还是调用PagedView的onLayout方法，只是在调用之前根据是否第一次Layout及当前页是否在有效范围来对Launcher壁纸的偏移量做处理。</p>
+<h3 id="onDraw"><a href="#onDraw" class="headerlink" title="onDraw"></a>onDraw</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</span><br><span class="line"><span class="keyword">super</span>.onDraw(canvas);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Call back to LauncherModel to finish binding after the first draw</span></span><br><span class="line">post(mBindPages);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用PagedView的onDraw方法，然后告知通知LauncherModel绑定完成。</p>
+<blockquote>
+<p>注意：ViewGroup作为一个View的容器，为了性能上的考虑，通常是不需要调用自己的onDraw函数的（不需要重写），只有在我们设置了ViewGroup的背景或者调用setWillNotDraw(false)时才会调用。</p>
+</blockquote>
+<h2 id="事件处理方面"><a href="#事件处理方面" class="headerlink" title="事件处理方面"></a>事件处理方面</h2><p>可以参考文章<a href="">Android View的事件处理流程分析</a></p>
+<h3 id="onInterceptTouchEvent-MotionEvent-ev"><a href="#onInterceptTouchEvent-MotionEvent-ev" class="headerlink" title="onInterceptTouchEvent(MotionEvent ev)"></a>onInterceptTouchEvent(MotionEvent ev)</h3><h3 id="onTouchEvent-MotionEvent-ev"><a href="#onTouchEvent-MotionEvent-ev" class="headerlink" title="onTouchEvent(MotionEvent ev)"></a>onTouchEvent(MotionEvent ev)</h3>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A180702.html" rel="next" title="Android Launcher3分析——开篇">
+                <i class="fa fa-chevron-left"></i> Android Launcher3分析——开篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A180709.html" rel="prev" title="Android Launcher3分析——LauncherModel">
+                Android Launcher3分析——LauncherModel <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android-Launcher3分析——自定义控件之Workspace"><span class="nav-number">1.</span> <span class="nav-text">Android Launcher3分析——自定义控件之Workspace</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#绘制方面"><span class="nav-number">1.1.</span> <span class="nav-text">绘制方面</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#onMeasure"><span class="nav-number">1.1.1.</span> <span class="nav-text">onMeasure</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#onLayout"><span class="nav-number">1.1.2.</span> <span class="nav-text">onLayout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#onDraw"><span class="nav-number">1.1.3.</span> <span class="nav-text">onDraw</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事件处理方面"><span class="nav-number">1.2.</span> <span class="nav-text">事件处理方面</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#onInterceptTouchEvent-MotionEvent-ev"><span class="nav-number">1.2.1.</span> <span class="nav-text">onInterceptTouchEvent(MotionEvent ev)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#onTouchEvent-MotionEvent-ev"><span class="nav-number">1.2.2.</span> <span class="nav-text">onTouchEvent(MotionEvent ev)</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

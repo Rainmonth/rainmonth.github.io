@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要结合源码，分析下ijkplayer的初始化流程，并对这个过程中的一些关键点（如消息循环、线程创建C层和Java层的通信几个方面来）做了一个详细分析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android之IjkPlayer简介">
+<meta property="og:url" content="http://yoursite.com/posts/A191206.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要结合源码，分析下ijkplayer的初始化流程，并对这个过程中的一些关键点（如消息循环、线程创建C层和Java层的通信几个方面来）做了一个详细分析。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.793Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android之IjkPlayer简介">
+<meta name="twitter:description" content="摘要结合源码，分析下ijkplayer的初始化流程，并对这个过程中的一些关键点（如消息循环、线程创建C层和Java层的通信几个方面来）做了一个详细分析。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A191206.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android之IjkPlayer简介 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A191206.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android之IjkPlayer简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-25T13:26:43+08:00">2020-03-25</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>结合源码，分析下ijkplayer的初始化流程，并对这个过程中的一些关键点（如消息循环、线程创建C层和Java层的通信几个方面来）做了一个详细分析。</p>
+<a id="more"></a>
+<h2 id="整体结构"><a href="#整体结构" class="headerlink" title="整体结构"></a>整体结构</h2><p>先看看有哪些Player可供使用</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">IMediaPlayer (tv.danmaku.ijk.media.player)                  # 播放器通用接口，不同播放器的差异化通过这个接口来体现</span><br><span class="line">    TextureMediaPlayer (tv.danmaku.ijk.media.player)        # 供IjkVideoView使用的播放器</span><br><span class="line">    MediaPlayerProxy (tv.danmaku.ijk.media.player)          # extureMediaPlayer播放器代理类，内部维护了一个TextureMediaPlayer实例</span><br><span class="line">        TextureMediaPlayer (tv.danmaku.ijk.media.player)</span><br><span class="line">    AbstractMediaPlayer (tv.danmaku.ijk.media.player)       # 主要定义了设置监听器的方法和事件通知的方法</span><br><span class="line">        AndroidMediaPlayer (tv.danmaku.ijk.media.player)    # Android系统MediaPlayer 的Ijk实现</span><br><span class="line">        IjkMediaPlayer (tv.danmaku.ijk.media.player)        # IjkMediaPlayer实现，里面的一些底层方法是基于ffplay来实现的，ffplay是基于FFmpeg实现的跨平台播放器</span><br><span class="line">        IjkExoMediaPlayer (tv.danmaku.ijk.media.exo)        # ExoPlayer的Ijk实现，内部持有一个DemoPlayer实例，该实例持有一个ExoPlayerImpl实例，播放最终都是通过它来完成的</span><br></pre></td></tr></table></figure>
+<h2 id="通用接口定义"><a href="#通用接口定义" class="headerlink" title="通用接口定义"></a>通用接口定义</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// IMediaPlayer.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IMediaPlayer</span> </span>&#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 常量定义，最好不要修改</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">int</span> MEDIA_INFO_UNKNOWN = <span class="number">1</span>;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置视频媒体展示的容器</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setDisplay</span><span class="params">(SurfaceHolder sh)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 不同版本的播放源设置</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setDataSource</span><span class="params">(Context context, Uri uri)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> IOException, IllegalArgumentException, SecurityException, IllegalStateException</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@TargetApi</span>(Build.VERSION_CODES.ICE_CREAM_SANDWICH)</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setDataSource</span><span class="params">(Context context, Uri uri, Map&lt;String, String&gt; headers)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> IOException, IllegalArgumentException, SecurityException, IllegalStateException</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setDataSource</span><span class="params">(FileDescriptor fd)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> IOException, IllegalArgumentException, IllegalStateException</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setDataSource</span><span class="params">(String path)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> IOException, IllegalArgumentException, SecurityException, IllegalStateException</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取播放源</span></span><br><span class="line">    <span class="function">String <span class="title">getDataSource</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 异步资源准备，对于流媒体，应该进行异步prepare，避免缓冲所有内容引起的阻塞（当然如果有这种需求就另当别论了）</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">prepareAsync</span><span class="params">()</span> <span class="keyword">throws</span> IllegalStateException</span>;</span><br><span class="line">    <span class="comment">// 开始播放</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> IllegalStateException</span>;</span><br><span class="line">    <span class="comment">// 停止播放</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">stop</span><span class="params">()</span> <span class="keyword">throws</span> IllegalStateException</span>;</span><br><span class="line">    <span class="comment">// 暂停播放</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">pause</span><span class="params">()</span> <span class="keyword">throws</span> IllegalStateException</span>;</span><br><span class="line">    <span class="comment">// 播放时是否保持屏幕常亮（最好调用这个方法，因为它无需请求权限）</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setScreenOnWhilePlaying</span><span class="params">(<span class="keyword">boolean</span> screenOn)</span></span>;</span><br><span class="line">    <span class="comment">// 获取视频的宽</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">getVideoWidth</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 获取视频的高</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">getVideoHeight</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 是否正在播放</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isPlaying</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 拖动支持</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">seekTo</span><span class="params">(<span class="keyword">long</span> msec)</span> <span class="keyword">throws</span> IllegalStateException</span>;</span><br><span class="line">    <span class="comment">// 当前的位置</span></span><br><span class="line">    <span class="function"><span class="keyword">long</span> <span class="title">getCurrentPosition</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 获取时长</span></span><br><span class="line">    <span class="function"><span class="keyword">long</span> <span class="title">getDuration</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 播放器资源释放</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">release</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 播放器重置</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">reset</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 音量设置</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setVolume</span><span class="params">(<span class="keyword">float</span> leftVolume, <span class="keyword">float</span> rightVolume)</span></span>;</span><br><span class="line">    <span class="comment">// 获取AudioSessionId，只有系统的MediaPlayer才支持</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">getAudioSessionId</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// ExoPlayer不支持</span></span><br><span class="line">    <span class="function">MediaInfo <span class="title">getMediaInfo</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"EmptyMethod"</span>)</span><br><span class="line">    <span class="meta">@Deprecated</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setLogEnabled</span><span class="params">(<span class="keyword">boolean</span> enable)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Deprecated</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isPlayable</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 监听器设置 这些方法主要有AbstractMediaPlayer来实现</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setOnPreparedListener</span><span class="params">(OnPreparedListener listener)</span></span>;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*--------------------</span></span><br><span class="line"><span class="comment">     * 回调定义</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">OnPreparedListener</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">onPrepared</span><span class="params">(IMediaPlayer mp)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*--------------------</span></span><br><span class="line"><span class="comment">     * 可选项设置，差异化的体现（有的播放器并不支持）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="comment">// 设置音频资源的类型</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setAudioStreamType</span><span class="params">(<span class="keyword">int</span> streamtype)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Deprecated</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setKeepInBackground</span><span class="params">(<span class="keyword">boolean</span> keepInBackground)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// IjkMediaPlayer才支持</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">getVideoSarNum</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">getVideoSarDen</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Deprecated</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setWakeMode</span><span class="params">(Context context, <span class="keyword">int</span> mode)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setLooping</span><span class="params">(<span class="keyword">boolean</span> looping)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isLooping</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*--------------------</span></span><br><span class="line"><span class="comment">     * AndroidMediaPlayer: JELLY_BEAN才支持</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    ITrackInfo[] getTrackInfo();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*--------------------</span></span><br><span class="line"><span class="comment">     * AndroidMediaPlayer: ICE_CREAM_SANDWICH才支持</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setSurface</span><span class="params">(Surface surface)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*--------------------</span></span><br><span class="line"><span class="comment">     * AndroidMediaPlayer: M:才支持</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setDataSource</span><span class="params">(IMediaDataSource mediaDataSource)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过上面的简单分析，可以看出IMediaPlayer抽象出了不同版本播放器的通用功能，也保留了不同播放器独特支持的方法。</p>
+<h2 id="IjkMediaPlayer实现"><a href="#IjkMediaPlayer实现" class="headerlink" title="IjkMediaPlayer实现"></a>IjkMediaPlayer实现</h2><h3 id="IjkMediaPlayer的创建"><a href="#IjkMediaPlayer的创建" class="headerlink" title="IjkMediaPlayer的创建"></a>IjkMediaPlayer的创建</h3><p>IjkMediaPlayer的创建是有Java层和C/C++层联合完成的，现在结合源码看看具体的步骤</p>
+<h4 id="Java层"><a href="#Java层" class="headerlink" title="Java层"></a>Java层</h4><p>IjkMediaPlayer的Java层比较简单，主要就是继承AbstractMediaPlayer，重写IMediaPlayer的相关方法，定义一些与C/C++交互的方法，并在合适的时机调用它。这里主要来说说IjkMediaPlayer的创建，因为它涉及到so库的加载。上代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 默认的so库加载器，在类被加载的时候就创建了</span></span><br><span class="line"><span class="comment"> * Load them by yourself, if your libraries are not installed at default place.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> IjkLibLoader sLocalLibLoader = <span class="keyword">new</span> IjkLibLoader() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">loadLibrary</span><span class="params">(String libName)</span> <span class="keyword">throws</span> UnsatisfiedLinkError, SecurityException </span>&#123;</span><br><span class="line">        System.loadLibrary(libName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 确保so库只加载一次</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> mIsLibLoaded = <span class="keyword">false</span>;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">loadLibrariesOnce</span><span class="params">(IjkLibLoader libLoader)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (IjkMediaPlayer.class) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!mIsLibLoaded) &#123;</span><br><span class="line">            <span class="keyword">if</span> (libLoader == <span class="keyword">null</span>)</span><br><span class="line">                libLoader = sLocalLibLoader;</span><br><span class="line"></span><br><span class="line">            libLoader.loadLibrary(<span class="string">"ijkffmpeg"</span>);</span><br><span class="line">            libLoader.loadLibrary(<span class="string">"ijksdl"</span>);</span><br><span class="line">            libLoader.loadLibrary(<span class="string">"ijkplayer"</span>);</span><br><span class="line">            mIsLibLoaded = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 确保C层相关代码初始化一次</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> mIsNativeInitialized = <span class="keyword">false</span>;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">initNativeOnce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (IjkMediaPlayer.class) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!mIsNativeInitialized) &#123;</span><br><span class="line">            native_init();</span><br><span class="line">            mIsNativeInitialized = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 利用上面的sLocalLibLoader来加载so库</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">IjkMediaPlayer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(sLocalLibLoader);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 采用自定义的库加载器来加载so</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">IjkMediaPlayer</span><span class="params">(IjkLibLoader libLoader)</span> </span>&#123;</span><br><span class="line">    initPlayer(libLoader);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 播放器初始化工作</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initPlayer</span><span class="params">(IjkLibLoader libLoader)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 加载相关的so文件，主要是ijkffmpeg、ijksdl、ijkplayer三个so文件</span></span><br><span class="line">    loadLibrariesOnce(libLoader);</span><br><span class="line">    <span class="comment">// c层的初始化</span></span><br><span class="line">    initNativeOnce();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据不同的线程创建不同的Handler</span></span><br><span class="line">    Looper looper;</span><br><span class="line">    <span class="keyword">if</span> ((looper = Looper.myLooper()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">        mEventHandler = <span class="keyword">new</span> EventHandler(<span class="keyword">this</span>, looper);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((looper = Looper.getMainLooper()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">        mEventHandler = <span class="keyword">new</span> EventHandler(<span class="keyword">this</span>, looper);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        mEventHandler = <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 让c++层以弱引用的方式来引用Java层创建的IjkMediaPlayer（因为Java层创建IjkMedioPlayer对象更容易）</span></span><br><span class="line">    native_setup(<span class="keyword">new</span> WeakReference&lt;IjkMediaPlayer&gt;(<span class="keyword">this</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过上面的一系列流程，就完成了IjkMediaPlayer的创建和初始化工作。接下来的操作就主要在c/c++层了，因为每个IMediaPlayer方法的实现，最终都会有一个与之对应的C/C++层方法与之对应，这一点通过源码横容易发现。</p>
+<h4 id="C-C-层"><a href="#C-C-层" class="headerlink" title="C/C++层"></a>C/C++层</h4><p>接下来分析IjkPlayer c/c++层的实现。根据JNI文档的<a href="https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/invocation.html#JNJI_OnLoad" target="_blank" rel="noopener">Invocation API</a>相关章节描述，native库一旦被加加载（即调用System.loadLibrary()），这个native库就对所有的classLoader可见。这就会导致不同类加载器中的连个类会链接到同一个native方法上，会导致以下两个问题：</p>
+<ul>
+<li>一个类会错误的链接到一个有其他类加载器加载的同名native库上；</li>
+<li>native库横容易混淆调用它的类（因为native库可以同时又不同的ClassLoader记载），这就导致了命名空间隔离无效，会产生类型安全问题；</li>
+</ul>
+<p>为了解决上面的问题，每个类加载器都维护了它自己的native库集，JNI规范规定<strong>同一个native库只能被一个类加载器加载</strong>，当在两个class Loader中加载native库时将会抛出<code>UnsatisfiedLinkError</code>错误，通过这种方式，会带来以下两点好处：</p>
+<ul>
+<li>基于ClassLoader命名空间隔离在native库中得以保持，这就避免了不同加载器中同一个类混下的发生；</li>
+<li>除此之外，native库会在与之对应的classLoader GC时被卸载</li>
+</ul>
+<p>为了实现版本管理和资源控制，JNI库要对外提供一下两个方法：JNI_OnLoad和JNI_OnUnload。</p>
+<p>所以我们看看ijkplayer中这两个方法的实现（这两个方法在ijkplayer_jni.c这个文件中）</p>
+<h5 id="JNI-OnLoad"><a href="#JNI-OnLoad" class="headerlink" title="JNI_OnLoad"></a>JNI_OnLoad</h5><p><code>jint JNI_OnLoad(JavaVM *vm, void *reserved)</code><br>该方法在native库被加载（即调用System.loadLibrary())方法的时候被调用，该方法将返回native库所必需的的JNI版本号。如果要使用新的JNI函数，需要返回<code>JNI_VERSION_1_2或以上；如果native库没有提供自己的</code>JNI_OnLoad<code>方法虚拟机就认为他需要的是</code>JNI_VERSION_1_1`。如果虚拟机不能识别JNI_OnLoad返回的版本号，虚拟机就会卸载这个native库。</p>
+<p><code>JNI_Onload_L(JavaVM *vm, void *reserved)</code><br>如果一个native库 L是通过静态链接的，那么在首次加载这个库的时候<code>JNI_Onload_L</code>将已相同的参数被调用并且要求返回对应的返回值，返回值必须是<code>JNI_VERSION_1_8</code>或之后的版本，如果返回的是不识别版本号，虚拟机会和<code>JNI_OnLoad</code>做同样的操作。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">JNIEXPORT jint <span class="title">JNI_OnLoad</span><span class="params">(JavaVM *vm, <span class="keyword">void</span> *reserved)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    JNIEnv* env = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 更新虚拟机的引用</span></span><br><span class="line">    g_jvm = vm;</span><br><span class="line">    <span class="keyword">if</span> ((*vm)-&gt;GetEnv(vm, (<span class="keyword">void</span>**) &amp;env, JNI_VERSION_1_4) != JNI_OK) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    assert(env != <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">// 线程初始化</span></span><br><span class="line">    pthread_mutex_init(&amp;g_clazz.mutex, <span class="literal">NULL</span> );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取到IjkPlayer的引用，即g_clazz.clazz的值</span></span><br><span class="line">    IJK_FIND_JAVA_CLASS(env, g_clazz.clazz, JNI_CLASS_IJKPLAYER);</span><br><span class="line">    <span class="comment">// 方法注册，形成Java层定义的native方法和c层定义的方法之间的映射</span></span><br><span class="line">    (*env)-&gt;RegisterNatives(env, g_clazz.clazz, g_methods, NELEM(g_methods) );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最终就是FFmpeg的全局初始化工作，具体可查看ff_ffplay.c的ffp_global_init方法</span></span><br><span class="line">    ijkmp_global_init();</span><br><span class="line">    <span class="comment">// 这只inject_callback</span></span><br><span class="line">    ijkmp_global_set_inject_callback(inject_callback);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// FFmpegApi初始化</span></span><br><span class="line">    FFmpegApi_global_init(env);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> JNI_VERSION_1_4;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看看注册了哪些方法：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> JNINativeMethod g_methods[] = &#123;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">"_setDataSource"</span>,</span><br><span class="line">        <span class="string">"(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V"</span>,</span><br><span class="line">        (<span class="keyword">void</span> *) IjkMediaPlayer_setDataSourceAndHeaders</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123; <span class="string">"_setDataSourceFd"</span>,       <span class="string">"(I)V"</span>,     (<span class="keyword">void</span> *) IjkMediaPlayer_setDataSourceFd &#125;,</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>这些都是IjkMediaPlayer定义的native方法，由此可见，这里将Java层的方法和c层的方法映射起来了。比如当Java层调用start方法是，其实调用的是C层的IjkMediaPlayer_start方法。观察IjkMediaPlayer源码时，发现其定义了两个注解： <code>AccessedByNative</code> 和<code>CalledByNative</code> ，顾名思义，这个就是用来表示该变量是供native使用的，该方法是供native调用的，具体可以在<code>IjkMediaPlayer.c</code>中看到：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"IjkMediaPlayer.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer</span> &#123;</span></span><br><span class="line">    jclass id;</span><br><span class="line"></span><br><span class="line">    jfieldID field_mNativeMediaPlayer;</span><br><span class="line">    jfieldID field_mNativeMediaDataSource;</span><br><span class="line">    jfieldID field_mNativeAndroidIO;</span><br><span class="line">    jmethodID method_postEventFromNative;</span><br><span class="line">    jmethodID method_onSelectCodec;</span><br><span class="line">    jmethodID method_onNativeInvoke;</span><br><span class="line">&#125; J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;</span><br><span class="line"><span class="keyword">static</span> J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;</span><br></pre></td></tr></table></figure>
+<p>定义了一个结构体，里面内容是被注解的Filed和Method，同时可以看到被注解的方法在IjkMediaPlayer.c中定义的方法中别调用。</p>
+<h5 id="JNI-OnUnload"><a href="#JNI-OnUnload" class="headerlink" title="JNI_OnUnload"></a>JNI_OnUnload</h5><p><code>void JNI_OnUnload(JavaVM *vm, void *reserved)</code>和<code>JNI_OnUnload_L(JavaVM *vm, void *reserved)</code></p>
+<p>这两个方法在在包含native库的class Loader被GC时被调用，由于GC的具体时机不明确，所以这个方法通常会运行在不确定的上下文中，所以在调用的时候需要做好防护措施。这个方法里面通常会进行<strong>资源的回收释放</strong>。</p>
+<h5 id="native-setup方法"><a href="#native-setup方法" class="headerlink" title="native_setup方法"></a>native_setup方法</h5><p>在initPlayer方法中，会调用native_setup方法，其具体实现如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)</span><br><span class="line">&#123;</span><br><span class="line">    MPTRACE(<span class="string">"%s\n"</span>, __func__);</span><br><span class="line">    <span class="comment">// 创建C层的IjkMediaPlayer（其实是一个结构体，该结构体最终在ijkplayer_intrenal.h中定义）</span></span><br><span class="line">    IjkMediaPlayer *mp = ijkmp_android_create(message_loop);</span><br><span class="line">    <span class="comment">// 检查是否创建成功，如果失败，抛出异常信息，并执行label return（减少mp的引用次数）</span></span><br><span class="line">    JNI_CHECK_GOTO(mp, env, <span class="string">"java/lang/OutOfMemoryError"</span>, <span class="string">"mpjni: native_setup: ijkmp_create() failed"</span>, LABEL_RETURN);</span><br><span class="line">    <span class="comment">// 将Java层的IjkPlayer（thiz）和C层的IjkPlayer（mp）绑定</span></span><br><span class="line">    jni_set_media_player(env, thiz, mp);</span><br><span class="line">    <span class="comment">// 持有Java层IjkPlayer的弱引用</span></span><br><span class="line">    ijkmp_set_weak_thiz(mp, (*env)-&gt;NewGlobalRef(env, weak_this));</span><br><span class="line">    <span class="comment">// 利用mp的弱引用来设置ffp的一些参数</span></span><br><span class="line">    ijkmp_set_inject_opaque(mp, ijkmp_get_weak_thiz(mp));</span><br><span class="line">    ijkmp_set_ijkio_inject_opaque(mp, ijkmp_get_weak_thiz(mp));</span><br><span class="line">    ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, ijkmp_get_weak_thiz(mp));</span><br><span class="line"></span><br><span class="line">LABEL_RETURN:</span><br><span class="line">    ijkmp_dec_ref_p(&amp;mp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>看看<code>ijkmp_android_create</code>的实现（该方法在ijkplayer_android.c中）<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">IjkMediaPlayer *ijkmp_android_create(int(*msg_loop)(void*))</span><br><span class="line">&#123;</span><br><span class="line">    IjkMediaPlayer *mp = ijkmp_create(msg_loop);</span><br><span class="line">    <span class="keyword">if</span> (!mp)</span><br><span class="line">        <span class="keyword">goto</span> fail;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置vout，其实就是创建Surface，用于展示视频</span></span><br><span class="line">    mp-&gt;ffplayer-&gt;vout = SDL_VoutAndroid_CreateForAndroidSurface();</span><br><span class="line">    <span class="keyword">if</span> (!mp-&gt;ffplayer-&gt;vout)</span><br><span class="line">        <span class="keyword">goto</span> fail;</span><br><span class="line">    <span class="comment">// 设置pipeline</span></span><br><span class="line">    mp-&gt;ffplayer-&gt;pipeline = ffpipeline_create_from_android(mp-&gt;ffplayer);</span><br><span class="line">    <span class="keyword">if</span> (!mp-&gt;ffplayer-&gt;pipeline)</span><br><span class="line">        <span class="keyword">goto</span> fail;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// vout和pipeline绑定</span></span><br><span class="line">    ffpipeline_set_vout(mp-&gt;ffplayer-&gt;pipeline, mp-&gt;ffplayer-&gt;vout);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> mp;</span><br><span class="line"></span><br><span class="line">fail:</span><br><span class="line">    ijkmp_dec_ref_p(&amp;mp);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>分析到此，IjkMediaPlayer的创建大致就完成了。</p>
+<h3 id="IjkMediaPlayer数据源的绑定"><a href="#IjkMediaPlayer数据源的绑定" class="headerlink" title="IjkMediaPlayer数据源的绑定"></a>IjkMediaPlayer数据源的绑定</h3><p>数据的绑定在Java层由setDataSource来实现，最终调用_setDataSourceXX系列的native方法，可见最终的数据绑定发生在C/C++层。</p>
+<ul>
+<li>_setDataSource，即C层<code>IjkMediaPlayer_setDataSourceAndHeaders</code>，对应于Java层的<code>setDataSource</code>；</li>
+<li>_setDataSourceFd，即C层<code>IjkMediaPlayer_setDataSourceFd</code>，对应于Java层的<code>setDataSource(FileDescriptor fd)</code>；</li>
+<li>_setDataSource（重载的），即C层<code>IjkMediaPlayer_setDataSourceCallback</code>，对应于<code>setAndroidIOCallback</code>；</li>
+</ul>
+<p>这里主要分析<code>IjkMediaPlayer_setDataSourceAndHeaders</code>的实现，通过代码看它的调用链：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">IjkMediaPlayer_setDataSourceAndHeaders(</span><br><span class="line">    JNIEnv *env, jobject thiz, jstring path,</span><br><span class="line">    jobjectArray keys, jobjectArray values)</span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 真正的设置播放源实现</span></span><br><span class="line">    retval = ijkmp_set_data_source(mp, c_path);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>ijkmp_set_data_source</code><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">ijkmp_set_data_source</span><span class="params">(IjkMediaPlayer *mp, <span class="keyword">const</span> <span class="keyword">char</span> *url)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">int</span> retval = ijkmp_set_data_source_l(mp, url);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>ijkmp_set_data_source_l</code><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">ijkmp_set_data_source_l</span><span class="params">(IjkMediaPlayer *mp, <span class="keyword">const</span> <span class="keyword">char</span> *url)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    freep((<span class="keyword">void</span>**)&amp;mp-&gt;data_source);</span><br><span class="line">    mp-&gt;data_source = strdup(url);</span><br><span class="line">    <span class="keyword">if</span> (!mp-&gt;data_source)</span><br><span class="line">        <span class="keyword">return</span> EIJK_OUT_OF_MEMORY;</span><br><span class="line"></span><br><span class="line">    ijkmp_change_state_l(mp, MP_STATE_INITIALIZED);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>最终走到<code>msg_queue_put_private</code>，这个过程其实就是生成一个AVMessage对象，然后放入ijkplayer-&gt;ffplayer-&gt;msg_queue中，最后通知其他线程去处理。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">inline</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">msg_queue_put_private</span><span class="params">(MessageQueue *q, AVMessage *msg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    SDL_CondSignal(q-&gt;cond);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>SDL_CondSignal</code><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">SDL_CondSignal</span><span class="params">(SDL_cond *cond)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    assert(cond);</span><br><span class="line">    <span class="keyword">if</span> (!cond)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> pthread_cond_signal(&amp;cond-&gt;id);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>pthread_cond_signal函数的作用是发送一个信号给另外一个正在处于阻塞等待状态的线程，使其脱离阻塞状态，继续执行，当某个线程继续执行的时候发现msg_queue中有msg的时候会有相应操作。这个pthread_cond_signal就是负责通知其他线程来处理消息队列中的消息的。具体是那个线程，在我们分析完<code>prepareAsync</code>函数的调用过程后就明白了。</p>
+<h3 id="prepareAsync"><a href="#prepareAsync" class="headerlink" title="prepareAsync"></a>prepareAsync</h3><p><code>prepareAsync</code>最终调用的是C层的<code>IJK_MediaPlayer_prepareAsync</code>方法。调用链：IjkMediaPlayer_prepareAsync()-&gt;ijkmp_prepare_async()-&gt;ijkmp_prepare_async_l()，和<code>setDataSource</code>的过程有点类似，这里详细分析下<code>ijkmp_prepare_async_l()</code>：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">ijkmp_prepare_async_l</span><span class="params">(IjkMediaPlayer *mp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 发送MP_STATE_ASYNC_PREPARING消息到消息队列</span></span><br><span class="line">    ijkmp_change_state_l(mp, MP_STATE_ASYNC_PREPARING);</span><br><span class="line">    <span class="comment">// 发送FFP_MSG_FLUSH消息到消息队列</span></span><br><span class="line">    msg_queue_start(&amp;mp-&gt;ffplayer-&gt;msg_queue);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// released in msg_loop</span></span><br><span class="line">    ijkmp_inc_ref(mp);</span><br><span class="line">    <span class="comment">// 创建消息循环线程</span></span><br><span class="line">    mp-&gt;msg_thread = SDL_CreateThreadEx(&amp;mp-&gt;_msg_thread, ijkmp_msg_loop, mp, <span class="string">"ff_msg_loop"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 真正的prepare</span></span><br><span class="line">    <span class="keyword">int</span> retval = ffp_prepare_async_l(mp-&gt;ffplayer, mp-&gt;data_source);</span><br><span class="line">    <span class="keyword">if</span> (retval &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">// 异常处理</span></span><br><span class="line">        ijkmp_change_state_l(mp, MP_STATE_ERROR);</span><br><span class="line">        <span class="keyword">return</span> retval;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>ffp_prepare_async_l</code><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">ffp_prepare_async_l</span><span class="params">(FFPlayer *ffp, <span class="keyword">const</span> <span class="keyword">char</span> *file_name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// log输出（运行ijkplayer的demo是可以看到这些输出</span></span><br><span class="line">    av_log(<span class="literal">NULL</span>, AV_LOG_INFO, <span class="string">"===== versions =====\n"</span>);</span><br><span class="line">    ffp_show_version_str(ffp, <span class="string">"ijkplayer"</span>,      ijk_version_info());</span><br><span class="line">    ffp_show_version_str(ffp, <span class="string">"FFmpeg"</span>,         av_version_info());</span><br><span class="line">    ffp_show_version_int(ffp, <span class="string">"libavutil"</span>,      avutil_version());</span><br><span class="line">    ffp_show_version_int(ffp, <span class="string">"libavcodec"</span>,     avcodec_version());</span><br><span class="line">    ffp_show_version_int(ffp, <span class="string">"libavformat"</span>,    avformat_version());</span><br><span class="line">    ffp_show_version_int(ffp, <span class="string">"libswscale"</span>,     swscale_version());</span><br><span class="line">    ffp_show_version_int(ffp, <span class="string">"libswresample"</span>,  swresample_version());</span><br><span class="line">    av_log(<span class="literal">NULL</span>, AV_LOG_INFO, <span class="string">"===== options =====\n"</span>);</span><br><span class="line">    ffp_show_dict(ffp, <span class="string">"player-opts"</span>, ffp-&gt;player_opts);</span><br><span class="line">    ffp_show_dict(ffp, <span class="string">"format-opts"</span>, ffp-&gt;format_opts);</span><br><span class="line">    ffp_show_dict(ffp, <span class="string">"codec-opts "</span>, ffp-&gt;codec_opts);</span><br><span class="line">    ffp_show_dict(ffp, <span class="string">"sws-opts   "</span>, ffp-&gt;sws_dict);</span><br><span class="line">    ffp_show_dict(ffp, <span class="string">"swr-opts   "</span>, ffp-&gt;swr_opts);</span><br><span class="line">    av_log(<span class="literal">NULL</span>, AV_LOG_INFO, <span class="string">"===================\n"</span>);</span><br><span class="line"></span><br><span class="line">    av_opt_set_dict(ffp, &amp;ffp-&gt;player_opts);</span><br><span class="line">    <span class="keyword">if</span> (!ffp-&gt;aout) &#123;</span><br><span class="line">        ffp-&gt;aout = ffpipeline_open_audio_output(ffp-&gt;pipeline, ffp);</span><br><span class="line">        <span class="keyword">if</span> (!ffp-&gt;aout)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 流处理开始</span></span><br><span class="line">    VideoState *is = stream_open(ffp, file_name, <span class="literal">NULL</span>);</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>stream_open</code>中做了很多工作，但从线程层面，主要创建了两个线程<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> VideoState *<span class="title">stream_open</span><span class="params">(FFPlayer *ffp, <span class="keyword">const</span> <span class="keyword">char</span> *filename, AVInputFormat *iformat)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建线程用以视频的显示</span></span><br><span class="line">    is-&gt;video_refresh_tid = SDL_CreateThreadEx(&amp;is-&gt;_video_refresh_tid, video_refresh_thread, ffp, <span class="string">"ff_vout"</span>);</span><br><span class="line">    <span class="keyword">if</span> (!is-&gt;video_refresh_tid) &#123;</span><br><span class="line">        av_freep(&amp;ffp-&gt;is);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    is-&gt;initialized_decoder = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// 创建读取网络数据或本地数据的线程，这个线程即read_thread内部还做了很多的消息处理，比如FFP_MSG_PREPARED（接到这个消息后，会调用Java层函数，向handler发送`MEDIA_PREPARED`、FFP_REQ_START等消息）</span></span><br><span class="line">    is-&gt;read_tid = SDL_CreateThreadEx(&amp;is-&gt;_read_tid, read_thread, ffp, <span class="string">"ff_read"</span>);</span><br><span class="line">    <span class="keyword">if</span> (!is-&gt;read_tid) &#123;</span><br><span class="line">        av_log(<span class="literal">NULL</span>, AV_LOG_FATAL, <span class="string">"SDL_CreateThread(): %s\n"</span>, SDL_GetError());</span><br><span class="line">        <span class="keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> is;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在读取线程<code>read_thread</code>发送FFP_MSG_PREPARED消息后，C层会调用Java层定义好的函数<code>postEventFromNative</code>向Java层发送<code>MEDIA_PREPARED</code>消息，这样就实现了c层到Java层的通信了。注意<strong>C层的消息循环处理函数在ijkplayer_jnc.c文件中</strong>。</p>
+<p>受到消息后，<code>player.notifyOnPrepared()</code>会执行，这样就通知到了Java层，播放器已经准备就绪了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文分析的ijkplayer的整体结构，并详细介绍了ijkplayer的初始化流程，同时了解到了ijkplayerC层比较重要的几个线程（<code>ijkmp_msg_loop</code>、<code>video_refresh_thread</code>、<code>read_thread</code>）的创建时机，ijkplayer消息的处理、ijkplayerC层和Java层之间的通信方式，后续会介绍读取线程<code>read_thread</code>的具体工作过程。</p>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
+<li><a href="https://www.jianshu.com/p/7d9b86919682" target="_blank" rel="noopener">ijkplayer视频播放器源码分析(android)</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/J191218.html" rel="next" title="Java基本概念的解释">
+                <i class="fa fa-chevron-left"></i> Java基本概念的解释
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A191224.html" rel="prev" title="Android基于ExoPlayer封装的音视频播放器">
+                Android基于ExoPlayer封装的音视频播放器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#整体结构"><span class="nav-number">2.</span> <span class="nav-text">整体结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通用接口定义"><span class="nav-number">3.</span> <span class="nav-text">通用接口定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IjkMediaPlayer实现"><span class="nav-number">4.</span> <span class="nav-text">IjkMediaPlayer实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IjkMediaPlayer的创建"><span class="nav-number">4.1.</span> <span class="nav-text">IjkMediaPlayer的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Java层"><span class="nav-number">4.1.1.</span> <span class="nav-text">Java层</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#C-C-层"><span class="nav-number">4.1.2.</span> <span class="nav-text">C/C++层</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#JNI-OnLoad"><span class="nav-number">4.1.2.1.</span> <span class="nav-text">JNI_OnLoad</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#JNI-OnUnload"><span class="nav-number">4.1.2.2.</span> <span class="nav-text">JNI_OnUnload</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#native-setup方法"><span class="nav-number">4.1.2.3.</span> <span class="nav-text">native_setup方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IjkMediaPlayer数据源的绑定"><span class="nav-number">4.2.</span> <span class="nav-text">IjkMediaPlayer数据源的绑定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#prepareAsync"><span class="nav-number">4.3.</span> <span class="nav-text">prepareAsync</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文章"><span class="nav-number">6.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要之前一直对NDK和JNI这两个玩意理解有点模糊，本文先分别介绍两者的相关概念，再介绍两者的使用的一般流程，最后介绍两者的联系。 Jni接口文档  本文主要介绍NDK开发时的一些环境配置，并提供了一个Java调用Native方法的简单实例。">
+<meta name="keywords" content="NDK,JNI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android之NDK与JNI简单介绍及NDK开发demo实现">
+<meta property="og:url" content="http://yoursite.com/posts/A191021.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要之前一直对NDK和JNI这两个玩意理解有点模糊，本文先分别介绍两者的相关概念，再介绍两者的使用的一般流程，最后介绍两者的联系。 Jni接口文档  本文主要介绍NDK开发时的一些环境配置，并提供了一个Java调用Native方法的简单实例。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/images/A191021/NDK的特点.png">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.793Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android之NDK与JNI简单介绍及NDK开发demo实现">
+<meta name="twitter:description" content="摘要之前一直对NDK和JNI这两个玩意理解有点模糊，本文先分别介绍两者的相关概念，再介绍两者的使用的一般流程，最后介绍两者的联系。 Jni接口文档  本文主要介绍NDK开发时的一些环境配置，并提供了一个Java调用Native方法的简单实例。">
+<meta name="twitter:image" content="http://yoursite.com/images/A191021/NDK的特点.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A191021.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android之NDK与JNI简单介绍及NDK开发demo实现 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A191021.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android之NDK与JNI简单介绍及NDK开发demo实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-21T22:37:02+08:00">2019-10-21</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>之前一直对NDK和JNI这两个玩意理解有点模糊，本文先分别介绍两者的相关概念，再介绍两者的使用的一般流程，最后介绍两者的联系。</p>
+<p><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/" target="_blank" rel="noopener">Jni接口文档</a></p>
+<blockquote>
+<p>本文主要介绍NDK开发时的一些环境配置，并提供了一个Java调用Native方法的简单实例。</p>
+</blockquote>
+<a id="more"></a>
+<h2 id="JNI"><a href="#JNI" class="headerlink" title="JNI"></a>JNI</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>JNI，即Java Native Interface，是指Java本地接口。它定义Java与其他语言（如c、c++）之间的交互规范，依据这个规范就可以<em>在Java代码中调用c、c++的方法，或者在c、c++代码中调用Java方法</em>。</p>
+<blockquote>
+<p>JNI是Java调用本地其他语言（如c、c++）的一种特性，是Java的概念，与Android无关。</p>
+</blockquote>
+<h3 id="为什么要有JNI"><a href="#为什么要有JNI" class="headerlink" title="为什么要有JNI"></a>为什么要有JNI</h3><p>Java具有跨平台的特性，所以Java就面临着与当前平台（本地环境）交互能力弱的这个痛点，为了解决这一痛点，JNI就应运而生了，JNI出现的目的就是为了增强Java与本地交互的能力。</p>
+<h3 id="JNI开发的一般步骤"><a href="#JNI开发的一般步骤" class="headerlink" title="JNI开发的一般步骤"></a>JNI开发的一般步骤</h3><ol>
+<li>在Java中声明native方法（即需要调用的本地方法）</li>
+<li>通过<code>javac</code>命令编译java源文件（得到.class文件）</li>
+<li>通过<code>javah</code>命令到处JNI的头文件（得到.h文件）</li>
+<li>利用c、c++根据3中得到的.h文件生成.c（或.cpp）文件，即native实现；</li>
+<li>编译生成.so库文件；</li>
+<li>在Java文件中加载so库文件，并调用native方法。</li>
+</ol>
+<p>后面会给出具体的Demo</p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><ul>
+<li><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/jniTOC.html" target="_blank" rel="noopener">官方JNI文档</a></li>
+</ul>
+<h2 id="NDK"><a href="#NDK" class="headerlink" title="NDK"></a>NDK</h2><h3 id="简介-1"><a href="#简介-1" class="headerlink" title="简介"></a>简介</h3><p>NDK，即Native Development Kit，是Android提供的一个原生开发工具包，NDK是Android开发中的一个概念，与Java并无直接关系。</p>
+<h3 id="为什么要有NDK"><a href="#为什么要有NDK" class="headerlink" title="为什么要有NDK"></a>为什么要有NDK</h3><p>通过JNI介绍可以看出，如果Android开发中想调用本地方法，步骤比较繁琐，NDK的出现，解决了这一问题，可以快速开发c、c++动态库，并将生成的so文件一起打包到apk中（可以理解为一种半自动化工具）</p>
+<h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h3><p>关于NDK的特点，用一张图来表示。<br><img src="./../images/A191021/NDK的特点.png" alt="NDK特点"></p>
+<p>关于NDK，还有一些需要注意的地方：</p>
+<ul>
+<li>NDK可以直接将so文件打包值apk中，而JNI需要先生成so文件，然后将so文件放在指定的位置；</li>
+<li>NDK提供的库优先，不要滥用，一般用于算法效率问题和安全敏感问题；</li>
+<li>NDK提供了交叉编译其，用于生成不同CPU平台的动态库；</li>
+</ul>
+<h3 id="NDK开发的一般步骤"><a href="#NDK开发的一般步骤" class="headerlink" title="NDK开发的一般步骤"></a>NDK开发的一般步骤</h3><ol>
+<li>配置Android NDK开发环境；</li>
+<li>创建Android项目，并与NDK进行关联；</li>
+<li>在Android相关的类（Activity）中声明需要调用的native方法；</li>
+<li>生成native的.h头文件；</li>
+<li>依据头文件，编写其具体实现；</li>
+<li>实现代码写好后，使用ndk build来编译生成so文件；</li>
+<li>编译Android项目，实现Android调用本地代码。</li>
+</ol>
+<h3 id="参考文档-1"><a href="#参考文档-1" class="headerlink" title="参考文档"></a>参考文档</h3><p><a href="https://developer.android.google.cn/ndk/guides" target="_blank" rel="noopener">NDK中文官方文档</a></p>
+<h2 id="NDK和JNI的关系"><a href="#NDK和JNI的关系" class="headerlink" title="NDK和JNI的关系"></a>NDK和JNI的关系</h2><p>NDK是Android平台上快速实现JNI的一种手段，JNI是Java实现的目的，即完成Java中调用本地代码。</p>
+<h2 id="JNI和NDK开发demo示例"><a href="#JNI和NDK开发demo示例" class="headerlink" title="JNI和NDK开发demo示例"></a>JNI和NDK开发demo示例</h2><p>由于NDK是达到JNI目的的一种方式，所以二者实现方式大体相同，区别就是生成.h文件以及so库的处理方式不同，所以这里主要给出NDK开发示例。<br>先说下我的环境配置</p>
+<ul>
+<li>Mac系统</li>
+<li>Android Studio 3.5</li>
+<li>JDK 1.8.1，已将JDK 的bin目录加入到PATH；</li>
+</ul>
+<h3 id="NDK开发demo示例"><a href="#NDK开发demo示例" class="headerlink" title="NDK开发demo示例"></a>NDK开发demo示例</h3><h2 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h2><ol>
+<li><p>配置NDK开发环境</p>
+<blockquote>
+<p>下载NDK，打开Android Studio -&gt;Preferences-&gt;Appearance &amp; Behavior-&gt;Android SDK，切换到SDK Tools，下载NDK开发工具；</p>
+</blockquote>
+</li>
+<li><p>创建Android项目，新建一个NdkDemo 项目，在src/main下新建目录jin和jinLibs，并在jni目录下新建JniTest.java文件，内容如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cn.rainonth.ndkdemo;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> 张豪成</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2019-10-21 20:36</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JniTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">static</span> String <span class="title">get</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>根据JniTest.java 生成jni头文件，有两种方案：</p>
+<ul>
+<li><p>方法1：点击Build-&gt;Make Project，生成JniTest.class文件，然后找到生成的.class文件，利用javah命令生成；</p>
+</li>
+<li><p>方法2：利用Android External tools来自动化上面的命令。具体方法如下：</p>
+<ul>
+<li>Preferences-&gt;Tools-&gt;Exteranl tools，新建external tools，分别按下面的内容配置：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Name:Generate Jni Header(可以随便填)</span><br><span class="line">Description:生成JNI头文件(可以随便填)</span><br><span class="line">Program:javah</span><br><span class="line">Arguments:-v -jni -d $ModuleFileDir$/src/main/jni $FileClass$</span><br><span class="line">Working Directory:$SourcepathEntry$</span><br></pre></td></tr></table></figure>
+<ul>
+<li>配置好后保存；</li>
+<li>找到刚新建的JniTest文件，右键-&gt;External tools-&gt;Generate Jni Header，即可在jin目录生成头文件了。</li>
+</ul>
+</li>
+</ul>
+<p>上面生成的头文件如下（<code>cn_rainmonth_ndkdemo_JniTest.h</code>）：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* DO NOT EDIT THIS FILE - it is machine generated */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;jni.h&gt;</span></span></span><br><span class="line"><span class="comment">/* Header for class cn_rainmonth_ndkdemo_JniTest */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> _Included_cn_rainmonth_ndkdemo_JniTest</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _Included_cn_rainmonth_ndkdemo_JniTest</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus</span></span><br><span class="line"><span class="keyword">extern</span> <span class="string">"C"</span> &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Class:     cn_rainmonth_ndkdemo_JniTest</span></span><br><span class="line"><span class="comment"> * Method:    get</span></span><br><span class="line"><span class="comment"> * Signature: ()Ljava/lang/String;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">JNIEXPORT jstring JNICALL Java_cn_rainmonth_ndkdemo_JniTest_get</span><br><span class="line">  (JNIEnv *, jobject);</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Class:     cn_rainmonth_ndkdemo_JniTest</span></span><br><span class="line"><span class="comment"> * Method:    add</span></span><br><span class="line"><span class="comment"> * Signature: (II)I</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">JNIEXPORT jint JNICALL Java_cn_rainmonth_ndkdemo_JniTest_add</span><br><span class="line">  (JNIEnv *, jobject, jint, jint);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __cplusplus</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编写JniTest.cpp文件<br>在jin目录新建JniTest.cpp文件，引入上面生成的头文件，开始编写c++文件内容，如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Created by Randy on 2019-10-22.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;jni.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"cn_rainmonth_ndkdemo_JniTest.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Class:     cn_rainonth_ndkdemo_JniTest</span></span><br><span class="line"><span class="comment"> * Method:    get</span></span><br><span class="line"><span class="comment"> * Signature: ()Ljava/lang/String;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">extern</span> <span class="string">"C"</span> JNIEXPORT jstring JNICALL Java_cn_rainmonth_ndkdemo_JniTest_get</span><br><span class="line">        (JNIEnv *env, jobject clazz) &#123;</span><br><span class="line">    <span class="keyword">return</span> env-&gt;NewStringUTF(<span class="string">"Hello World from C"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Class:     cn_rainonth_ndkdemo_JniTest</span></span><br><span class="line"><span class="comment"> * Method:    add</span></span><br><span class="line"><span class="comment"> * Signature: (II)I</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">extern</span> <span class="string">"C"</span> JNIEXPORT jint JNICALL Java_cn_rainmonth_ndkdemo_JniTest_add</span><br><span class="line">        (JNIEnv *, jobject clazz, jint a, jint b) &#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我在编写的时候，发现没有代码不全，这里介绍下如何让代码补全，后面会介绍Android Studio 支持C++代码提示的方法，参见后面的补充。</p>
+</li>
+<li><p>使用ndk build来编译项目，并生成so库</p>
+<ol>
+<li><p>编写Android.mk文件<br>Android.mk文件中定义了c++项目编译的一些配置，具体配置及代码如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 当前路径</span></span><br><span class="line">LOCAL_PATH := <span class="variable">$(<span class="built_in">call</span> my-<span class="built_in">dir</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 清除LOCAL_XXX变量</span></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(CLEAR_VARS)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 原生库名称</span></span><br><span class="line">LOCAL_MODULE := jnitest-lib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 原生代码文件</span></span><br><span class="line">LOCAL_SRC_FILES =: JniTest.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译动态库</span></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_SHARED_LIBRARY)</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编写Application.mk</p>
+<p>Application.mk用来指定生成的.so库的名称，以及支持的ABI类型，代码如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 原生库名称</span></span><br><span class="line">APP_MODULES := jnitest-lib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定机器指令集，armeabi mips mips64不再支持了</span></span><br><span class="line">APP_ABI := armeabi-v7a arm64-v8a x86 x86_64</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成so库<br>在jni目录上右键，执行External Tools的ndk-build，就可以在main下面生成libs和obj目录了，libs目录下就是我们想要的so文件内容</p>
+</li>
+</ol>
+</li>
+<li>使用</li>
+</ol>
+<p>项目的MainActivity如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cn.rainmonth.ndkdemo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> androidx.appcompat.app.AppCompatActivity;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.os.Bundle;</span><br><span class="line"><span class="keyword">import</span> android.view.View;</span><br><span class="line"><span class="keyword">import</span> android.widget.TextView;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cn.rainmonth.ndkdemo.R;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 参考：https://juejin.im/post/5a67dcdb518825732c53b338</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    TextView tvHello;</span><br><span class="line">    TextView tvAdd;</span><br><span class="line">    TextView tvResult;</span><br><span class="line">		</span><br><span class="line">  	<span class="comment">// 加载so库</span></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.loadLibrary(<span class="string">"jnitest-lib"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line"></span><br><span class="line">        tvHello = findViewById(R.id.tv_hello);</span><br><span class="line">        tvAdd = findViewById(R.id.tv_add);</span><br><span class="line">        tvResult = findViewById(R.id.tv_result);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> JniTest jniTest = <span class="keyword">new</span> JniTest();</span><br><span class="line"></span><br><span class="line">        tvHello.setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</span><br><span class="line">								<span class="comment">// 调用native的get方法</span></span><br><span class="line">                tvResult.setText(jniTest.get());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        tvAdd.setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</span><br><span class="line">              	<span class="comment">// 调用native的add方法</span></span><br><span class="line">                tvResult.setText(String.valueOf(jniTest.add(<span class="number">5</span>, <span class="number">3</span>)));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h2><p>Android Studio开启c++代码补全</p>
+<ul>
+<li>先在jni目录编写Android.mk文件，内容同上面的<code>Android.mk</code>;</li>
+<li>然后Android Studio，File-&gt;Link C++ Project with Gradle，在弹出的配置框中，Build System选择ndkBuild，Project Path 选择刚才新建的Android.mk文件即可。这样就把C++代码和Gradle连接起来了。</li>
+</ul>
+<p>注意：上面的操作其实相当于在app moudle的build.gradle的android闭包中添加如下代码：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 相当于执行Link C++ Project with Gradle</span></span><br><span class="line">externalNativeBuild &#123;</span><br><span class="line"> ndkBuild &#123;</span><br><span class="line">	 path file(<span class="string">'src/main/jni/Android.mk'</span>)</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这只是NDK开发的第一步，其中External Tools相关的操作能帮我们省去不少时间，后面讲通过实际项目来进行NDK开发的实践。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/NDK/" rel="tag"># NDK</a>
+          
+            <a href="/tags/JNI/" rel="tag"># JNI</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A191019.html" rel="next" title="Android系统的启动">
+                <i class="fa fa-chevron-left"></i> Android系统的启动
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A191023.html" rel="prev" title="Android Binder线程池工作过程">
+                Android Binder线程池工作过程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JNI"><span class="nav-number">2.</span> <span class="nav-text">JNI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">2.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要有JNI"><span class="nav-number">2.2.</span> <span class="nav-text">为什么要有JNI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JNI开发的一般步骤"><span class="nav-number">2.3.</span> <span class="nav-text">JNI开发的一般步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考文档"><span class="nav-number">2.4.</span> <span class="nav-text">参考文档</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NDK"><span class="nav-number">3.</span> <span class="nav-text">NDK</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介-1"><span class="nav-number">3.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要有NDK"><span class="nav-number">3.2.</span> <span class="nav-text">为什么要有NDK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特点"><span class="nav-number">3.3.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NDK开发的一般步骤"><span class="nav-number">3.4.</span> <span class="nav-text">NDK开发的一般步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考文档-1"><span class="nav-number">3.5.</span> <span class="nav-text">参考文档</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NDK和JNI的关系"><span class="nav-number">4.</span> <span class="nav-text">NDK和JNI的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JNI和NDK开发demo示例"><span class="nav-number">5.</span> <span class="nav-text">JNI和NDK开发demo示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NDK开发demo示例"><span class="nav-number">5.1.</span> <span class="nav-text">NDK开发demo示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体步骤"><span class="nav-number">6.</span> <span class="nav-text">具体步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#补充"><span class="nav-number">7.</span> <span class="nav-text">补充</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

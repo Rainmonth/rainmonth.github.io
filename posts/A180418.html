@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要 本文先谈了下布局优化的必要性，然后阐述不好的布局会引发哪些问题，在针对这些情况提出具体的布局优化方案，同时介绍一些常用布局优化工具的使用。  参考文章：  Android UI性能优化实战 识别绘制中的性能问题 Android性能优化：布局优化 详细解析（含\、\、\讲解 ）  必要性为了避免手机资源的浪费（CPU资源和GPU资源），减少卡顿的发生，必须对App的布局进行优化。优化可以从下三">
+<meta name="keywords" content="布局优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 性能优化之布局优化">
+<meta property="og:url" content="http://yoursite.com/posts/A180418.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要 本文先谈了下布局优化的必要性，然后阐述不好的布局会引发哪些问题，在针对这些情况提出具体的布局优化方案，同时介绍一些常用布局优化工具的使用。  参考文章：  Android UI性能优化实战 识别绘制中的性能问题 Android性能优化：布局优化 详细解析（含\、\、\讲解 ）  必要性为了避免手机资源的浪费（CPU资源和GPU资源），减少卡顿的发生，必须对App的布局进行优化。优化可以从下三">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-25T05:26:43.795Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 性能优化之布局优化">
+<meta name="twitter:description" content="摘要 本文先谈了下布局优化的必要性，然后阐述不好的布局会引发哪些问题，在针对这些情况提出具体的布局优化方案，同时介绍一些常用布局优化工具的使用。  参考文章：  Android UI性能优化实战 识别绘制中的性能问题 Android性能优化：布局优化 详细解析（含\、\、\讲解 ）  必要性为了避免手机资源的浪费（CPU资源和GPU资源），减少卡顿的发生，必须对App的布局进行优化。优化可以从下三">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A180418.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android 性能优化之布局优化 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A180418.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 性能优化之布局优化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-18T10:54:12+08:00">2018-04-18</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/性能优化/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><blockquote>
+<p>本文先谈了下布局优化的必要性，然后阐述不好的布局会引发哪些问题，在针对这些情况提出具体的布局优化方案，同时介绍一些常用布局优化工具的使用。</p>
+</blockquote>
+<p>参考文章：</p>
+<ul>
+<li><a href="https://blog.csdn.net/lmj623565791/article/details/45556391" target="_blank" rel="noopener">Android UI性能优化实战 识别绘制中的性能问题</a></li>
+<li><a href="https://juejin.im/entry/5ab05e13f265da238b7dd3ac?utm_source=gold_browser_extension" target="_blank" rel="noopener">Android性能优化：布局优化 详细解析（含\<include\>、\<viewstub\>、\<merge\>讲解 ）</merge\></viewstub\></include\></a></li>
+</ul>
+<h2 id="必要性"><a href="#必要性" class="headerlink" title="必要性"></a>必要性</h2><p>为了避免手机资源的浪费（CPU资源和GPU资源），减少卡顿的发生，必须对App的布局进行优化。优化可以从下三方面着手：</p>
+<ul>
+<li>无必要的layout</li>
+<li>过于频繁的invidations</li>
+<li>Overdraw</li>
+</ul>
+<a id="more"></a>
+<h2 id="检测工具"><a href="#检测工具" class="headerlink" title="检测工具"></a>检测工具</h2><ul>
+<li>Android Device Monitor ——Hierarchy View，查看布局层级，看看有没有不必要的嵌套</li>
+<li>Android Studio-&gt;Tools-&gt;Layout Inspector</li>
+<li>开发者选项——Show GPU Overdraw，查看视图的绘制情况</li>
+</ul>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><h3 id="Overdraw的检测"><a href="#Overdraw的检测" class="headerlink" title="Overdraw的检测"></a>Overdraw的检测</h3><p>打开上面的Show GPU Overdraw后，App上会有不同的颜色显示当前的Overdraw情况：</p>
+<ul>
+<li>蓝色， 1x overdraw</li>
+<li>绿色， 2x overdraw</li>
+<li>淡红， 3x overdraw</li>
+<li>深红， 4x overdraw</li>
+</ul>
+<p>如果红色区域较多，就说明当前页面过度绘制严重，需要我们解决了。</p>
+<h4 id="解决方案一：移除非必要的background"><a href="#解决方案一：移除非必要的background" class="headerlink" title="解决方案一：移除非必要的background"></a>解决方案一：移除非必要的background</h4><ul>
+<li><p>有时候为了统一UI效果，通常会设置整体的背景，这就可能导致父容器设置了背景，然后子容器也设置了背景，这时如果嵌套过深，就会出现严重的overdraw</p>
+</li>
+<li><p>DecorView也存在一层背景的，如果我们自己设置了跟布局的背景，我们可以将DecorView的背景置空：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getWindow().setBackgroundDrawable(<span class="keyword">null</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在设置背景是，要慎用layer-list。为什么呢？因为layer-list 本身就存在多层绘制。</p>
+</li>
+</ul>
+<h4 id="解决方案二：在绘制的时候采用ClipRect"><a href="#解决方案二：在绘制的时候采用ClipRect" class="headerlink" title="解决方案二：在绘制的时候采用ClipRect"></a>解决方案二：在绘制的时候采用ClipRect</h4><p>自定义控件的时候，如果涉及到矩形绘制，可以采用ClipRect，它可以很好的处理绘图区域的重叠部分</p>
+<h4 id="解决方案三：降低View的层级"><a href="#解决方案三：降低View的层级" class="headerlink" title="解决方案三：降低View的层级"></a>解决方案三：降低View的层级</h4><p>如果View的层级过深，那么overdraw的概率就会加大，所以降低View的嵌套层级是解决Overdraw的最基本途径。减少View的层级，可以从以下几个方面入手：</p>
+<ul>
+<li>选择合理的根布局，推荐使用ConstraintLayout（Android Studio 3.x以上的版本新建Activity默认的根布局就是采用ConstraintLayout），他结合了LinearLayout和RelativeLayout的特性，比提供了几个非常有用的辅助布局工具，如ViewGroup、GuidLine等。</li>
+<li>merge标签的使用，比如一个View继承自FrameLayout，而它inflate的layout文件的根布局也是FrameLayout，这样就可以采用merge标签来代替根布局中的FrameLayout标签，通过很简单的方式就减少了一层嵌套。<h3 id="HierarchyView使用"><a href="#HierarchyView使用" class="headerlink" title="HierarchyView使用"></a>HierarchyView使用</h3></li>
+</ul>
+<p>使用HierarchyView可以查看布局的层级，并针对某个布局来查看其measure、layout、draw的速度，从而检测问题可能发生的地方。</p>
+<p>一般，在布局的时候，要注意一下几点：</p>
+<ul>
+<li>避免RelativeLayout嵌套</li>
+<li>尽量避免布局多层嵌套</li>
+<li>使用include、merge等标签</li>
+<li>使用ViewStub优化布局</li>
+<li>不常用的布局使用GONE隐藏而不是INVISIBLE</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>减少布局的嵌套，避免过渡重绘，经实践真的能提高App的性能（我有效的解决了公司App首页卡段的问题，嘿嘿）。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/布局优化/" rel="tag"># 布局优化</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A180417.html" rel="next" title="Android 从一个简单的弹窗说起">
+                <i class="fa fa-chevron-left"></i> Android 从一个简单的弹窗说起
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A180419.html" rel="prev" title="Android Fragment详解">
+                Android Fragment详解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#必要性"><span class="nav-number">2.</span> <span class="nav-text">必要性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检测工具"><span class="nav-number">3.</span> <span class="nav-text">检测工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">4.</span> <span class="nav-text">解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overdraw的检测"><span class="nav-number">4.1.</span> <span class="nav-text">Overdraw的检测</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#解决方案一：移除非必要的background"><span class="nav-number">4.1.1.</span> <span class="nav-text">解决方案一：移除非必要的background</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解决方案二：在绘制的时候采用ClipRect"><span class="nav-number">4.1.2.</span> <span class="nav-text">解决方案二：在绘制的时候采用ClipRect</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解决方案三：降低View的层级"><span class="nav-number">4.1.3.</span> <span class="nav-text">解决方案三：降低View的层级</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HierarchyView使用"><span class="nav-number">4.2.</span> <span class="nav-text">HierarchyView使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
