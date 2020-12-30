@@ -109,8 +109,8 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/images/A201230/Android%20上传项目到JitPack.png">
 <meta property="og:image" content="http://yoursite.com/images/A201230/Android%20发布项目到JitPack之创建release.png">
-<meta property="og:image" content="http://yoursite.com/Users/randy/Documents/RandyBlog/source/images/A201230/jitpack查找项目.png">
-<meta property="og:updated_time" content="2020-12-30T06:30:44.546Z">
+<meta property="og:image" content="http://yoursite.com/images/A201230/jitpack查找项目.png">
+<meta property="og:updated_time" content="2020-12-30T06:32:36.847Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android 发布在线库到JitPack">
 <meta name="twitter:description" content="主要分以下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用">
@@ -493,8 +493,8 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git remote add origin https://github.com/Rainmonth/RandyJitPack.git</span><br><span class="line">git push --set-upstream origin master</span><br></pre></td></tr></table></figure>
 <h3 id="创建release并在JitPack中编译"><a href="#创建release并在JitPack中编译" class="headerlink" title="创建release并在JitPack中编译"></a>创建release并在JitPack中编译</h3><h4 id="创建release"><a href="#创建release" class="headerlink" title="创建release"></a>创建release</h4><p>在<code>RandyJitPack</code>的项目主页，找到release，点击，就可以看到<code>create a new release</code>（之前没有创建过release）或着<code>Draft a new relase</code>（之前创建过）按钮，点击即可完成release的创建，如下图：</p>
 <p><img src="../images/A201230/Android 发布项目到JitPack之创建release.png" alt="创建release"></p>
-<p>信息录入号后，点击<code>Publish release</code>即可将项目发布到<code>https://jitpack.io</code>。这个时候我们复制我们项目的地址，然后在<code>https://jitpack.io</code>中查找，即可看到下图所示的界面</p>
-<p><img src="/Users/randy/Documents/RandyBlog/source/images/A201230/jitpack查找项目.png" alt="jitpack.io查找项目" style="zoom:50%;"></p>
+<h4 id="JitPack中编译"><a href="#JitPack中编译" class="headerlink" title="JitPack中编译"></a>JitPack中编译</h4><p>信息录入号后，点击<code>Publish release</code>即可将项目发布到<code>https://jitpack.io</code>。这个时候我们复制我们项目的地址，然后在<code>https://jitpack.io</code>中查找，即可看到下图所示的界面</p>
+<p><img src="../images/A201230/jitpack查找项目.png" alt="jitpack.io查找项目" style="zoom:50%;"></p>
 <p>看到后，点击Get it：</p>
 <ul>
 <li>如果log为红色的，说明编译失败了，可以点击log查看失败的原因</li>
@@ -812,7 +812,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建Library工具类"><span class="nav-number">1.</span> <span class="nav-text">创建Library工具类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置JitPack相关信息"><span class="nav-number">2.</span> <span class="nav-text">配置JitPack相关信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#排查Library中错误并上传至GitHub"><span class="nav-number">3.</span> <span class="nav-text">排查Library中错误并上传至GitHub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建release并在JitPack中编译"><span class="nav-number">4.</span> <span class="nav-text">创建release并在JitPack中编译</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建release"><span class="nav-number">4.1.</span> <span class="nav-text">创建release</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在项目中引用"><span class="nav-number">5.</span> <span class="nav-text">在项目中引用</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建Library工具类"><span class="nav-number">1.</span> <span class="nav-text">创建Library工具类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置JitPack相关信息"><span class="nav-number">2.</span> <span class="nav-text">配置JitPack相关信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#排查Library中错误并上传至GitHub"><span class="nav-number">3.</span> <span class="nav-text">排查Library中错误并上传至GitHub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建release并在JitPack中编译"><span class="nav-number">4.</span> <span class="nav-text">创建release并在JitPack中编译</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建release"><span class="nav-number">4.1.</span> <span class="nav-text">创建release</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JitPack中编译"><span class="nav-number">4.2.</span> <span class="nav-text">JitPack中编译</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在项目中引用"><span class="nav-number">5.</span> <span class="nav-text">在项目中引用</span></a></li></ol></div>
             
 
           </div>
