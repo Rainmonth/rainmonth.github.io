@@ -107,7 +107,7 @@
 <meta property="og:site_name" content="荏苒追寻个人博客">
 <meta property="og:description" content="摘要 adb，指的是Android Debug Bridge，即Android调试桥，顾名思义，和Android调试有莫大的关系。可以在命令通过输入命令来查看Android系统支持的服务的各种运行状态。  环境配置 首先要已经搭建好Android开发环境（具体请自行百度）  其次，为了避免频繁调用cd（切换目录命令，建议配置好环境变量，Mac下具体配置如下） 1export PATH=$&amp;#123">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-03-25T05:26:43.789Z">
+<meta property="og:updated_time" content="2020-09-02T01:57:11.026Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android adb学习">
 <meta name="twitter:description" content="摘要 adb，指的是Android Debug Bridge，即Android调试桥，顾名思义，和Android调试有莫大的关系。可以在命令通过输入命令来查看Android系统支持的服务的各种运行状态。  环境配置 首先要已经搭建好Android开发环境（具体请自行百度）  其次，为了避免频繁调用cd（切换目录命令，建议配置好环境变量，Mac下具体配置如下） 1export PATH=$&amp;#123">
@@ -507,6 +507,14 @@
 <li>adb reconnect         服务器端的重连</li>
 <li>adb reconnect device 设备端的重连</li>
 </ul>
+<h2 id="开启远程连接"><a href="#开启远程连接" class="headerlink" title="开启远程连接"></a>开启远程连接</h2><h2 id="断开远程连接"><a href="#断开远程连接" class="headerlink" title="断开远程连接"></a>断开远程连接</h2><ol>
+<li><p>adb devices 查看已经远程连接的设备，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">10.1.30.114:5555        device</span><br><span class="line">10.1.30.50:5555 device</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>adb disconnect 要断开的设备号，即可断开链接。如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb disconnect 10.1.30.50:5555</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
 <h2 id="相关环境变量"><a href="#相关环境变量" class="headerlink" title="相关环境变量"></a>相关环境变量</h2><pre><code>2、安装(-r 替换已存在的应用)
 adb -s 5LM7N16531010541 shell pm install -r &quot;/data/local/tmp/tinker.sample.android&quot;
 </code></pre><p>adb push <local apk="" file="" path=""> <remote apk="" file="" path=""> 将本地apk文件推送到模拟器（或手机）上</remote></local></p>
@@ -630,7 +638,7 @@ adb -s 5LM7N16531010541 shell pm install -r &quot;/data/local/tmp/tinker.sample.
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-count">78</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -772,7 +780,11 @@ adb -s 5LM7N16531010541 shell pm install -r &quot;/data/local/tmp/tinker.sample.
                     
                       
                     
-                    <span class="site-state-item-count">36</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -817,7 +829,7 @@ adb -s 5LM7N16531010541 shell pm install -r &quot;/data/local/tmp/tinker.sample.
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境配置"><span class="nav-number">2.</span> <span class="nav-text">环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全局配置选项"><span class="nav-number">3.</span> <span class="nav-text">全局配置选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用命令"><span class="nav-number">4.</span> <span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#shell命令"><span class="nav-number">5.</span> <span class="nav-text">shell命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#am"><span class="nav-number">5.1.</span> <span class="nav-text">am</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pm"><span class="nav-number">5.2.</span> <span class="nav-text">pm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dumpsys"><span class="nav-number">5.3.</span> <span class="nav-text">dumpsys</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#activity"><span class="nav-number">5.3.1.</span> <span class="nav-text">activity</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#window"><span class="nav-number">5.3.2.</span> <span class="nav-text">window</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#batterystats"><span class="nav-number">5.3.3.</span> <span class="nav-text">batterystats</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#package"><span class="nav-number">5.3.4.</span> <span class="nav-text">package</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#memoinfo"><span class="nav-number">5.3.5.</span> <span class="nav-text">memoinfo</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gfxinfo"><span class="nav-number">5.3.6.</span> <span class="nav-text">gfxinfo</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#app安装／卸载"><span class="nav-number">5.4.</span> <span class="nav-text">app安装／卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份／恢复"><span class="nav-number">5.5.</span> <span class="nav-text">备份／恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试"><span class="nav-number">5.6.</span> <span class="nav-text">调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安全"><span class="nav-number">5.7.</span> <span class="nav-text">安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#脚本命令"><span class="nav-number">5.8.</span> <span class="nav-text">脚本命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内部调试"><span class="nav-number">5.9.</span> <span class="nav-text">内部调试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关环境变量"><span class="nav-number">6.</span> <span class="nav-text">相关环境变量</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境配置"><span class="nav-number">2.</span> <span class="nav-text">环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全局配置选项"><span class="nav-number">3.</span> <span class="nav-text">全局配置选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用命令"><span class="nav-number">4.</span> <span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#shell命令"><span class="nav-number">5.</span> <span class="nav-text">shell命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#am"><span class="nav-number">5.1.</span> <span class="nav-text">am</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pm"><span class="nav-number">5.2.</span> <span class="nav-text">pm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dumpsys"><span class="nav-number">5.3.</span> <span class="nav-text">dumpsys</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#activity"><span class="nav-number">5.3.1.</span> <span class="nav-text">activity</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#window"><span class="nav-number">5.3.2.</span> <span class="nav-text">window</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#batterystats"><span class="nav-number">5.3.3.</span> <span class="nav-text">batterystats</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#package"><span class="nav-number">5.3.4.</span> <span class="nav-text">package</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#memoinfo"><span class="nav-number">5.3.5.</span> <span class="nav-text">memoinfo</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gfxinfo"><span class="nav-number">5.3.6.</span> <span class="nav-text">gfxinfo</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#app安装／卸载"><span class="nav-number">5.4.</span> <span class="nav-text">app安装／卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份／恢复"><span class="nav-number">5.5.</span> <span class="nav-text">备份／恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试"><span class="nav-number">5.6.</span> <span class="nav-text">调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安全"><span class="nav-number">5.7.</span> <span class="nav-text">安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#脚本命令"><span class="nav-number">5.8.</span> <span class="nav-text">脚本命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内部调试"><span class="nav-number">5.9.</span> <span class="nav-text">内部调试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开启远程连接"><span class="nav-number">6.</span> <span class="nav-text">开启远程连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#断开远程连接"><span class="nav-number">7.</span> <span class="nav-text">断开远程连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关环境变量"><span class="nav-number">8.</span> <span class="nav-text">相关环境变量</span></a></li></ol></div>
             
 
           </div>

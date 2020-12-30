@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="摘要Dagger是一个编译时依赖注入框架。实现原理是在编译的时候根据注解生成相应的Java源代码，然后在利用这些源代码进行程序的处理，所以并不会降低程序运行时的性能。 Dagger解决了什么问题呢？就是对象之间的耦合。将直接的组合方式造成的耦合，改为间接的依赖关系，从而降低耦合。">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android之Dagger2简介">
+<meta property="og:url" content="http://yoursite.com/posts/A200701.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="摘要Dagger是一个编译时依赖注入框架。实现原理是在编译的时候根据注解生成相应的Java源代码，然后在利用这些源代码进行程序的处理，所以并不会降低程序运行时的性能。 Dagger解决了什么问题呢？就是对象之间的耦合。将直接的组合方式造成的耦合，改为间接的依赖关系，从而降低耦合。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-08-26T05:41:30.608Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android之Dagger2简介">
+<meta name="twitter:description" content="摘要Dagger是一个编译时依赖注入框架。实现原理是在编译的时候根据注解生成相应的Java源代码，然后在利用这些源代码进行程序的处理，所以并不会降低程序运行时的性能。 Dagger解决了什么问题呢？就是对象之间的耦合。将直接的组合方式造成的耦合，改为间接的依赖关系，从而降低耦合。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A200701.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android之Dagger2简介 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A200701.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android之Dagger2简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-01T00:00:00+08:00">2020-07-01</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p><a href="https://dagger.dev/" target="_blank" rel="noopener">Dagger</a>是一个编译时依赖注入框架。实现原理是在编译的时候根据注解生成相应的Java源代码，然后在利用这些源代码进行程序的处理，所以并不会降低程序运行时的性能。</p>
+<p>Dagger解决了什么问题呢？就是对象之间的耦合。将直接的组合方式造成的耦合，改为间接的依赖关系，从而降低耦合。</p>
+<a id="more"></a>
+<p>既然是实现原理是基于Java编译时注解，所以需要先掌握一点Java编译时注解的知识，可以参考<a href="https://rainmonth.github.io/posts/J191115.html" target="_blank" rel="noopener">Java注解</a>。Dagger用到的注解主要有以下几个：</p>
+<ul>
+<li>@Inject，具体使用的地方，添加该注解的就可以通过Dagger来获取到相应的对象，不用自己实例化；</li>
+<li>@Provides，在@Module中使用，用来表示该方法可以向外部提供一个其注解方法返回的对象；</li>
+<li>@Module，用来定义一个模块，这个模块中可以使用@Providers注解来想外部提供相应的对象供外部调用，主要是为了解决依赖第三方库时不能修改其源码导致无法直接注入的问题；</li>
+<li>@Component，连接依赖需求方和依赖对象提供方的桥梁，<strong>依赖需求方</strong>指的就是实例对象最终要被注入的地方（在Android开发场景下一般有Activity、Fragment等，无特殊要求）；<strong>依赖提供方</strong>可以是采用@Module注解的类或采用@Inject注解的实例类的构造函数，可以提供需要注入的对象的实例。@Component注解的modules参数代表的就是<strong>依赖提供方</strong>，而其注解的类里面定义的inject方法的参数代表的就是<strong>依赖需求方</strong>；</li>
+</ul>
+<h2 id="知识准备"><a href="#知识准备" class="headerlink" title="知识准备"></a>知识准备</h2><ol>
+<li>Java注解的基础知识；</li>
+<li>javax.inject.jar中定义的注解和接口；</li>
+</ol>
+<p>由于Dagger2是一个编译时依赖注意框架，在介绍它之前，先看看Java EE提供本身都提供了哪些依赖注入的东西。</p>
+<p>在javax.inject.jar包下，定义了一下几个注解和接口：</p>
+<ul>
+<li>@Inject，标识可注入的构造函数，字段和方法，也可以是静态成员变量，注意问题：<ol>
+<li>可以是任意修饰符；</li>
+<li>注入顺序依次是：构造函数，父类字段（如果有），子类字段，父类方法（如果有），子类方法；</li>
+<li>每个类最多可有一个构造函数可添加@Inject；</li>
+<li>修饰构造函数时，当<strong>只有一个public无参数构造函数</strong>时，@Inject可以省略不写；</li>
+<li>修饰成员变量时，必须是<strong>一个有合法名字的非final</strong> 变量；</li>
+<li>修饰方法时：<ol>
+<li>不能是抽象方法；</li>
+<li>可以有返回类型；</li>
+<li>可以有方法参数，但方法参数不能是自身参数类型（比如 class A中的methodA(A a）就不能用@Inject）；</li>
+</ol>
+</li>
+<li>要避免循环依赖；</li>
+<li>需要利用javax.inject.Provider来监测循环依赖；</li>
+</ol>
+</li>
+<li>@Named，类似于<code>@Qualifier</code>，只不过他是通过一个简单的String参数来指定到底来使用哪个依赖提供方，一个接口多个实现,匹配引入想要的实现类；</li>
+<li>@Qualifier，<strong>依赖需求方 创建数据的时候使用哪个依赖提供方</strong>。</li>
+<li>@Scope，标记一个注解实例的使用范围，是一个元注解，利用他可以定义@ActivityScope、@FragmentScope等；</li>
+<li>@Singleton，标记该类只能被创建一次，不能被继承；</li>
+<li>Provider，用来提供某个类型实例的接口，每次get方法调用都会生成一个新的实例化对象；</li>
+<li>Lazy，用来提供某个实例的接口，但采用懒加载实现，在单一范围内注解的对象实例化后，再次调用，采用的仍是第一次实例化后的对象；</li>
+</ul>
+<h2 id="基本使用方式"><a href="#基本使用方式" class="headerlink" title="基本使用方式"></a>基本使用方式</h2><h3 id="先引入官方库"><a href="#先引入官方库" class="headerlink" title="先引入官方库"></a>先引入官方库</h3><p>在项目主module的build.gradle的dependencies中，采用以下代码引入Dagger2，具体的版本自行选择（我选择的是2.14.1）：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">compile <span class="string">'com.google.dagger:dagger:2.14.1'</span></span><br><span class="line">annotationProcessor <span class="string">'com.google.dagger:dagger-compiler:2.14.1'</span></span><br></pre></td></tr></table></figure>
+<h3 id="再随便定义一个对象A："><a href="#再随便定义一个对象A：" class="headerlink" title="再随便定义一个对象A："></a>再随便定义一个对象A：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">methodA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"I am methodA"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="然后创建Module"><a href="#然后创建Module" class="headerlink" title="然后创建Module"></a>然后创建Module</h3><p>使用<code>@Module来</code>注解用来获取对象实例的类，Dagger通过这个类就可以知道自己要去按个对应的类中获取实例了，具体代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestModule</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="function">A <span class="title">provideA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> A();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面@Provides用来注解<strong>获取对象实例的方法的</strong>（为方便描述称之为获取实例方案1），Dagger2根据该注解及方法的返回类型将对象实例注入到对应的引用中。</p>
+<p>经过上面两部后，<strong>依赖提供方（提供对象实例的那一方）</strong>相关工作就完成了。接下来看看<strong>依赖需求方</strong>要做哪些工作。</p>
+<p>定义一个MainActivity，以来于A对象，在点击的时候调用A对象的methodA方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    A a;</span><br><span class="line">    TextView tvTest1;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line"></span><br><span class="line">        tvTest1 = findViewById(R.id.tv_test1);</span><br><span class="line"></span><br><span class="line">        tvTest1.setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</span><br><span class="line">                a.methodA();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>依赖需求方通过@Inject注解，告诉外界（目前还不知道到底是哪个会给他提供A对象），A对象需要注入，很简单！</p>
+<p>这个时候如果运行，会报空指针异常，因为A对象没有真正的实例化。</p>
+<p>我们需要一个中介来将依赖需求方和依赖提供方联系起来，@Component扮演的就是这个角色。</p>
+<h3 id="创建Component"><a href="#创建Component" class="headerlink" title="创建Component"></a>创建Component</h3><ol>
+<li>第一步，使用<code>@Component</code>来声明：</li>
+<li>第二步，添加要使用的Module；</li>
+<li>第三部，同目标页面（Activity或Fragment）绑定；</li>
+</ol>
+<p>具体代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span>(modules = TestModule.class)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">TestComponent</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">inject</span><span class="params">(MainActivity activity)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>@Component注解的modules参数表示的就是依赖的提供方，即TestModule；里面的inject方法的参数MainActivity指代的就是依赖的需求方，告诉实例对象要被注入到哪个地方。</p>
+<blockquote>
+<p>实际上@Component还有一个参数dependencies，表明要想完成这次依赖需求方和依赖提供方的交易，还需要其他机构的协助，后面会给出示例</p>
+</blockquote>
+<p>根据@Component注解支持的参数modules的形式不难推断：一个Component可以依赖多个Module，而实际项目上也是如此。</p>
+<p>都定义好了之后，就可以编译项目了。</p>
+<h3 id="编译项目"><a href="#编译项目" class="headerlink" title="编译项目"></a>编译项目</h3><p>在Module和Component创建完毕后，在AS中Build菜单中点击Rebuild Project，编译成功后，AS中就会自动生成名为<code>DaggerTestComponent</code>的类，自动生成的Component都是Dagger开头的。</p>
+<h3 id="开始绑定"><a href="#开始绑定" class="headerlink" title="开始绑定"></a>开始绑定</h3><p>编译项目之后，在MainActivity建立依赖需求方和依赖提供方的联系</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    A a;</span><br><span class="line">    TextView tvTest1;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">				<span class="comment">// 途径1：</span></span><br><span class="line">        DaggerTestComponent.builder().build().inject(<span class="keyword">this</span>);</span><br><span class="line">  			<span class="comment">// 途径2：</span></span><br><span class="line"><span class="comment">//        DaggerTestComponent.create().inject(this);</span></span><br><span class="line"></span><br><span class="line">        tvTest1 = findViewById(R.id.tv_test1);</span><br><span class="line"></span><br><span class="line">        tvTest1.setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</span><br><span class="line">                a.methodA();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面就是Dagger使用的一般流程，十分简单。</p>
+<blockquote>
+<p>上面的示例中，是通过@Provides注解的方法来提供A的对象实例的，还有一种途径就是直接用@Inject注解A类的构造函数（为方便描述称之为获取实例方案2），这样就不用在TestModule中定义相应的provideA方法了。</p>
+</blockquote>
+<p>看完了简单使用，我们接下来分析下Dagger2为我们生成了哪些代码：</p>
+<p>获取实例采用方案1时：</p>
+<ul>
+<li>DaggerTestComponent，即TestComponent接口的实现类；</li>
+<li>TestModule_ProvideAFactory，即Dagger2的Factory接口的实现类，实际上Factory接口继承自javax.inject.Provider接口，用来提供A对象的；</li>
+<li>MainActivity_MembersInjector，即Dagger2的MemgersInject接口实现类，负责将被依赖项注入到目标类的成员变量或成员方法的接口中。</li>
+</ul>
+<p>获取实例采用方案2时：</p>
+<ul>
+<li>DaggerTestComponent，即TestComponent接口的实现类；</li>
+<li>A_Factory，即Dagger2的Factory接口的实现类，实际上Factory接口继承自javax.inject.Provider接口，用来提供A对象的；</li>
+<li>MainActivity_MembersInjector，即Dagger2的MemgersInject接口实现类，负责将被依赖项注入到目标类的成员变量或成员方法的接口中。</li>
+</ul>
+<p>两者不同之处在于A对象的生成方式。</p>
+<p>如果实例A的构造依赖于其他类B，即A的构造函数如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> B b;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">A</span><span class="params">(B b)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">this</span>.b = b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个时候我们只要提供合适的方法来构造B的实例即可（同样可以采用上面说的两种实例构造方案：直接用@Inject注解B的无参数构造函数和在对应的Module中提供相应的provide方法。</p>
+<h2 id="进阶使用方式"><a href="#进阶使用方式" class="headerlink" title="进阶使用方式"></a>进阶使用方式</h2><p>Dagger2处理上面几个注解外，还有@Scope、@Singleton、@Bind等比较实用的注解</p>
+<h3 id="单例对象注入"><a href="#单例对象注入" class="headerlink" title="单例对象注入"></a>单例对象注入</h3><p>我要获取一个在Application声明周期内都是单例的对象，该如何操作呢？看下面的例子：</p>
+<blockquote>
+<p>要在TestApplicaion中注入一个DbManager对象，并保证他在Application声明周期内是单例的。</p>
+</blockquote>
+<p>和基本方法一样，页需要经历定义Module、定义Component、关联依赖方，编译和提供方几个步骤</p>
+<p>DbManager如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DbManager</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AppModule如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppModule</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Singleton</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="function">DbManager <span class="title">provideDbManager</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> DbManager();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AppComponent如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Singleton</span></span><br><span class="line"><span class="meta">@Component</span>(modules = AppModule.class)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">AppComponent</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">inject</span><span class="params">(TestApplication testApplication)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意：由于AppModule中的@Provides注解的方法上采用了@Singleton注解，如果AppComponent中不使用@Singleton注解，就会报如下错误</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.AppComponent (unscoped) may not reference scoped bindings:</span><br></pre></td></tr></table></figure>
+<p>再看TestApplication代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestApplication</span> <span class="keyword">extends</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    DbManager mDbManager;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate();</span><br><span class="line">        DaggerAppComponent.create().inject(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样就能保证mDbManager在Application是单例的了（当然这是狭义上的单例）</p>
+<blockquote>
+<p>虽说是单例，但实际上跟@Singleton没有任何关系，可以看看@Singleton这个注解的定义，它是有@Scope元注解定义生成的一个注解，也就是说@Singleton表示的也是一个范围。</p>
+</blockquote>
+<h3 id="与抽象类相关的注入"><a href="#与抽象类相关的注入" class="headerlink" title="与抽象类相关的注入"></a>与抽象类相关的注入</h3><p>假设上面的DbManager是一个抽象类，他定一个方法sayHello():</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">DbManager</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String TAG = DbManager.class.getSimpleName();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">sayHello</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CourseDbManager</span> <span class="keyword">extends</span> <span class="title">DbManager</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Log.d(TAG, <span class="string">"I am courseDbManager!"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WorkDbManager</span> <span class="keyword">extends</span> <span class="title">DbManager</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Log.d(TAG, <span class="string">"I am workDbManager!"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 修改后的AppModule</span></span><br><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AppModule</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Singleton</span></span><br><span class="line">    <span class="meta">@Binds</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> DbManager <span class="title">bindsManager</span><span class="params">(CourseDbManager courseDbManager)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Singleton</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> CourseDbManager <span class="title">providesCourseDbManager</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CourseDbManager();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Singleton</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> WorkDbManager <span class="title">providesWorkDbManager</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> WorkDbManager();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面代码需要说明以下两点：</p>
+<ul>
+<li>@Binds的作用于@Moudle注解的抽象类中的抽象方法，该方法的返回值是抽象类，但方法的参数必须是具体的实现类，@Provides无法作用于抽象方法；</li>
+<li>对抽象类使用@Module注解时，获取对象实例的方法必须是static方法（即相应的provides方法必须是static方法）</li>
+</ul>
+<h3 id="Provides方法返回参数相同如何处理"><a href="#Provides方法返回参数相同如何处理" class="headerlink" title="@Provides方法返回参数相同如何处理"></a>@Provides方法返回参数相同如何处理</h3><p>上面的AppModule中如果两个provides方法的返回值都写成DbManager可不可以呢？显然直接改成DbManager是不可以的，无法通过编译，会报如下错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DbManager is bound multiple times</span><br></pre></td></tr></table></figure>
+<p>那么有没有什么方法能让它通过呢？方法是有的，那就是用到另一个注解@Named</p>
+<blockquote>
+<p>@Named，可以注解在参数、成员变量以及方法上，他其实也是@Qualifier注解定义而来的，可以算作@Qualifier比较简单的实现。</p>
+</blockquote>
+<p>利用@Named改写AppModule即可通过编译：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AppModule</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Singleton</span></span><br><span class="line">    <span class="meta">@Binds</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> DbManager <span class="title">bindsDbManager</span><span class="params">(@Named(<span class="string">"courseDbManager"</span>)</span> DbManager dbManager)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Singleton</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="meta">@Named</span>(<span class="string">"courseDbManager"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> DbManager <span class="title">providesCourseDbManager</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CourseDbManager();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Singleton</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="meta">@Named</span>(<span class="string">"workDbManager"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> DbManager <span class="title">providesWorkDbManager</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> WorkDbManager();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我的理解，@Qualifier或@Named注解就是给一个抽象类的某个具体实现类一个唯一表示，这样Dagger2生成注入时就知道具体使用哪个实现类了。</p>
+<h3 id="Component依赖属性的使用"><a href="#Component依赖属性的使用" class="headerlink" title="@Component依赖属性的使用"></a>@Component依赖属性的使用</h3><p>如果我想把TestApplication中的DbManager对象同样页注入到MainActivity该如何实现呢？我们可以利用@Component注解的另外一个属性<code>dependencies</code>来实现，改写后的TestComponent如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span>(modules = TestModule.class, dependencies = AppComponent.class)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">TestComponent</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">inject</span><span class="params">(MainActivity activity)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>直接按上面的写法，同样不能通过编译，报错如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(unscoped) may not reference scoped bindings:</span><br></pre></td></tr></table></figure>
+<p>很容易理解，就是没有定义scoped的Component引用了定义了作用范围（@Singleton）的Component，要解决这个问题，我们需哟啊给TestComponent定义一个Scope，那么定义成@Singleton可不可以呢？先试试：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">错误: This @Singleton component cannot depend on scoped components:</span><br><span class="line">@Singleton cn.rainmonth.daggerdemo.di.AppComponent</span><br></pre></td></tr></table></figure>
+<p>意思就是相同的scope间不能存在依赖关系，那么问题就好解决了，我给TestComponent定义一个不同的Scope就可以了，问题就来了，如何定义一个Scope呢？</p>
+<p>看了下javax.inject包下的代码，其中@Scope作为元注解就是用来做这个的，可以参照@Singleton这个注解的写法来定义一个注解，这里姑且叫@ActivityScope吧，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Scope</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention</span>(RUNTIME)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> ActivityScope &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将定义好的@ActivityScope注解应用与TestComponent上，编译通过。</p>
+<p>编译通过后，就是在MainActivity中使用了，在使用之前，我们需要将AppComponent在TestApplication中暴露出来，在TestApplication中添加如下方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> AppComponent <span class="title">getAppComponent</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> DaggerAppComponent.create();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>为了方便从AppComponent获取DbManager对象，我们需要在AppComponent中添加一个接口方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">DbManager <span class="title">dbManager</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+<p>再次编译，编译成功后，看看Dagger2为我们生成的代码，发现dbManger方法已经自动帮我们实现了。</p>
+<p>如果我们要在MainActivity中获取DbManager实例，只要如下操作就可以了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> DbManager dbManager = ((TestApplication) getApplication()).getAppComponent().dbManager();</span><br></pre></td></tr></table></figure>
+<p>当然可以稍微加上自己的封装，这里就不赘述了。</p>
+<h3 id="懒加载机制"><a href="#懒加载机制" class="headerlink" title="懒加载机制"></a>懒加载机制</h3><p>在实际使用过程中，有的对象并不是时刻都被使用到的，我们只需要在使用它的时候实例化它就可以了，要实现这种功能，可以使用Lazy，使用Lazy包装后，就会在第一次调用该Lazy包装的对象的get方法后，才去实例化相应对象，实例化后，下次如果还是使用这个Lazy包装对象的get方法，就不再重新创建了。与之对应的Provider接口，虽然也是使用 的时候才实例化，但它每次使用都会重新实例化，而不是像Lazy那样复用第一次实例化出来的实例。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>上面通过实例展示了Dagger2的一些基本的使用方法，并逐步深入，讲到了一些进阶的用法，后面还会继续深入Dagger2具体的内部原理。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/200424.html" rel="next" title="Mac 常见问题及解决方案">
+                <i class="fa fa-chevron-left"></i> Mac 常见问题及解决方案
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A201230.html" rel="prev" title="Android 发布在线库到JitPack">
+                Android 发布在线库到JitPack <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">78</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">37</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#知识准备"><span class="nav-number">2.</span> <span class="nav-text">知识准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本使用方式"><span class="nav-number">3.</span> <span class="nav-text">基本使用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#先引入官方库"><span class="nav-number">3.1.</span> <span class="nav-text">先引入官方库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#再随便定义一个对象A："><span class="nav-number">3.2.</span> <span class="nav-text">再随便定义一个对象A：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#然后创建Module"><span class="nav-number">3.3.</span> <span class="nav-text">然后创建Module</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建Component"><span class="nav-number">3.4.</span> <span class="nav-text">创建Component</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译项目"><span class="nav-number">3.5.</span> <span class="nav-text">编译项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开始绑定"><span class="nav-number">3.6.</span> <span class="nav-text">开始绑定</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进阶使用方式"><span class="nav-number">4.</span> <span class="nav-text">进阶使用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#单例对象注入"><span class="nav-number">4.1.</span> <span class="nav-text">单例对象注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#与抽象类相关的注入"><span class="nav-number">4.2.</span> <span class="nav-text">与抽象类相关的注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Provides方法返回参数相同如何处理"><span class="nav-number">4.3.</span> <span class="nav-text">@Provides方法返回参数相同如何处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Component依赖属性的使用"><span class="nav-number">4.4.</span> <span class="nav-text">@Component依赖属性的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#懒加载机制"><span class="nav-number">4.5.</span> <span class="nav-text">懒加载机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">5.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

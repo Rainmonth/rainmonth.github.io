@@ -99,18 +99,18 @@
 
 
 
-  <meta name="description" content="摘要 本文主要介绍android.support.design.widget包下的一些Material Design控件，很多市场上绚丽的App的实现都是基于这些库的，Android本身为我们封装出来的效果就足够平常使用了，下面我讲分别详细介绍各个MD控件，同时自己会做一些扩展，本文先大体介绍一下各个控件，然后详细介绍CoordinatorLayout控件。  系列文章参考：  AppBarLay">
+  <meta name="description" content="摘要 本文主要介绍android.support.design.widget包下的一些Material Design控件，很多市场上绚丽的App的实现都是基于这些库的，Android本身为我们封装出来的效果就足够平常使用了，下面我讲分别详细介绍各个MD控件，同时自己会做一些扩展，本文先大体介绍一下各个控件，然后详细介绍CoordinatorLayout控件。  系列文章参考：  Coordinat">
 <meta name="keywords" content="Material Design">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android 是时候了解一波MD库控件了">
 <meta property="og:url" content="http://yoursite.com/posts/A180305.html">
 <meta property="og:site_name" content="荏苒追寻个人博客">
-<meta property="og:description" content="摘要 本文主要介绍android.support.design.widget包下的一些Material Design控件，很多市场上绚丽的App的实现都是基于这些库的，Android本身为我们封装出来的效果就足够平常使用了，下面我讲分别详细介绍各个MD控件，同时自己会做一些扩展，本文先大体介绍一下各个控件，然后详细介绍CoordinatorLayout控件。  系列文章参考：  AppBarLay">
+<meta property="og:description" content="摘要 本文主要介绍android.support.design.widget包下的一些Material Design控件，很多市场上绚丽的App的实现都是基于这些库的，Android本身为我们封装出来的效果就足够平常使用了，下面我讲分别详细介绍各个MD控件，同时自己会做一些扩展，本文先大体介绍一下各个控件，然后详细介绍CoordinatorLayout控件。  系列文章参考：  Coordinat">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-03-25T05:26:43.790Z">
+<meta property="og:updated_time" content="2020-08-26T05:41:30.608Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android 是时候了解一波MD库控件了">
-<meta name="twitter:description" content="摘要 本文主要介绍android.support.design.widget包下的一些Material Design控件，很多市场上绚丽的App的实现都是基于这些库的，Android本身为我们封装出来的效果就足够平常使用了，下面我讲分别详细介绍各个MD控件，同时自己会做一些扩展，本文先大体介绍一下各个控件，然后详细介绍CoordinatorLayout控件。  系列文章参考：  AppBarLay">
+<meta name="twitter:description" content="摘要 本文主要介绍android.support.design.widget包下的一些Material Design控件，很多市场上绚丽的App的实现都是基于这些库的，Android本身为我们封装出来的效果就足够平常使用了，下面我讲分别详细介绍各个MD控件，同时自己会做一些扩展，本文先大体介绍一下各个控件，然后详细介绍CoordinatorLayout控件。  系列文章参考：  Coordinat">
 
 
 
@@ -408,14 +408,57 @@
 </blockquote>
 <p>系列文章参考：</p>
 <ul>
-<li><a href="">AppBarLayout介绍</a></li>
 <li><a href="">CoordinatorLayout</a></li>
+<li><a href="">AppBarLayout介绍</a></li>
 <li><a href="">SwipeRefreshLayout</a></li>
 <li><a href="">CardView</a></li>
 <li><a href="">CollapsingToolbarLayout</a></li>
 <li><a href="">FloatingActionButton</a></li>
 </ul>
 <a id="more"></a>
+<h2 id="CoordinatorLayout"><a href="#CoordinatorLayout" class="headerlink" title="CoordinatorLayout"></a>CoordinatorLayout</h2><blockquote>
+<p>使用场景</p>
+<ul>
+<li>作为顶层容器；</li>
+<li>作为协调子View交互的容器；</li>
+</ul>
+</blockquote>
+<p>注意事项</p>
+<ul>
+<li>通过为子View指定Behavior，CoordinatorLayout可以让在同一个父容器的子View之间有许多不同种类的交互（子View之间、子View和父View之间），CoordinatorLayout的子View可以指定默认的Behavior</li>
+<li>Behavior可以用来实现不同的交互和附加的布局改动效果；</li>
+<li>可以通过设置<code>CoordinatorLayout.LayoutParams#setAnchorId(int)</code>来实现浮动相关效果；</li>
+<li>可以通过设置<code>`CoordinatorLayout.LayoutParams#insetEdge</code>参数来控制子View插入CoordinatorLayout的方式</li>
+</ul>
+<h2 id="AppBarLayout"><a href="#AppBarLayout" class="headerlink" title="AppBarLayout"></a>AppBarLayout</h2><p><code>AppBarLayout</code>继承自LinearLayout，但他实现了很多Material Design中App Bar概念中的功能，其中的代表就是手势滑动。</p>
+<ul>
+<li>AppBarLayout的子View必需声明其滚动的行为（通过<code>setScrollFlags(int)</code>方法或’app:layout_scrollFlags’属性）；</li>
+<li>AppBarLayout通常是配合CoordinatorLayout来使用的，并且是其直接子View，如果其父类不是CoordinatorLayout，那么其很多特性就发挥不出来；</li>
+<li>AppBarLayout通常还需要一个同级的滚动控件（即兄弟控件），这样就能知道AppBarLayout需要在什么时机配合滚动了。</li>
+</ul>
+<h3 id="layout-scrollFlags属性解释"><a href="#layout-scrollFlags属性解释" class="headerlink" title="layout_scrollFlags属性解释"></a>layout_scrollFlags属性解释</h3><p>上面说了，AppBarLayout的子View必须设置<code>layout_scrollFlags</code>属性，否则其很多特性就不能发挥作用了，那么这个属性到底有什么作用呢。这个属性共有以下5种值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SCROLL_FLAG_SCROLL,</span><br><span class="line">SCROLL_FLAG_EXIT_UNTIL_COLLAPSED,</span><br><span class="line">SCROLL_FLAG_ENTER_ALWAYS,</span><br><span class="line">SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED,</span><br><span class="line">SCROLL_FLAG_SNAP</span><br></pre></td></tr></table></figure>
+<p>下面分别对这五种属性作说明：</p>
+<ul>
+<li><p><code>SCROLL_FLAG_SCROLL</code>，对应于属性<code>scroll</code>，表示伴随着滚动事件滚出或滚进屏幕；</p>
+<blockquote>
+<ol>
+<li>该值是其他四种值生效的前提，及其他四个值如果要生效，必须设置这个值；</li>
+<li>如果设置了该属性的子View前面有没有设置该属性的统计View，那么AppBarLayout其他设置了改属性的子View都无效</li>
+</ol>
+</blockquote>
+</li>
+<li><p><code>SCROLL_FLAG_ENTER_ALWAYS</code>，对应于属性<code>enterAlways</code>，在和<code>scroll</code>一起使用时，当发生向下滚动事件时，设置了该属性的子View会优先于SrollView先进入屏幕；</p>
+</li>
+<li><p><code>SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED</code>，对应于<code>enterAlwaysCollapsed</code>，是<code>enterAlways</code>的附加值。当子View设置的<code>layout_scrollFlags</code>属性值为<code>scroll|enterAlways|enterAlwaysCollapsed</code>时，如果子View设置了最小高度<code>minHeight</code>，那么当发生向下滚动的事件时，子View会先滚动，知道达到最小高度，达到后，ScrollView会滚动知道滚动完毕，然后子View在滚动剩余的高度。</p>
+</li>
+<li><p><code>SCROLL_FLAG_EXIT_UNTIL_COLLAPSED</code>，对应于<code>exitUntilCollapsed</code>，同样和最小高度有关，当向上滑动的事件发生时，设置该属性的子View会先向上滚动至最小高度，然后保持高度不变，然后ScrollView再开始滚动。</p>
+</li>
+<li><p><code>SCROLL_FLAG_SNAP</code>，对应于<code>snap</code>属性，即ChildView的滚动吸附效果，设置了该值后，ChildView不会存在局部显示的情况，要么全部滚进屏幕，要么全部滚出屏幕。</p>
+</li>
+</ul>
+<p>总结下：<code>scroll</code>就是子View后滚，<code>enterAlways</code>就是子View先滚，<code>enterAlwaysCollapsed</code>就是子View先滚到折叠状态然后ScrollView再滚，完成后子View在滚，<code>exitUntilCollapsed</code>，子View滚到到折叠态后就不在滚了，开始管ScrollView，<code>snap</code>指的是吸附滚动，要么全部显示，要么全部隐藏。</p>
+<h3 id="最终保留的高度"><a href="#最终保留的高度" class="headerlink" title="最终保留的高度"></a>最终保留的高度</h3><p>这个最终保留高度其实是针对<code>layout_scrollFlags</code>为<code>exitUntilCollapsed</code>和<code>enterAlwaysCollapsed</code>的，当<code>layout_scrollFlags</code>设置成了上面两个值时，前者在子View滑动达到最小高度后子View就不在滚动，这个就是<code>最终保留高度</code>。</p>
 <h2 id="android-support-v7-Toolbar"><a href="#android-support-v7-Toolbar" class="headerlink" title="android.support.v7.Toolbar"></a>android.support.v7.Toolbar</h2><p>Toolbar为我们顶部导航栏的开发带来了许多便利，但如果使用不注意也会有很多坑。</p>
 <h3 id="便利"><a href="#便利" class="headerlink" title="便利"></a>便利</h3><ul>
 <li><p>可以只将Toolbar当做一个容器，它本身就是继承自ViewGroup的，然后在里面定义自己的顶部导航栏布局</p>
@@ -444,7 +487,7 @@
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">name</span>=<span class="string">"myToolbarNavigationButtonStyle"</span> <span class="attr">parent</span>=<span class="string">"@style/Widget.AppCompat.Toolbar.Button.Navigation"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:minWidth"</span>&gt;</span>32dp<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:padding"</span>&gt;</span>0dp<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:scaleType"</span>&gt;</span>centerInside<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span></span><br><span class="line"><span class="undefined">    </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <p>通过上面的padding可以实现NavigationIcon相关的属性定制。</p>
 <h4 id="ActionBar方法调用存在限制"><a href="#ActionBar方法调用存在限制" class="headerlink" title="ActionBar方法调用存在限制"></a>ActionBar方法调用存在限制</h4><p>一定要先调用<code>setSupportActionBar</code>这个方法之后然后在调用ActionBar的相关方法</p>
-
+<h2 id="CardView"><a href="#CardView" class="headerlink" title="CardView"></a>CardView</h2>
       
     </div>
 
@@ -563,7 +606,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-count">78</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -705,7 +748,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">36</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -750,7 +797,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#android-support-v7-Toolbar"><span class="nav-number">2.</span> <span class="nav-text">android.support.v7.Toolbar</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#便利"><span class="nav-number">2.1.</span> <span class="nav-text">便利</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#坑"><span class="nav-number">2.2.</span> <span class="nav-text">坑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Toolbar元素间距调整麻烦"><span class="nav-number">2.2.1.</span> <span class="nav-text">Toolbar元素间距调整麻烦</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ActionBar方法调用存在限制"><span class="nav-number">2.2.2.</span> <span class="nav-text">ActionBar方法调用存在限制</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CoordinatorLayout"><span class="nav-number">2.</span> <span class="nav-text">CoordinatorLayout</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AppBarLayout"><span class="nav-number">3.</span> <span class="nav-text">AppBarLayout</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#layout-scrollFlags属性解释"><span class="nav-number">3.1.</span> <span class="nav-text">layout_scrollFlags属性解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最终保留的高度"><span class="nav-number">3.2.</span> <span class="nav-text">最终保留的高度</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#android-support-v7-Toolbar"><span class="nav-number">4.</span> <span class="nav-text">android.support.v7.Toolbar</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#便利"><span class="nav-number">4.1.</span> <span class="nav-text">便利</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#坑"><span class="nav-number">4.2.</span> <span class="nav-text">坑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Toolbar元素间距调整麻烦"><span class="nav-number">4.2.1.</span> <span class="nav-text">Toolbar元素间距调整麻烦</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ActionBar方法调用存在限制"><span class="nav-number">4.2.2.</span> <span class="nav-text">ActionBar方法调用存在限制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CardView"><span class="nav-number">5.</span> <span class="nav-text">CardView</span></a></li></ol></div>
             
 
           </div>

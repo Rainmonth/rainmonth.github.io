@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="主要分一下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用  创建Library工具类新建了一个新Android项目RandyJitPack，然后给改项目添加一个名为utils的Library Module，Library Module的包名为com.rainmonth">
+<meta name="keywords" content="在线库发布">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 发布在线库到JitPack">
+<meta property="og:url" content="http://yoursite.com/posts/A201230.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="主要分一下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用  创建Library工具类新建了一个新Android项目RandyJitPack，然后给改项目添加一个名为utils的Library Module，Library Module的包名为com.rainmonth">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/images/A201230/Android%20上传项目到JitPack.png">
+<meta property="og:image" content="http://yoursite.com/images/A201230/Android%20发布项目到JitPack之创建release.png">
+<meta property="og:image" content="http://yoursite.com/Users/randy/Documents/RandyBlog/source/images/A201230/jitpack查找项目.png">
+<meta property="og:updated_time" content="2020-12-30T06:13:15.229Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 发布在线库到JitPack">
+<meta name="twitter:description" content="主要分一下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用  创建Library工具类新建了一个新Android项目RandyJitPack，然后给改项目添加一个名为utils的Library Module，Library Module的包名为com.rainmonth">
+<meta name="twitter:image" content="http://yoursite.com/images/A201230/Android%20上传项目到JitPack.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A201230.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android 发布在线库到JitPack | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A201230.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 发布在线库到JitPack</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-30T00:00:00+08:00">2020-12-30</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>主要分一下几步：</p>
+<ol>
+<li>本地创建Library工具类；</li>
+<li>配置JitPack相关信息；</li>
+<li>排查Library中错误并上传至GitHub；</li>
+<li>创建release并在JitPack中编译；</li>
+<li>在项目中引用</li>
+</ol>
+<h3 id="创建Library工具类"><a href="#创建Library工具类" class="headerlink" title="创建Library工具类"></a>创建Library工具类</h3><p>新建了一个新Android项目<code>RandyJitPack</code>，然后给改项目添加一个名为<code>utils</code>的Library Module，Library Module的包名为<code>com.rainmonth.utils</code>；</p>
+<h3 id="配置JitPack相关信息"><a href="#配置JitPack相关信息" class="headerlink" title="配置JitPack相关信息"></a>配置JitPack相关信息</h3><ol>
+<li><p>在RandyJitPack项目的根目录的build.gradle文件中添加如下配置：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Top-level build file where you can add configuration options common to all sub-projects/modules.</span></span><br><span class="line"></span><br><span class="line">buildscript &#123;</span><br><span class="line">    </span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath <span class="string">'com.android.tools.build:gradle:3.6.1'</span></span><br><span class="line">        <span class="comment">// 注意插件和gradle的对应关系，可以在 https://developer.android.google.cn/studio/releases/gradle-plugin.html#updating-gradle查询</span></span><br><span class="line">      	<span class="comment">// 查询插件版本： https://github.com/dcendents/android-maven-gradle-plugin/releases</span></span><br><span class="line">        classpath <span class="string">'com.github.dcendents:android-maven-gradle-plugin:2.1'</span></span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">        <span class="comment">// <span class="doctag">NOTE:</span> Do not place your application dependencies here; they belong</span></span><br><span class="line">        <span class="comment">// in the individual module build.gradle files</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">allprojects &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">        maven &#123; url <span class="string">'https://jitpack.io'</span>&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">task clean(<span class="string">type:</span> Delete) &#123;</span><br><span class="line">    delete rootProject.buildDir</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>插件版本和gradle版本（gradle-wrapper.properties中的版本）对应关系速查</p>
+<p>| 插件版本    | 所需的Gradle版本 | Dependencie版本                                        |<br>| :———- | :————— | —————————————————— |<br>| 1.0.0-1.1.3 | 2.2.1-2.3        | com.github.dcendents:android-maven-gradle-plugin:1.2   |<br>| 1.2.0-1.3.1 | 2.2.1-2.9        | com.github.dcendents:android-maven-gradle-plugin:1.2   |<br>| 1.5.0       | 2.2.1-2.13       | com.github.dcendents:android-maven-gradle-plugin:1.2   |<br>| 2.0.0-2.1.2 | 2.10-2.13        | com.github.dcendents:android-maven-gradle-plugin:1.1   |<br>| 2.1.3-2.2.3 | 2.14.1+          | com.github.dcendents:android-maven-gradle-plugin:1.5.1 |<br>| 2.3.0+      | 3.3+             | com.github.dcendents:android-maven-gradle-plugin:1.5   |<br>| 3.0.0+      | 4.1+             | com.github.dcendents:android-maven-gradle-plugin:2.0   |<br>| 3.1.0+      | 4.4+             | com.github.dcendents:android-maven-gradle-plugin:2.0   |<br>| 3.2.0-3.2.1 | 4.6+             | com.github.dcendents:android-maven-gradle-plugin:2.1   |<br>| 3.3.0-3.3.2 | 4.10.1+          | com.github.dcendents:android-maven-gradle-plugin:2.1   |<br>| 3.4.0-3.4.1 | 5.1.1+           | com.github.dcendents:android-maven-gradle-plugin:2.1   |<br>| 3.5.0+      | 5.4.1-5.6.4      | com.github.dcendents:android-maven-gradle-plugin:2.1   |</p>
+<p><em>注意上面的dependencies列的内容不一定准确，可以多试几次。</em></p>
+</li>
+<li><p>在<code>utils</code>这个mudule的build.gradle中，添加如下配置：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 应用maven插件</span></span><br><span class="line">apply <span class="string">plugin:</span> <span class="string">'com.github.dcendents.android-maven'</span></span><br><span class="line"><span class="comment">// 声明group</span></span><br><span class="line">group = <span class="string">'com.github.rainmonth'</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="排查Library中错误并上传至GitHub"><a href="#排查Library中错误并上传至GitHub" class="headerlink" title="排查Library中错误并上传至GitHub"></a>排查Library中错误并上传至GitHub</h3><p>将项目中的utils module以及跟项目的配置文件上传至GitHub，如下图：</p>
+<p><img src="../images/A201230/Android 上传项目到JitPack.png" alt="Android上传项目到JitPack" style="zoom:50%;"></p>
+<p>只需要上传红河框框里面的部分。（前提先要在自己的GitHub账户上创建一个响应的项目，如RandyJitPack，然后将上面截图部分提交至改地址，用一下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git remote add origin https://github.com/Rainmonth/RandyJitPack.git</span><br><span class="line">git push --set-upstream origin master</span><br></pre></td></tr></table></figure>
+<h3 id="创建release并在JitPack中编译"><a href="#创建release并在JitPack中编译" class="headerlink" title="创建release并在JitPack中编译"></a>创建release并在JitPack中编译</h3><h4 id="创建release"><a href="#创建release" class="headerlink" title="创建release"></a>创建release</h4><p>在<code>RandyJitPack</code>的项目主页，找到release，点击，就可以看到<code>create a new release</code>（之前没有创建过release）或着<code>Draft a new relase</code>（之前创建过）按钮，点击即可完成release的创建，如下图：</p>
+<p><img src="../images/A201230/Android 发布项目到JitPack之创建release.png" alt="创建release"></p>
+<p>信息录入号后，点击<code>Publish release</code>即可将项目发布到<code>https://jitpack.io</code>。这个时候我们复制我们项目的地址，然后在<code>https://jitpack.io</code>中查找，即可看到下图所示的界面</p>
+<p><img src="/Users/randy/Documents/RandyBlog/source/images/A201230/jitpack查找项目.png" alt="jitpack.io查找项目" style="zoom:50%;"></p>
+<p>看到后，点击Get it：</p>
+<ul>
+<li>如果log为红色的，说明编译失败了，可以点击log查看失败的原因</li>
+<li>如果是绿色的，说明成功的，可以通过项目名称 + tab号来引用该项目；</li>
+</ul>
+<h3 id="在项目中引用"><a href="#在项目中引用" class="headerlink" title="在项目中引用"></a>在项目中引用</h3><p>还是在jitpack.io中搜到的项目那个页面，在编译成功后，下面会有如下所示的一段引用代码，将其加入到要引用的项目的build.gradle文件的dependencies中即可完成引用，代码如下：</p>
+<p>Root project下的build.gradle添加如下代码：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">allprojects &#123;</span><br><span class="line">		repositories &#123;</span><br><span class="line">			...</span><br><span class="line">			maven &#123; url <span class="string">'https://jitpack.io'</span> &#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>要应用的module的build.gradle中添加如下代码：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">	        implementation <span class="string">'com.github.Rainmonth:RandyJitPack:Tag'</span><span class="comment">// tag为创建release时填入的内容</span></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>通过以上几个步骤，我们就完成了在线库的发布，是不是很容易！</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/在线库发布/" rel="tag"># 在线库发布</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A200701.html" rel="next" title="Android之Dagger2简介">
+                <i class="fa fa-chevron-left"></i> Android之Dagger2简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">78</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">37</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建Library工具类"><span class="nav-number">1.</span> <span class="nav-text">创建Library工具类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置JitPack相关信息"><span class="nav-number">2.</span> <span class="nav-text">配置JitPack相关信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#排查Library中错误并上传至GitHub"><span class="nav-number">3.</span> <span class="nav-text">排查Library中错误并上传至GitHub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建release并在JitPack中编译"><span class="nav-number">4.</span> <span class="nav-text">创建release并在JitPack中编译</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建release"><span class="nav-number">4.1.</span> <span class="nav-text">创建release</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在项目中引用"><span class="nav-number">5.</span> <span class="nav-text">在项目中引用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -107,7 +107,7 @@
 <meta property="og:site_name" content="荏苒追寻个人博客">
 <meta property="og:description" content="#Android 零散知识点（持续更新） [TOC]  Q：为什么Android的更新试图操作必须在主线程中进行？  这是因为Android系统中的视图组件并不是线程安全的。通常应该让主线程负责创建、显示和更新UI，启动子线程，停止子线程。让子线程完成计算并向主线程发出更新UI的消息，让主线程来更新UI。这就促使Android中产生了Handler机制。     Q：如何更改Android Stu">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-03-25T10:06:23.554Z">
+<meta property="og:updated_time" content="2020-08-26T05:46:39.510Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android 零散知识点（持续更新）">
 <meta name="twitter:description" content="#Android 零散知识点（持续更新） [TOC]  Q：为什么Android的更新试图操作必须在主线程中进行？  这是因为Android系统中的视图组件并不是线程安全的。通常应该让主线程负责创建、显示和更新UI，启动子线程，停止子线程。让子线程完成计算并向主线程发出更新UI的消息，让主线程来更新UI。这就促使Android中产生了Handler机制。     Q：如何更改Android Stu">
@@ -433,6 +433,21 @@
 <li>索尼手机，debug模式打开webView就崩溃</li>
 </ul>
 <h2 id="控件问题"><a href="#控件问题" class="headerlink" title="控件问题"></a>控件问题</h2><ul>
+<li><p>Group控件设置可见性的时候，存在设置不生效的问题</p>
+<blockquote>
+<p>解决方法，调用设置可见性之后，调用其提供的<code>updatePreLayout</code>来更新其关联View的可见性。</p>
+</blockquote>
+</li>
+<li><p>ViewPager（应用PagerTransformer效果）的一页中的子View动画超出边界被裁的问题</p>
+<blockquote>
+<p>采用在PagerTransformer的transfromPage方法中找到该View，对该View进行动画</p>
+</blockquote>
+</li>
+<li><p>clipChildren和clipPadding属性的作用</p>
+<blockquote>
+<p>允许子View超过父View的边界，但有的情况下会失效（比如ViewPager应用了PagerTransformer效果后</p>
+</blockquote>
+</li>
 <li><p>EditText 的光标为何不显示？</p>
 <blockquote>
 <p>首先设置cursorVisible属性为true，然后设置textCursorDrawable（背景色与<br>控件背景色不要一样），textCursorDrawable属性是在API11才推出的属性；</p>
@@ -476,8 +491,32 @@
 <p>建议不要写这样的嵌套，但实在没办法的时候，我们要对嵌套的控件做处理（可以处理嵌套的控件，也可以处理处理被嵌套的控件）</p>
 </blockquote>
 </li>
+<li><p>Activity布局文件中界面中的TextView设置的内容不显示？</p>
+<blockquote>
+<p>这个问题很可能是因为你的Activity布局文件中存在了相同的id。注意Android Studio默认是不允许一个xml文件中出现相同id的，但通过自定义控件的子View、include、merge标签等可能会导致View树上面出现相同id的情况，排查这种情况最有效的方法是通过Tools-&gt;Layout Inspector来生成当前界面的View树，然后查看是否有相同的id出现</p>
+</blockquote>
+</li>
 </ul>
 <h2 id="编译配置问题"><a href="#编译配置问题" class="headerlink" title="编译配置问题"></a>编译配置问题</h2><ul>
+<li><p>DexCount的使用</p>
+<blockquote>
+<p>官方文档：<a href="https://github.com/KeepSafe/dexcount-gradle-plugin" target="_blank" rel="noopener">dexcount-gradle-plugin</a> Android官方查看应用方法数工具</p>
+<ol>
+<li><p>在项目的更目录的build.gradle 的dependencies节点添加</p>
+<p>classpath ‘com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.6’，注意主要在buildScript中添加相应的仓库地址：mavenCentral()</p>
+</li>
+<li><p>在app/build.gradle 中应用该插件：</p>
+<p>apply plugin: ‘com.android.application’</p>
+<p>apply plugin: ‘com.getkeepsafe.dexcount’</p>
+</li>
+</ol>
+</blockquote>
+</li>
+<li><p>Mac Android Studio打开新项目后出现Connect to 127.0.0.1:8888 [/127.0.0.1] failed: Connection refused (Connectio refused）问题</p>
+<blockquote>
+<p>首先，检查项目的gradle.property 文件中代理配置；然后，检查系统.gradle文件夹下的gradle.property中的代理配置；这还不行，请关闭所有的翻墙代理软件，然后打开所连接网络的高级设置，去掉所有代理设置，然后请记得重启Android Studio</p>
+</blockquote>
+</li>
 <li><p>Could not download support-compat.aar</p>
 <p>&gt;</p>
 </li>
@@ -594,6 +633,21 @@
 <p><code>&lt;uses-sdk tools:overrideLibrary=&quot;name&quot; /&gt;</code>    </p>
 </blockquote>
 </li>
+<li><p>解决com.android.builder.dexing.DexArchiveBuilderException</p>
+<blockquote>
+<p>compileOptions {</p>
+<p>  sourceCompatibility 1.8</p>
+<p>  targetCompatibility 1.8</p>
+<p>}</p>
+</blockquote>
+</li>
+<li><p>解决duplicate class的问题 Duplicate class android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat found in modules classes.jar (com.android.support:support-compat:28.0.0) and classes.jar (com.android.support:support-v4:22.0.0)</p>
+<blockquote>
+<p>configurations {</p>
+<p>  all*.exclude group: ‘com.android.support’, module: ‘support-v4’</p>
+<p>}</p>
+</blockquote>
+</li>
 </ul>
 <h2 id="四大组件问题"><a href="#四大组件问题" class="headerlink" title="四大组件问题"></a>四大组件问题</h2><ul>
 <li><p>Activity中应用Fragment进行数据的加载与显示时，第一次进入正常，推出再次进入崩溃？</p>
@@ -647,7 +701,7 @@
 <h2 id="第三方库常见问题"><a href="#第三方库常见问题" class="headerlink" title="第三方库常见问题"></a>第三方库常见问题</h2><ul>
 <li><p>使用Glide报如下错误如何解决？</p>
 <blockquote>
-<p>java.lang.IllegalArgumentException: You cannot start a load for a destroyed activity<br>​    com.bumptech.glide.manager.k.b(Unknown Source)<br>​    com.bumptech.glide.manager.k.a(Unknown Source)<br>​    com.bumptech.glide.manager.k.a(Unknown Source)<br>​    com.bumptech.glide.e.b(Unknown Source)</p>
+<p>java.lang.IllegalArgumentException: You cannot start a load for a destroyed activity<br>   com.bumptech.glide.manager.k.b(Unknown Source)<br>   com.bumptech.glide.manager.k.a(Unknown Source)<br>   com.bumptech.glide.manager.k.a(Unknown Source)<br>   com.bumptech.glide.e.b(Unknown Source)</p>
 <p>   …</p>
 <p>   …</p>
 </blockquote>
@@ -682,9 +736,54 @@
 <li><p>提示<code>zsh: command not found</code></p>
 <blockquote>
 <p>先确定<code>.bash_profile</code>的PATH是否有相应的环境变量，如果有，看看<code>.zshrc</code>的配置文件的User Configuraion 是否包含了<code>source ~/.bash_profile</code>这个配置</p>
+<p>出现的原因是Fragment还没attach到Activity，就调用了Activity相关的getResource方法，导致IllegalStateException发生，解决方法即使提前判断Fragment是否attach成功，调用isAdded方法进行判断</p>
 </blockquote>
 </li>
+<li><p>Android Studio创建9 patch图透明背景变黑</p>
+</li>
 </ul>
+<blockquote>
+<p>在AS中右键一个图片创建9 patch图，可能会发现新创建的9 patch图和原图相比，颜色失真，透明背景变黑，无法编辑拉伸和内容区域。</p>
+<p>这是因为原图的颜色存储方案是colormap，也就是常说的索引图，AS创建9 patch图的原图的颜色方案需要是RGBA。</p>
+<p>如果设计师使用sketch导出图片，似乎默认就会使用colormap，一张RGBA图片使用tinypng压缩，输出的图片同样会转为colormap图片，这也是9 patch图不能使用tinypng压缩的原因。</p>
+<p>colormap方案对于颜色数量较少的图片，能显著降低图片大小。</p>
+<p>在Mac上，使用<code>file</code>指令可以查看png图片的颜色方案，如果发现是colormap，可以使用Mac的预览中的另存为，勾选上<code>alpha</code>存储即可，会自动转为RGBA图片，此时再使用它创建9 patch图，则一切工作正常。</p>
+</blockquote>
+<ul>
+<li>解决Charles和ShadowSock共存的问题，</li>
+</ul>
+<blockquote>
+<p>请访问链接<a href="https://sanchew.github.io/2017/08/15/charles-shadowsocks/" target="_blank" rel="noopener">sanchew.github.io/2017/08/15/charles-shadowsocks/</a></p>
+</blockquote>
+<ul>
+<li><p>Android configChange属性详细探究</p>
+<ol>
+<li>设置configChange与不设置的影响与区别；</li>
+</ol>
+</li>
+</ul>
+<ol>
+<li>设置不同configChange属性的不同表现（screenSize、orientation、keyboardHidden的不同影响）；<ol>
+<li>设置不同configChange属性在不同的系统版本上的表现；</li>
+</ol>
+</li>
+<li>如何解决configChange对Activity生命周期的影响；</li>
+</ol>
+<ul>
+<li>java.net.UnknownServiceException: CLEARTEXT communication to wanandroid.com not permitted by network</li>
+</ul>
+<blockquote>
+<p>问题原因就是Android API27以上 限制了明文流量的网络请求，非加密（即非https的）的流量会被系统禁止掉。解决方法：</p>
+<ol>
+<li><p>如果一定要使用明文通信的话，则可以打开AndroidManifest.xml 文件，在 application 元素中添加：</p>
+<p><code>android:usesCleartextTraffic=&quot;true&quot;</code></p>
+<p><strong>上面的这种方法不建议使用，只能作为一种临时方案。</strong></p>
+</li>
+<li><p>项目改用https请求；</p>
+</li>
+<li>项目的<code>targetSdkVersion</code>改为27（不包括27）以下；</li>
+</ol>
+</blockquote>
 
       
     </div>
@@ -804,7 +903,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-count">78</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -946,7 +1045,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">36</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>

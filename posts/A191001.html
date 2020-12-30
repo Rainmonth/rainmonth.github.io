@@ -107,7 +107,7 @@
 <meta property="og:site_name" content="荏苒追寻个人博客">
 <meta property="og:description" content="约定，本文中WebView所在的Activity为WebViewActivity 问题分析 采用独立进程后，发现首次启动时，WebView所在的Activity启动速度比较慢，如果每次退出这个Activity的时候都杀掉其所在的独立进程，则每次进入WebView所在的Activity速度都比较慢。因此可以看到导致启动速度慢的根本原因就是fork进程所花费的额外时间。 解决方案：  WebViewA">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-03-25T05:26:43.789Z">
+<meta property="og:updated_time" content="2020-08-26T05:41:30.607Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android WebView独立进程的使用及优化">
 <meta name="twitter:description" content="约定，本文中WebView所在的Activity为WebViewActivity 问题分析 采用独立进程后，发现首次启动时，WebView所在的Activity启动速度比较慢，如果每次退出这个Activity的时候都杀掉其所在的独立进程，则每次进入WebView所在的Activity速度都比较慢。因此可以看到导致启动速度慢的根本原因就是fork进程所花费的额外时间。 解决方案：  WebViewA">
@@ -410,6 +410,7 @@
 <ol>
 <li><code>WebViewActivity</code>所属的独立进程启动后，在退出Activity时不杀掉其所属进程。</li>
 <li>在AndroidManifest.xml文件中声名一个Service，该Service运行在独立进程中，需要启动WebView是，发送消息给该Service，让该Service来启动<code>WebViewActivity</code>。</li>
+<li>由于Web View运行于独立进程，那么自然而然的就会涉及到进程间的通信问题，Android进程间的通信，最常见的就是通过AIDL来实现。</li>
 </ol>
 
       
@@ -521,7 +522,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-count">78</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -663,7 +664,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">36</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>

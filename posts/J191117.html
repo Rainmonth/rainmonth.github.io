@@ -107,7 +107,7 @@
 <meta property="og:description" content="摘要说实话，本人在平常工作中关于Java并发的使用还是比较少的，为了提升下自己，就打算看看Java中对并发的支持，本文主要介绍一下java.util.concurrent包下并发相关的内容。该包下的内容大多数是java.util包下对应集合类的并发实现，可以通过比较来看看并发的妙处。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/images/J191115/关系图.png">
-<meta property="og:updated_time" content="2020-03-25T05:26:43.798Z">
+<meta property="og:updated_time" content="2020-08-31T03:03:37.131Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java并发基础">
 <meta name="twitter:description" content="摘要说实话，本人在平常工作中关于Java并发的使用还是比较少的，为了提升下自己，就打算看看Java中对并发的支持，本文主要介绍一下java.util.concurrent包下并发相关的内容。该包下的内容大多数是java.util包下对应集合类的并发实现，可以通过比较来看看并发的妙处。">
@@ -402,7 +402,37 @@
 <h2 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h2><p>利用Idea编辑器强大的diagram功能，将java 1.8.45版本下java.util.concurrent包下的内容的简单关系生成了如下一张图，能很清晰的看到这个包中各个类的关系。</p>
 <p><img src="./../images/J191115/关系图.png" alt="concurrent包类关系图"></p>
 <p>下满根据上面的关系图，来分模块以此分析。</p>
-<h3 id="线程池相关"><a href="#线程池相关" class="headerlink" title="线程池相关"></a>线程池相关</h3><h4 id="Executor"><a href="#Executor" class="headerlink" title="Executor"></a>Executor</h4><h2 id="相关类"><a href="#相关类" class="headerlink" title="相关类"></a>相关类</h2><ul>
+<h3 id="线程池相关"><a href="#线程池相关" class="headerlink" title="线程池相关"></a>线程池相关</h3><h4 id="Executor"><a href="#Executor" class="headerlink" title="Executor"></a>Executor</h4><h4 id="ExecutorService"><a href="#ExecutorService" class="headerlink" title="ExecutorService"></a>ExecutorService</h4><p>继承自Executor接口，在它基础之上提供了以下接口定义方法：</p>
+<ul>
+<li>shutdown()</li>
+<li>shutdownNow()</li>
+<li>submit()</li>
+<li>invokeAll()</li>
+<li>invokeAny()</li>
+</ul>
+<h4 id="ScheduledExecutorService"><a href="#ScheduledExecutorService" class="headerlink" title="ScheduledExecutorService"></a>ScheduledExecutorService</h4><p>接口，支持<strong>延时执行任务</strong>和<strong>定期执行任务</strong>的<code>ExecutorService</code>，提供了以下接口方法：</p>
+<ul>
+<li><p>schedule()</p>
+</li>
+<li><p>scheduleAtFixedRate()，按一定间隔定期的执行任务，终止的条件：</p>
+<ul>
+<li>任务通过任务返回的Future取消了；</li>
+<li>Executor本身终止了，同样会导致任务取消；</li>
+<li>任务的执行过程中出现了异常</li>
+</ul>
+<p>如果定期执行的<strong>任务执行时间比设置的定期时间长</strong>的话，那么下一个任务的执行就会延迟，而不是并发的执行</p>
+</li>
+<li><p>scheduleWithFixedDelay()</p>
+</li>
+</ul>
+<p>上面三个方法返回的都是<code>ScheduledFuture对象</code>，<code>ScheduledFuture</code>实现了<code>Delay</code>和<code>Future</code>接口。</p>
+<p><code>ScheduledThreadPoolExecutor</code>是Java SDK提供的<code>ScheduledExecutorService</code>实现类。</p>
+<h4 id="AbstractExecutorService"><a href="#AbstractExecutorService" class="headerlink" title="AbstractExecutorService"></a>AbstractExecutorService</h4><p>提供了ExecutorService接口的默认实现的抽象类</p>
+<ul>
+<li>ThreadPoolExecutor</li>
+<li>ForkJoinPool</li>
+</ul>
+<h2 id="相关类"><a href="#相关类" class="headerlink" title="相关类"></a>相关类</h2><ul>
 <li>TreeMap</li>
 <li>CountdownLatch</li>
 </ul>
@@ -519,7 +549,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">73</span>
+                    <span class="site-state-item-count">78</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -661,7 +691,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">36</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -706,7 +740,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总览"><span class="nav-number">2.</span> <span class="nav-text">总览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#线程池相关"><span class="nav-number">2.1.</span> <span class="nav-text">线程池相关</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Executor"><span class="nav-number">2.1.1.</span> <span class="nav-text">Executor</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关类"><span class="nav-number">3.</span> <span class="nav-text">相关类</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总览"><span class="nav-number">2.</span> <span class="nav-text">总览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#线程池相关"><span class="nav-number">2.1.</span> <span class="nav-text">线程池相关</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Executor"><span class="nav-number">2.1.1.</span> <span class="nav-text">Executor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ExecutorService"><span class="nav-number">2.1.2.</span> <span class="nav-text">ExecutorService</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ScheduledExecutorService"><span class="nav-number">2.1.3.</span> <span class="nav-text">ScheduledExecutorService</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AbstractExecutorService"><span class="nav-number">2.1.4.</span> <span class="nav-text">AbstractExecutorService</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#相关类"><span class="nav-number">3.</span> <span class="nav-text">相关类</span></a></li></ol></div>
             
 
           </div>
