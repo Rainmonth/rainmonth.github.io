@@ -99,21 +99,21 @@
 
 
 
-  <meta name="description" content="主要分一下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用">
+  <meta name="description" content="主要分以下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用">
 <meta name="keywords" content="在线库发布">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android 发布在线库到JitPack">
 <meta property="og:url" content="http://yoursite.com/posts/A201230.html">
 <meta property="og:site_name" content="荏苒追寻个人博客">
-<meta property="og:description" content="主要分一下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用">
+<meta property="og:description" content="主要分以下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/images/A201230/Android%20上传项目到JitPack.png">
 <meta property="og:image" content="http://yoursite.com/images/A201230/Android%20发布项目到JitPack之创建release.png">
 <meta property="og:image" content="http://yoursite.com/Users/randy/Documents/RandyBlog/source/images/A201230/jitpack查找项目.png">
-<meta property="og:updated_time" content="2020-12-30T06:28:07.277Z">
+<meta property="og:updated_time" content="2020-12-30T06:30:44.546Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android 发布在线库到JitPack">
-<meta name="twitter:description" content="主要分一下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用">
+<meta name="twitter:description" content="主要分以下几步：  本地创建Library工具类； 配置JitPack相关信息； 排查Library中错误并上传至GitHub； 创建release并在JitPack中编译； 在项目中引用">
 <meta name="twitter:image" content="http://yoursite.com/images/A201230/Android%20上传项目到JitPack.png">
 
 
@@ -400,7 +400,7 @@
       
 
       
-        <p>主要分一下几步：</p>
+        <p>主要分以下几步：</p>
 <ol>
 <li>本地创建Library工具类；</li>
 <li>配置JitPack相关信息；</li>
@@ -410,12 +410,9 @@
 </ol>
 <a id="more"></a>
 <h3 id="创建Library工具类"><a href="#创建Library工具类" class="headerlink" title="创建Library工具类"></a>创建Library工具类</h3><p>新建了一个新Android项目<code>RandyJitPack</code>，然后给改项目添加一个名为<code>utils</code>的Library Module，Library Module的包名为<code>com.rainmonth.utils</code>；</p>
-<h3 id="配置JitPack相关信息"><a href="#配置JitPack相关信息" class="headerlink" title="配置JitPack相关信息"></a>配置JitPack相关信息</h3><ol>
-<li><p>在RandyJitPack项目的根目录的build.gradle文件中添加如下配置：</p>
+<h3 id="配置JitPack相关信息"><a href="#配置JitPack相关信息" class="headerlink" title="配置JitPack相关信息"></a>配置JitPack相关信息</h3><p>在RandyJitPack项目的根目录的build.gradle文件中添加如下配置：</p>
 <figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Top-level build file where you can add configuration options common to all sub-projects/modules.</span></span><br><span class="line"></span><br><span class="line">buildscript &#123;</span><br><span class="line">    </span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath <span class="string">'com.android.tools.build:gradle:3.6.1'</span></span><br><span class="line">        <span class="comment">// 注意插件和gradle的对应关系，可以在 https://developer.android.google.cn/studio/releases/gradle-plugin.html#updating-gradle查询</span></span><br><span class="line">      	<span class="comment">// 查询插件版本： https://github.com/dcendents/android-maven-gradle-plugin/releases</span></span><br><span class="line">        classpath <span class="string">'com.github.dcendents:android-maven-gradle-plugin:2.1'</span></span><br><span class="line">        </span><br><span class="line"></span><br><span class="line">        <span class="comment">// <span class="doctag">NOTE:</span> Do not place your application dependencies here; they belong</span></span><br><span class="line">        <span class="comment">// in the individual module build.gradle files</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">allprojects &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">        maven &#123; url <span class="string">'https://jitpack.io'</span>&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">task clean(<span class="string">type:</span> Delete) &#123;</span><br><span class="line">    delete rootProject.buildDir</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>插件版本和gradle版本（gradle-wrapper.properties中的版本）对应关系速查</p>
-</li>
-</ol>
 <table>
 <thead>
 <tr>
@@ -487,12 +484,9 @@
 </tr>
 </tbody>
 </table>
-<p>   <em>注意上面的dependencies列的内容不一定准确，可以多试几次。</em></p>
-<ol>
-<li><p>在<code>utils</code>这个mudule的build.gradle中，添加如下配置：</p>
+<p><em>注意上面的dependencies列的内容不一定准确，可以多试几次。</em></p>
+<p>在<code>utils</code>这个mudule的build.gradle中，添加如下配置：</p>
 <figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 应用maven插件</span></span><br><span class="line">apply <span class="string">plugin:</span> <span class="string">'com.github.dcendents.android-maven'</span></span><br><span class="line"><span class="comment">// 声明group</span></span><br><span class="line">group = <span class="string">'com.github.rainmonth'</span></span><br></pre></td></tr></table></figure>
-</li>
-</ol>
 <h3 id="排查Library中错误并上传至GitHub"><a href="#排查Library中错误并上传至GitHub" class="headerlink" title="排查Library中错误并上传至GitHub"></a>排查Library中错误并上传至GitHub</h3><p>将项目中的utils module以及跟项目的配置文件上传至GitHub，如下图：</p>
 <p><img src="../images/A201230/Android 上传项目到JitPack.png" alt="Android上传项目到JitPack" style="zoom:50%;"></p>
 <p>只需要上传红河框框里面的部分。（前提先要在自己的GitHub账户上创建一个响应的项目，如RandyJitPack，然后将上面截图部分提交至改地址，用一下命令：</p>
