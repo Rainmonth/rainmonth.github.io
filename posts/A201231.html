@@ -99,20 +99,20 @@
 
 
 
-  <meta name="description" content="将醒目发布到Maven，根据自己的需求，可以有以下三种方式：  发布到本地Maven仓库，即在自己的电脑上共享； 发布到本地局域网，即局域网内用户共享； 发布到JCenter，即全网共享；  上面三种方式大同小异，具体可继续往下看。">
+  <meta name="description" content="将项目发布到Maven，根据自己的需求，可以有以下三种方式：  发布到本地Maven仓库，即在自己的电脑上共享； 发布到本地局域网，即局域网内用户共享； 发布到JCenter，即全网共享；  上面三种方式大同小异，具体可继续往下看。">
 <meta name="keywords" content="在线库发布">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android 发布项目到Maven">
 <meta property="og:url" content="http://yoursite.com/posts/A201231.html">
 <meta property="og:site_name" content="荏苒追寻个人博客">
-<meta property="og:description" content="将醒目发布到Maven，根据自己的需求，可以有以下三种方式：  发布到本地Maven仓库，即在自己的电脑上共享； 发布到本地局域网，即局域网内用户共享； 发布到JCenter，即全网共享；  上面三种方式大同小异，具体可继续往下看。">
+<meta property="og:description" content="将项目发布到Maven，根据自己的需求，可以有以下三种方式：  发布到本地Maven仓库，即在自己的电脑上共享； 发布到本地局域网，即局域网内用户共享； 发布到JCenter，即全网共享；  上面三种方式大同小异，具体可继续往下看。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/images/A201231/创建uploadArchives任务.png">
 <meta property="og:image" content="http://yoursite.com/images/A201231/执行uploadArchives任务结果.png">
-<meta property="og:updated_time" content="2021-01-04T06:10:34.050Z">
+<meta property="og:updated_time" content="2021-01-04T06:16:54.967Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android 发布项目到Maven">
-<meta name="twitter:description" content="将醒目发布到Maven，根据自己的需求，可以有以下三种方式：  发布到本地Maven仓库，即在自己的电脑上共享； 发布到本地局域网，即局域网内用户共享； 发布到JCenter，即全网共享；  上面三种方式大同小异，具体可继续往下看。">
+<meta name="twitter:description" content="将项目发布到Maven，根据自己的需求，可以有以下三种方式：  发布到本地Maven仓库，即在自己的电脑上共享； 发布到本地局域网，即局域网内用户共享； 发布到JCenter，即全网共享；  上面三种方式大同小异，具体可继续往下看。">
 <meta name="twitter:image" content="http://yoursite.com/images/A201231/创建uploadArchives任务.png">
 
 
@@ -399,7 +399,7 @@
       
 
       
-        <p>将醒目发布到Maven，根据自己的需求，可以有以下三种方式：</p>
+        <p>将项目发布到Maven，根据自己的需求，可以有以下三种方式：</p>
 <ul>
 <li>发布到本地Maven仓库，即在自己的电脑上共享；</li>
 <li>发布到本地局域网，即局域网内用户共享；</li>
@@ -412,14 +412,13 @@
 <h4 id="在库项目中新建uploadArchives任务"><a href="#在库项目中新建uploadArchives任务" class="headerlink" title="在库项目中新建uploadArchives任务"></a>在库项目中新建<code>uploadArchives</code>任务</h4><p>找到库项目的<code>build.gradle</code>文件，添加一个名为<code>uploadArchives</code>的Task，具体内容如下：</p>
 <figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="string">plugin:</span> <span class="string">'maven'</span></span><br><span class="line"></span><br><span class="line">uploadArchives&#123;</span><br><span class="line">    repositories.mavenDeployer&#123;</span><br><span class="line">        <span class="comment">// 配置本地仓库路径，项目根目录下的repository目录中</span></span><br><span class="line">        repository(<span class="string">url:</span> uri(<span class="string">'../repository'</span>))</span><br><span class="line">        pom.groupId = <span class="string">"com.rainmonth.utils"</span><span class="comment">// 唯一标识（通常为模块包名，也可以任意）</span></span><br><span class="line">        pom.artifactId = <span class="string">"utils"</span> <span class="comment">// 项目名称（通常为类库模块名称，也可以任意）</span></span><br><span class="line">        pom.version = <span class="string">"1.0.0"</span> <span class="comment">// 版本号</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>注意：由于我用的是和Android 发布项目到JitPack相同的库，这里需要注视调库项目中JitPack插件的相关代码</p>
+<p>注意：由于我用的是和Android 发布项目到JitPack相同的库，这里需要注释调库项目中JitPack插件的相关代码</p>
 </blockquote>
 <p>添加完上述代码后，同步项目，在库项目<code>utils</code>的gradle任务下，就可以看到<code>upload/uploadArchives</code>任务了，如下图：</p>
 <p><img src="../images/A201231/创建uploadArchives任务.png" alt="创建uploadArchives`" style="zoom:25%;"></p>
 <h4 id="执行uploadArchives任务"><a href="#执行uploadArchives任务" class="headerlink" title="执行uploadArchives任务"></a>执行<code>uploadArchives</code>任务</h4><p>上面的任务执行完成后，执行<code>uploadArchives</code>任务（双击任务名或者在命令行中用<code>gradlew uploadArchives</code>运行。执行完成后会看到项目根目录下多了如下文件：</p>
 <p><img src="../images/A201231/执行uploadArchives任务结果.png" alt="执行uploadArchives任务结果" style="zoom:25%;"></p>
-<p>引用本地仓库中的类库</p>
-<p>要引用上面生成的类库，首先需要告诉gradle我们在哪里可以找到类库，所以我们需要在项目根目录中指定生成库的地址，即在root Project中的build.gradle中添加如下代码：</p>
+<h4 id="引用本地仓库中的类库"><a href="#引用本地仓库中的类库" class="headerlink" title="引用本地仓库中的类库"></a>引用本地仓库中的类库</h4><p>要引用上面生成的类库，首先需要告诉gradle我们在哪里可以找到类库，所以我们需要在项目根目录中指定生成库的地址，即在root Project中的build.gradle中添加如下代码：</p>
 <figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">allprojects &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line"><span class="comment">//        maven &#123; url 'https://jitpack.io' &#125;</span></span><br><span class="line">      	<span class="comment">// 告诉本地maven仓库的地址</span></span><br><span class="line">        maven &#123; url(<span class="string">'../repository'</span>)&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>添加好后，在app module中的build.gradle添加引用库项目的代码，如下：</p>
 <figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">	implementation <span class="string">'com.rainmonth.utils:utils:1.0.0'</span> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -430,7 +429,7 @@
 <figure class="highlight shell"><figcaption><span>l</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nexus start</span><br></pre></td></tr></table></figure>
 <p>一段时间后，在浏览器中输入<code>http://localhost:8081</code>    即可验证nexus是否安装成功。</p>
 <p>安装成功后，使用<code>admin</code>登录，3.x版本的密码放在压缩包中，可以按提示自行查找，输入找到密码后，即可设置新的密码。</p>
-<h5 id="配置库项目的gradle文件"><a href="#配置库项目的gradle文件" class="headerlink" title="配置库项目的gradle文件"></a>配置库项目的gradle文件</h5><p>将库项目的gradle配置更改如下：</p>
+<h4 id="配置库项目的gradle文件"><a href="#配置库项目的gradle文件" class="headerlink" title="配置库项目的gradle文件"></a>配置库项目的gradle文件</h4><p>将库项目的gradle配置更改如下：</p>
 <figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// (PS：这个是2.x版本的nexus写法)</span></span><br><span class="line"><span class="comment">//上传到Maven仓库的task</span></span><br><span class="line">uploadArchives &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        mavenDeployer &#123;</span><br><span class="line">            <span class="comment">//指定maven仓库url</span></span><br><span class="line">            repository(<span class="string">url:</span> <span class="string">"http://localhost:8081/repository/maven-releases/"</span>) &#123;</span><br><span class="line">            		<span class="comment">//nexus登录默认用户名和密码</span></span><br><span class="line">            		authentication(<span class="string">userName:</span> <span class="string">"admin"</span>, <span class="string">password:</span> <span class="string">"admin123"</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            pom.groupId = <span class="string">"com.rainmonth.utils"</span><span class="comment">// 唯一标识（通常为模块包名，也可以任意）</span></span><br><span class="line">		        pom.artifactId = <span class="string">"utils"</span> <span class="comment">// 项目名称（通常为类库模块名称，也可以任意）</span></span><br><span class="line">    		    pom.version = <span class="string">"1.0.0"</span> <span class="comment">// 版本号</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// (PS：这个是3.x版本的nexus写法)</span></span><br><span class="line"><span class="comment">//上传到Maven仓库的task</span></span><br><span class="line">uploadArchives &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        mavenDeployer &#123;</span><br><span class="line">            <span class="comment">//指定maven仓库url</span></span><br><span class="line">            repository(<span class="string">url:</span> <span class="string">"http://localhost:8081/repository/maven-releases/"</span>) &#123;</span><br><span class="line">            		<span class="comment">//nexus登录默认用户名和密码</span></span><br><span class="line">            		authentication(<span class="string">userName:</span> <span class="string">"admin"</span>, <span class="string">password:</span> <span class="string">"admin123"</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            pom.groupId = <span class="string">"com.rainmonth.utils"</span><span class="comment">// 唯一标识（通常为模块包名，也可以任意）</span></span><br><span class="line">		        pom.artifactId = <span class="string">"utils"</span> <span class="comment">// 项目名称（通常为类库模块名称，也可以任意）</span></span><br><span class="line">    		    pom.version = <span class="string">"1.0.0"</span> <span class="comment">// 版本号</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>其他配置不必更改，然后运行该任务。</p>
 <p>运行uploadArchives时，我遇到了一下问题：</p>
@@ -458,7 +457,7 @@
 <li><p>接下来的就是各种配置了，这里我没有实际操作，有需要的可以参考下面文章：<a href="https://blog.csdn.net/xmxkf/article/details/80674232" target="_blank" rel="noopener">https://blog.csdn.net/xmxkf/article/details/80674232</a></p>
 </li>
 </ol>
-<p>这样就简单的介绍了下将项目发布到本地maven仓库、局域网maven仓库和JCenter的方法。期间会遇到一些问题，但只要实际操作一下，就会发现没有想象的那么麻烦。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>这样就简单的介绍了下将项目发布到本地maven仓库、局域网maven仓库和JCenter的方法。期间会遇到一些问题，但只要实际操作一下，就会发现没有想象的那么麻烦。</p>
 
       
     </div>
@@ -765,7 +764,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#准备工作"><span class="nav-number">1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发布项目到本地Maven"><span class="nav-number">2.</span> <span class="nav-text">发布项目到本地Maven</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在库项目中新建uploadArchives任务"><span class="nav-number">2.1.</span> <span class="nav-text">在库项目中新建uploadArchives任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#执行uploadArchives任务"><span class="nav-number">2.2.</span> <span class="nav-text">执行uploadArchives任务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发布项目到局域网"><span class="nav-number">3.</span> <span class="nav-text">发布项目到局域网</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#下载Nexus"><span class="nav-number">3.1.</span> <span class="nav-text">下载Nexus</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#配置库项目的gradle文件"><span class="nav-number">3.1.1.</span> <span class="nav-text">配置库项目的gradle文件</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用发布的项目"><span class="nav-number">3.2.</span> <span class="nav-text">使用发布的项目</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发布项目到JCenter"><span class="nav-number">4.</span> <span class="nav-text">发布项目到JCenter</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#准备工作"><span class="nav-number">1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发布项目到本地Maven"><span class="nav-number">2.</span> <span class="nav-text">发布项目到本地Maven</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在库项目中新建uploadArchives任务"><span class="nav-number">2.1.</span> <span class="nav-text">在库项目中新建uploadArchives任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#执行uploadArchives任务"><span class="nav-number">2.2.</span> <span class="nav-text">执行uploadArchives任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#引用本地仓库中的类库"><span class="nav-number">2.3.</span> <span class="nav-text">引用本地仓库中的类库</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发布项目到局域网"><span class="nav-number">3.</span> <span class="nav-text">发布项目到局域网</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#下载Nexus"><span class="nav-number">3.1.</span> <span class="nav-text">下载Nexus</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置库项目的gradle文件"><span class="nav-number">3.2.</span> <span class="nav-text">配置库项目的gradle文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用发布的项目"><span class="nav-number">3.3.</span> <span class="nav-text">使用发布的项目</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发布项目到JCenter"><span class="nav-number">4.</span> <span class="nav-text">发布项目到JCenter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">5.</span> <span class="nav-text">小结</span></a></li></ol></div>
             
 
           </div>
