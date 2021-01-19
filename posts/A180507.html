@@ -99,18 +99,18 @@
 
 
 
-  <meta name="description" content="#Activity与Fragment的通信方式  Fragment访问Activity的内容 Activity访问Fragment的内容 Fragment与Activity共享事件  ###Fragment访问Activity的内容    Fragment通过getActivity()这种方式获取Activity实例后，可以访问Activity中定义的public成员。">
+  <meta name="description" content="Activity与Fragment的通信方式 Fragment访问Activity的内容 Activity访问Fragment的内容 Fragment与Activity共享事件  Fragment访问Activity的内容​    Fragment通过getActivity()这种方式获取Activity实例后，可以访问Activity中定义的public成员。">
 <meta name="keywords" content="Android">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Activity与Fragment的通信方式">
 <meta property="og:url" content="http://yoursite.com/posts/A180507.html">
 <meta property="og:site_name" content="荏苒追寻个人博客">
-<meta property="og:description" content="#Activity与Fragment的通信方式  Fragment访问Activity的内容 Activity访问Fragment的内容 Fragment与Activity共享事件  ###Fragment访问Activity的内容    Fragment通过getActivity()这种方式获取Activity实例后，可以访问Activity中定义的public成员。">
+<meta property="og:description" content="Activity与Fragment的通信方式 Fragment访问Activity的内容 Activity访问Fragment的内容 Fragment与Activity共享事件  Fragment访问Activity的内容​    Fragment通过getActivity()这种方式获取Activity实例后，可以访问Activity中定义的public成员。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-03-25T05:26:43.784Z">
+<meta property="og:updated_time" content="2021-01-19T02:27:26.418Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Activity与Fragment的通信方式">
-<meta name="twitter:description" content="#Activity与Fragment的通信方式  Fragment访问Activity的内容 Activity访问Fragment的内容 Fragment与Activity共享事件  ###Fragment访问Activity的内容    Fragment通过getActivity()这种方式获取Activity实例后，可以访问Activity中定义的public成员。">
+<meta name="twitter:description" content="Activity与Fragment的通信方式 Fragment访问Activity的内容 Activity访问Fragment的内容 Fragment与Activity共享事件  Fragment访问Activity的内容​    Fragment通过getActivity()这种方式获取Activity实例后，可以访问Activity中定义的public成员。">
 
 
 
@@ -396,89 +396,36 @@
       
 
       
-        <p>#Activity与Fragment的通信方式</p>
-<ul>
+        <h1 id="Activity与Fragment的通信方式"><a href="#Activity与Fragment的通信方式" class="headerlink" title="Activity与Fragment的通信方式"></a>Activity与Fragment的通信方式</h1><ul>
 <li>Fragment访问Activity的内容</li>
 <li>Activity访问Fragment的内容</li>
 <li>Fragment与Activity共享事件</li>
 </ul>
-<p>###Fragment访问Activity的内容<br>    Fragment通过getActivity()这种方式获取Activity实例后，可以访问Activity中定义的public成员。<br><a id="more"></a>    </p>
-<p>###Activity访问Fragment的内容</p>
-<ul>
+<h3 id="Fragment访问Activity的内容"><a href="#Fragment访问Activity的内容" class="headerlink" title="Fragment访问Activity的内容"></a>Fragment访问Activity的内容</h3><p>​    Fragment通过getActivity()这种方式获取Activity实例后，可以访问Activity中定义的public成员。<br><a id="more"></a>    </p>
+<h3 id="Activity访问Fragment的内容"><a href="#Activity访问Fragment的内容" class="headerlink" title="Activity访问Fragment的内容"></a>Activity访问Fragment的内容</h3><ul>
 <li>通过FragmentManager的FindFragmentById(int fragmentId)方法，这种情形适用于<br>Activity获取其布局文件中的Fragment情况</li>
 <li>Activity中创建Fragment时，通过Fragment的setArgument(Bundle bundle)方法向Fragment传递参数，然后在Fragment的onCreate()生命周期函数中的调用getArgument()<br>方法获取参数</li>
 </ul>
-<p>###Fragment与Activity共享事件，实现方式（接口回调）<br>    Fragment定义接口，然后Fragment所属的Activity实现该接口，Fragment在持有一个<br>    实现接口的Activity实例进行事件的共享。</p>
+<h3 id="Fragment与Activity共享事件，实现方式（接口回调）"><a href="#Fragment与Activity共享事件，实现方式（接口回调）" class="headerlink" title="Fragment与Activity共享事件，实现方式（接口回调）"></a>Fragment与Activity共享事件，实现方式（接口回调）</h3><p>​    Fragment定义接口，然后Fragment所属的Activity实现该接口，Fragment在持有一个<br>​    实现接口的Activity实例进行事件的共享。</p>
 <ol>
 <li><p>在Fragment中定义一个接口，如：</p>
-<pre><code>class TestFragment extends Fragment {
-    private OnAnswerSelectedListener listener;
-
-   public interface OnAnswerSelectedListener{
-       void onAnswerSelected(String url);
-   }
-}
-</code></pre></li>
-<li><p>在TestFragment所属的Activity中实现TestFragment中定义的这个接口<br>OnAnswerSelectedListener，如：</p>
-<p>   class TestActivity extends Activity implements </p>
-<pre><code>TestFragment.OnAnswerSelectedListener {
-
-public void onAnswerSelected(String url) {
-
-}
-</code></pre><p>   }</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestFragment</span> <span class="keyword">extends</span> <span class="title">Fragment</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> OnAnswerSelectedListener listener;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">OnAnswerSelectedListener</span></span>&#123;</span><br><span class="line">       <span class="function"><span class="keyword">void</span> <span class="title">onAnswerSelected</span><span class="params">(String url)</span></span>;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
+</ol>
+<ol>
+<li><p>在TestFragment所属的Activity中实现TestFragment中定义的这个接口<br> OnAnswerSelectedListener，如：</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> <span class="keyword">implements</span> </span></span><br><span class="line"><span class="class">    <span class="title">TestFragment</span>.<span class="title">OnAnswerSelectedListener</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAnswerSelected</span><span class="params">(String url)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
 <li><p>在TestFragment中接受已经实现OnAnswerSelectedListener接口的Activity，如：</p>
-<p>class TestFragment extends Fragment {</p>
-<pre><code>private OnAnswerSelectedListener listener;
-
-public interface OnAnswerSelectedListener{
-    void onAnswerSelected();
-}
-
-@Override
-public void onAttach(Activity activity) {
-    super.onAttach(activity);
-    try {
-        // 强转要防止异常
-        listener = (OnAnswerSelectedListener)activity;
-    } catch(ClassCastException e) {
-        throw new ClassCastException(activity.toString() + 
-            &quot; must implement     OnAnswerSelectedListener&quot;);
-    }
-}
-</code></pre><p>}</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestFragment</span> <span class="keyword">extends</span> <span class="title">Fragment</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> OnAnswerSelectedListener listener;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">OnAnswerSelectedListener</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onAnswerSelected</span><span class="params">()</span></span>;</span><br><span class="line">  &#125;</span><br><span class="line">   	</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAttach</span><span class="params">(Activity activity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onAttach(activity);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">// 强转要防止异常</span></span><br><span class="line">      listener = (OnAnswerSelectedListener)activity;</span><br><span class="line">    &#125; <span class="keyword">catch</span>(ClassCastException e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> ClassCastException(activity.toString() + </span><br><span class="line">                                   <span class="string">" must implement 	OnAnswerSelectedListener"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
+</ol>
+<ol>
 <li><p>接下来TestFragment就可以和TestActivity共享事件了，如：</p>
-<p>   class TestFragment extends Fragment implements </p>
-<pre><code>    ListView.OnListItemClickListener {
-    private OnAnswerSelectedListener listener;
-
-    public interface OnAnswerSelectedListener{
-        void onAnswerSelected();
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            // 强转要防止异常
-            listener = (OnAnswerSelectedListener)activity;
-        } catch(ClassCastException e) {
-            throw new ClassCastException(activity.toString() + 
-            &quot; must implement OnAnswerSelectedListener&quot;);
-        }
-    }
-    @Override
-  public void onListItemClick(ListView l,View v,int position,long id){  
-       // 生成参数
-       Uri noteUri =ContentUris.withAppendedId(ArticleColumns
-          .CONTENT_URI,id);
-       // 将事件和参数传递给所属的Activity 
-       listener.onArticleSelected(noteUri); // TestActivity 中处理该事件
-  }
-｝
-</code></pre></li>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestFragment</span> <span class="keyword">extends</span> <span class="title">Fragment</span> <span class="keyword">implements</span> </span></span><br><span class="line"><span class="class">  <span class="title">ListView</span>.<span class="title">OnListItemClickListener</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> OnAnswerSelectedListener listener;</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">OnAnswerSelectedListener</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onAnswerSelected</span><span class="params">()</span></span>;</span><br><span class="line">  &#125;</span><br><span class="line">          </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAttach</span><span class="params">(Activity activity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onAttach(activity);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">// 强转要防止异常</span></span><br><span class="line">      listener = (OnAnswerSelectedListener)activity;</span><br><span class="line">    &#125; <span class="keyword">catch</span>(ClassCastException e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> ClassCastException(activity.toString() + </span><br><span class="line">                                   <span class="string">" must implement OnAnswerSelectedListener"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onListItemClick</span><span class="params">(ListView l,View v,<span class="keyword">int</span> position,<span class="keyword">long</span> id)</span></span>&#123;  </span><br><span class="line">    <span class="comment">// 生成参数</span></span><br><span class="line">    Uri noteUri =ContentUris.withAppendedId(ArticleColumns</span><br><span class="line">                                            .CONTENT_URI,id);</span><br><span class="line">    <span class="comment">// 将事件和参数传递给所属的Activity </span></span><br><span class="line">    listener.onArticleSelected(noteUri); <span class="comment">// TestActivity 中处理该事件</span></span><br><span class="line">  &#125;</span><br><span class="line">｝</span><br></pre></td></tr></table></figure>
+</li>
 </ol>
 
       
@@ -574,8 +521,17 @@ public void onAttach(Activity activity) {
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -736,6 +692,10 @@ public void onAttach(Activity activity) {
                     
                       
                     
+                      
+                    
+                      
+                    
                     <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
@@ -771,6 +731,22 @@ public void onAttach(Activity activity) {
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Activity与Fragment的通信方式"><span class="nav-number">1.</span> <span class="nav-text">Activity与Fragment的通信方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Fragment访问Activity的内容"><span class="nav-number">1.0.1.</span> <span class="nav-text">Fragment访问Activity的内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Activity访问Fragment的内容"><span class="nav-number">1.0.2.</span> <span class="nav-text">Activity访问Fragment的内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fragment与Activity共享事件，实现方式（接口回调）"><span class="nav-number">1.0.3.</span> <span class="nav-text">Fragment与Activity共享事件，实现方式（接口回调）</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

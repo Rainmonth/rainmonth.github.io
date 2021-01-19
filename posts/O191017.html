@@ -107,7 +107,7 @@
 <meta property="og:site_name" content="荏苒追寻个人博客">
 <meta property="og:description" content="摘要最近在研究源码，需要快速打印当前目录的结构，于是找到便有了这篇文章，这里简要介绍一下tree的使用（该命令其实就是ls 命令的加强版本）。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-03-25T05:26:43.803Z">
+<meta property="og:updated_time" content="2021-01-19T08:05:26.706Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mac 使用tree打印目录结构">
 <meta name="twitter:description" content="摘要最近在研究源码，需要快速打印当前目录的结构，于是找到便有了这篇文章，这里简要介绍一下tree的使用（该命令其实就是ls 命令的加强版本）。">
@@ -382,6 +382,15 @@
 <a id="more"></a>
 <p>[toc]</p>
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>Mac机器上如果安装了brew，安装tree就很简单，直接运行命令<code>brew install tree</code>即可，安装成功后，可以执行<code>which tree</code>来验证是否安装成功。</p>
+<blockquote>
+<p>PS: 如果没有安装brew，先输入如下命令安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> ruby -e<span class="string">"<span class="variable">$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)</span>"</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"></span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>&gt;</p>
+<blockquote>
+<p>或者：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> /bin/bash -c <span class="string">"<span class="variable">$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)</span>"</span></span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash"></span></span><br></pre></td></tr></table></figure>
+</blockquote>
 <h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>拿到一个命令，首先使用<code>tree --help</code>来查看其帮助文档了，运行结果如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">usage: tree [-acdfghilnpqrstuvxACDFJQNSUX] [-H baseHREF] [-T title ]</span><br><span class="line">	[-L level [-R]] [-P pattern] [-I pattern] [-o filename] [--version]</span><br><span class="line">	[--help] [--inodes] [--device] [--noreport] [--nolinks] [--dirsfirst]</span><br><span class="line">	[--charset charset] [--filelimit[=]#] [--si] [--timefmt[=]&lt;f&gt;]</span><br><span class="line">	[--sort[=]&lt;name&gt;] [--matchdirs] [--ignore-case] [--] [&lt;directory list&gt;]</span><br><span class="line">  ------- Listing options -------</span><br><span class="line">  -a            目录下的所有文件（目录和文件）都会列出来</span><br><span class="line">  -d            目录下的所有目录都会列出来</span><br><span class="line">  -l            将替身文件的原身在后面展示出来</span><br><span class="line">  -f            打印出目录或文件在当前目录下的全路径</span><br><span class="line">  -x            只打印当前文件系统的的目录信息</span><br><span class="line">  -L level      打印的深度</span><br><span class="line">  -R            达到最大支持的文件数后退出tree命令</span><br><span class="line">  -P pattern    正则打印出符合规则的文件</span><br><span class="line">  -I pattern    正则过滤掉符合规则的文件</span><br><span class="line">  --ignore-case 正则匹配时忽略大小写</span><br><span class="line">  --matchdirs   Include directory names in -P pattern matching.</span><br><span class="line">  --noreport    打印完成后不显示列出的目录和文件的数目</span><br><span class="line">  --charset X   Use charset X for terminal/HTML and indentation line output.</span><br><span class="line">  --filelimit # Do not descend dirs with more than # files in them.</span><br><span class="line">  --timefmt &lt;f&gt; Print and format time according to the format &lt;f&gt;.</span><br><span class="line">  -o filename   将目录结构输出到指定的filename文件中</span><br><span class="line">  -------- File options ---------</span><br><span class="line">  -q            不支持的字符用问好替代.</span><br><span class="line">  -N            不支持的字符原样输出（如中文）.</span><br><span class="line">  -Q            输出用“”</span><br><span class="line">  -p            打印出文件的权限</span><br><span class="line">  -u            Displays file owner or UID number.</span><br><span class="line">  -g            Displays file group owner or GID number.</span><br><span class="line">  -s            文件的大小（以字节为单位）</span><br><span class="line">  -h            文件的大小（更智能的显示kb，mb等）</span><br><span class="line">  --si          文件的大小（但按1kb = 1000b来计算</span><br><span class="line">  -D            输出文件最后一次更改的时间</span><br><span class="line">  -F            Appends '/', '=', '*', '@', '|' or '&gt;' as per ls -F.</span><br><span class="line">  --inodes      Print inode number of each file.</span><br><span class="line">  --device      Print device ID number to which each file belongs.</span><br><span class="line">  ------- Sorting options -------</span><br><span class="line">  -v            根据版本对文件进行字母数字排序</span><br><span class="line">  -t            根据mtime来排序（配置-U时失效）</span><br><span class="line">  -c            根据ctime来排序（配置-U时失效）</span><br><span class="line">  -U            不排序</span><br><span class="line">  -r            当前排序逆序排列</span><br><span class="line">  --dirsfirst   目录优先（配置-U时失效）</span><br><span class="line">  --sort X      选择排序方式（支持name,version,size,mtime,ctime等）</span><br><span class="line">  ------- Graphics options ------</span><br><span class="line">  -i            不打印缩进</span><br><span class="line">  -A            Print ANSI lines graphic indentation lines.</span><br><span class="line">  -S            Print with CP437 (console) graphics indentation lines.</span><br><span class="line">  -n            禁用文件着色</span><br><span class="line">  -C            启用文件着色.</span><br><span class="line">  ------- XML/HTML/JSON options -------</span><br><span class="line">  -X            Prints out an XML representation of the tree.</span><br><span class="line">  -J            Prints out an JSON representation of the tree.</span><br><span class="line">  -H baseHREF   Prints out HTML format with baseHREF as top directory.</span><br><span class="line">  -T string     Replace the default HTML title and H1 header with string.</span><br><span class="line">  --nolinks     Turn off hyperlinks in HTML output.</span><br><span class="line">  ---- Miscellaneous options ----</span><br><span class="line">  --version     查看tree的版本</span><br><span class="line">  --help        Print usage and this help message and exit.</span><br><span class="line">  --            Options processing terminator.</span><br></pre></td></tr></table></figure>
 <p>所有支持的命令都列举在上面了，下面看看几个常用的命令。</p>
@@ -432,8 +441,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/posts/M201010.html" rel="next" title="Mac 使用tree打印目录结构">
-                <i class="fa fa-chevron-left"></i> Mac 使用tree打印目录结构
+              <a href="/posts/A191012.html" rel="next" title="Android MacOs下的源码下载及编译">
+                <i class="fa fa-chevron-left"></i> Android MacOs下的源码下载及编译
               </a>
             
           </div>
@@ -442,8 +451,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/posts/A191017.html" rel="prev" title="Android Android Studio 导入android 8.0源码">
-                Android Android Studio 导入android 8.0源码 <i class="fa fa-chevron-right"></i>
+              <a href="/posts/M201010.html" rel="prev" title="Mac 使用tree打印目录结构">
+                Mac 使用tree打印目录结构 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -587,6 +596,10 @@
                 <div class="site-state-item site-state-tags">
                   <a href="/tags/index.html">
                     
+                    
+                      
+                    
+                      
                     
                       
                     
