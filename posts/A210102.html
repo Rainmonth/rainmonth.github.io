@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="简介 AudioRecorder，可以采集PCM格式的原始音频文件，对PCM格式数据，根据一定的协议约定，可以转换成wav格式等其他格式； AudioTrack，可以直接播放PCM格式的文件，也就是说上面利用AudioRecorder生成的原始文件可以通过AudioTrack直接播放； MediaRecorder，可以录制音频，也可以配合相机（Camera）录制视频，相比较而言，MediaReco">
+<meta name="keywords" content="音视频学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频基础1——AudioTrack、AudioRecorder、MediaRecorder音频数据采集播放处理">
+<meta property="og:url" content="http://yoursite.com/posts/A210102.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="简介 AudioRecorder，可以采集PCM格式的原始音频文件，对PCM格式数据，根据一定的协议约定，可以转换成wav格式等其他格式； AudioTrack，可以直接播放PCM格式的文件，也就是说上面利用AudioRecorder生成的原始文件可以通过AudioTrack直接播放； MediaRecorder，可以录制音频，也可以配合相机（Camera）录制视频，相比较而言，MediaReco">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/Users/RandyZhang/Documents/hexo/source/images/A210102/mediarecorder_state_diagram.gif">
+<meta property="og:updated_time" content="2021-02-19T01:24:48.050Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频基础1——AudioTrack、AudioRecorder、MediaRecorder音频数据采集播放处理">
+<meta name="twitter:description" content="简介 AudioRecorder，可以采集PCM格式的原始音频文件，对PCM格式数据，根据一定的协议约定，可以转换成wav格式等其他格式； AudioTrack，可以直接播放PCM格式的文件，也就是说上面利用AudioRecorder生成的原始文件可以通过AudioTrack直接播放； MediaRecorder，可以录制音频，也可以配合相机（Camera）录制视频，相比较而言，MediaReco">
+<meta name="twitter:image" content="http://yoursite.com/Users/RandyZhang/Documents/hexo/source/images/A210102/mediarecorder_state_diagram.gif">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A210102.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>音视频基础1——AudioTrack、AudioRecorder、MediaRecorder音频数据采集播放处理 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A210102.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">音视频基础1——AudioTrack、AudioRecorder、MediaRecorder音频数据采集播放处理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-02T00:00:00+08:00">2021-01-02</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><ul>
+<li>AudioRecorder，可以采集PCM格式的原始音频文件，对PCM格式数据，根据一定的协议约定，可以转换成wav格式等其他格式；</li>
+<li>AudioTrack，可以直接播放PCM格式的文件，也就是说上面利用AudioRecorder生成的原始文件可以通过AudioTrack直接播放；</li>
+<li>MediaRecorder，可以录制音频，也可以配合相机（Camera）录制视频，相比较而言，MediaRecorder功能更丰富，更易用，使用场景也更多，而AudioRecorder和AudioTrack则更底层一点，且功能存在局限性。</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li style="list-style: none"><input type="checkbox" checked> <a href="https://rainmonth.github.io/posts/A210101.html" target="_blank" rel="noopener">音视频基础0——目录</a></li>
+<li style="list-style: none"><input type="checkbox" checked> <a href="https://rainmonth.github.io/posts/A210102.html" target="_blank" rel="noopener">音视频基础1——AudioTrack、AudioRecorder、MediaRecorder音频数据采集播放处理</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210103.html" target="_blank" rel="noopener">音视频基础2——Android Camera API及Camera2 API的使用</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210104.html" target="_blank" rel="noopener">音视频基础3——Android Camera API及Camera2 采集视频数据</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210105.html" target="_blank" rel="noopener">音视频基础4——Android MediaCodec API学习</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210306.html" target="_blank" rel="noopener">音视频基础5——Android 实现rtmp推流</a></li>
+<li style="list-style: none"><input type="checkbox" checked> <a href="https://rainmonth.github.io/posts/A210307.html" target="_blank" rel="noopener">音视频基础6——交叉编译动态库</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210308.html" target="_blank" rel="noopener">音视频基础7——MacOs下编译FFMpeg4.2.2</a></li>
+</ul>
+<p>下面分别介绍 这三个音频采集过程中常用的类。</p>
+<h2 id="AudioRecord"><a href="#AudioRecord" class="headerlink" title="AudioRecord"></a>AudioRecord</h2><blockquote>
+<p>AudioRecord的说明比较简单，构造好后，通过其read系列方法，从指定的硬件源中读取数据到缓存中（这个缓存的大小的最小值由 采样率 <em> 通道数 </em> 音频数据类型 的值获取而来），然后将其写入到文件，这个原始的文件就是PCM文件，再根据媒体格式之间的转换协议，做下转换，就可以得到其他格式的文件了。</p>
+</blockquote>
+<p>由于比价简单，这里直接贴上我针对AudioRecord封装的代码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AudioRecordWrapper</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TAG = <span class="string">"AudioRecordWrapper"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> STATE_INIT = <span class="number">0</span>;                            <span class="comment">// 初始化状态</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> STATE_RECORDING = <span class="number">1</span>;                       <span class="comment">// 录制状态</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> STATE_STOP = <span class="number">2</span>;                            <span class="comment">// 停止状态</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> STATE_RELEASE = <span class="number">3</span>;                         <span class="comment">// 释放状态</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> mRecordState;                                           <span class="comment">// 当前的状态</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * most time is &#123;<span class="doctag">@link</span> android.media.MediaRecorder.AudioSource#MIC&#125;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> audioSource = MediaRecorder.AudioSource.MIC;            <span class="comment">// 录音硬件来源</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> sampleRateInHz = <span class="number">44100</span>;                                 <span class="comment">// 采样率</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> channelConfig = AudioFormat.CHANNEL_IN_MONO;            <span class="comment">// 声道设置</span></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * &#123;<span class="doctag">@link</span> android.media.AudioFormat#ENCODING_PCM_8BIT&#125;</span></span><br><span class="line"><span class="comment">     * &#123;<span class="doctag">@link</span> android.media.AudioFormat#ENCODING_PCM_16BIT&#125;</span></span><br><span class="line"><span class="comment">     * &#123;<span class="doctag">@link</span> android.media.AudioFormat#ENCODING_PCM_FLOAT&#125;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> audioFormat = AudioFormat.ENCODING_PCM_16BIT;           <span class="comment">// PCM 源文件格式</span></span><br><span class="line">    <span class="keyword">private</span> String dirPath = PathUtils.getExternalAppAudioRecordPath(); <span class="comment">// PCM 和 WAV 文件目录</span></span><br><span class="line">    <span class="keyword">private</span> String srcFileName = <span class="string">"sr_test.pcm"</span>;                         <span class="comment">// PCM 文件名称</span></span><br><span class="line">    <span class="keyword">private</span> String disFileName = <span class="string">"sr_test.wav"</span>;                         <span class="comment">// WAV 文件名称</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> AudioRecord mAudioRecord;                                   <span class="comment">// 用来音频录制的AudioRecord</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> mBufferedSizeInBytes;                                   <span class="comment">// 音频录制的最小缓冲值</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AudioRecordWrapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);</span><br><span class="line">        mAudioRecord = <span class="keyword">new</span> AudioRecord(audioSource, sampleRateInHz, channelConfig, audioFormat, bufferSizeInBytes);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AudioRecordWrapper</span><span class="params">(Builder builder)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.audioSource = builder.audioSource;</span><br><span class="line">        <span class="keyword">this</span>.sampleRateInHz = builder.sampleRateInHz;</span><br><span class="line">        <span class="keyword">this</span>.channelConfig = builder.channelConfig;</span><br><span class="line">        <span class="keyword">this</span>.audioFormat = builder.audioFormat;</span><br><span class="line">        <span class="keyword">this</span>.dirPath = builder.dirPath;</span><br><span class="line">        <span class="keyword">this</span>.srcFileName = builder.srcFileName;</span><br><span class="line">        <span class="keyword">this</span>.disFileName = builder.disFileName;</span><br><span class="line"></span><br><span class="line">        mBufferedSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);</span><br><span class="line">        <span class="keyword">if</span> (mBufferedSizeInBytes &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"AudioRecord can not be created due to mBufferedSizeInBytes(need great than 0), mBufferedSizeInBytes: "</span> + mBufferedSizeInBytes);</span><br><span class="line">        &#125;</span><br><span class="line">        mAudioRecord = <span class="keyword">new</span> AudioRecord(audioSource, sampleRateInHz, channelConfig, audioFormat, mBufferedSizeInBytes);</span><br><span class="line">        mRecordState = STATE_INIT;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> recordFileName pcm 文件名称</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> audioSource    音频文件来源（通常是麦克风）</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> sampleRateInHz 采样率</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> channelConfig  声道设置</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> audioFormat    PCM数据格式</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">createAudioRecord</span><span class="params">(String recordFileName, <span class="keyword">int</span> audioSource, <span class="keyword">int</span> sampleRateInHz, <span class="keyword">int</span> channelConfig, <span class="keyword">int</span> audioFormat)</span> </span>&#123;</span><br><span class="line">        mBufferedSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);</span><br><span class="line">        <span class="keyword">if</span> (mBufferedSizeInBytes &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"AudioRecord is not available due to mBufferedSizeInBytes: "</span> + mBufferedSizeInBytes);</span><br><span class="line">        &#125;</span><br><span class="line">        mAudioRecord = <span class="keyword">new</span> AudioRecord(audioSource, sampleRateInHz, channelConfig, audioFormat, mBufferedSizeInBytes);</span><br><span class="line">        <span class="keyword">int</span> state = mAudioRecord.getState();</span><br><span class="line">        LogUtils.i(TAG, <span class="string">"createAudio state: "</span> + state + <span class="string">", initialize: "</span> + (state == AudioRecord.STATE_INITIALIZED));</span><br><span class="line">        <span class="keyword">this</span>.srcFileName = recordFileName;</span><br><span class="line">        <span class="keyword">this</span>.mRecordState = STATE_INIT;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 不能依靠&#123;<span class="doctag">@link</span> AudioRecord#getState()&#125; 来进行判断</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startRecord</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        LogUtils.d(TAG, <span class="string">"startRecord()"</span>);</span><br><span class="line">        <span class="keyword">if</span> (mAudioRecord == <span class="keyword">null</span> || (mRecordState != STATE_INIT &amp;&amp; mRecordState != STATE_STOP)) &#123;</span><br><span class="line">            LogUtils.w(TAG, <span class="string">"can not startRecord due to mAudioRecord is null or mRecordState is wrong"</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            mAudioRecord.startRecording();</span><br><span class="line">            mRecordState = STATE_RECORDING;</span><br><span class="line">            ThreadUtils.getIoPool().execute(<span class="keyword">this</span>::writeAudioDataToFile);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            LogUtils.printStackTrace(TAG, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startRecord</span><span class="params">(String recordFileName)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.srcFileName = recordFileName;</span><br><span class="line">        LogUtils.d(TAG, <span class="string">"startRecord(), mRecordFileName: "</span> + srcFileName);</span><br><span class="line">        startRecord();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 将音频数据写入文件</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">writeAudioDataToFile</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        LogUtils.d(TAG, <span class="string">"writeAudioDataToFile()"</span>);</span><br><span class="line">        File recordDir = FileUtils.makeDirs(dirPath);</span><br><span class="line">        File file = <span class="keyword">new</span> File(recordDir, srcFileName);</span><br><span class="line">        <span class="keyword">if</span> (file.exists()) &#123;</span><br><span class="line">            file.delete();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> (BufferedOutputStream bos = <span class="keyword">new</span> BufferedOutputStream(<span class="keyword">new</span> FileOutputStream(file))) &#123;</span><br><span class="line">            <span class="keyword">byte</span>[] audioData = <span class="keyword">new</span> <span class="keyword">byte</span>[mBufferedSizeInBytes];</span><br><span class="line">            <span class="keyword">while</span> (mRecordState == STATE_RECORDING) &#123;</span><br><span class="line">                <span class="comment">// 从音频采集硬件中读取数据</span></span><br><span class="line">                <span class="keyword">int</span> readSize = mAudioRecord.read(audioData, <span class="number">0</span>, mBufferedSizeInBytes);</span><br><span class="line">                <span class="keyword">if</span> (readSize &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    bos.write(audioData, <span class="number">0</span>, readSize);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    LogUtils.w(TAG, <span class="string">"readSize: "</span> + readSize);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            bos.flush();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            LogUtils.printStackTrace(TAG, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stopRecord</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        LogUtils.d(TAG, <span class="string">"stopRecord()"</span>);</span><br><span class="line">        <span class="keyword">if</span> (mAudioRecord == <span class="keyword">null</span>) &#123;</span><br><span class="line">            LogUtils.w(TAG, <span class="string">"mAudioRecord is null"</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (mRecordState == STATE_INIT || mRecordState == STATE_RELEASE) &#123;</span><br><span class="line">            LogUtils.w(TAG, <span class="string">"stopRecord(), error state"</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.mRecordState = STATE_STOP;</span><br><span class="line"></span><br><span class="line">        pcm2wav(<span class="string">"test_"</span> + System.currentTimeMillis() + <span class="string">".wav"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">release</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        LogUtils.d(TAG, <span class="string">"release()"</span>);</span><br><span class="line">        <span class="keyword">if</span> (mAudioRecord != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mAudioRecord.release();</span><br><span class="line">            mAudioRecord = <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.mRecordState = STATE_RELEASE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">pcm2wav</span><span class="params">(String wavFileName)</span> </span>&#123;</span><br><span class="line">        File pcmFile = <span class="keyword">new</span> File(dirPath, srcFileName);</span><br><span class="line">        File wavFile;</span><br><span class="line">        <span class="keyword">if</span> (TextUtils.isEmpty(wavFileName)) &#123;</span><br><span class="line">            wavFile = <span class="keyword">new</span> File(dirPath, disFileName);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            wavFile = <span class="keyword">new</span> File(dirPath, wavFileName);</span><br><span class="line">        &#125;</span><br><span class="line">        ThreadUtils.getIoPool().execute(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                MediaUtils.pcm2Wav(pcmFile, wavFile, <span class="keyword">false</span>, <span class="number">1</span>, <span class="number">44100</span>, <span class="number">16</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                LogUtils.printStackTrace(e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * AudioRecorderWrapper构造器</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> audioSource;            <span class="comment">// 录音硬件来源</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> sampleRateInHz;         <span class="comment">// 采样率</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> channelConfig;          <span class="comment">// 声道设置</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> audioFormat;            <span class="comment">// PCM 源文件格式</span></span><br><span class="line">        <span class="keyword">private</span> String dirPath;             <span class="comment">// PCM 和 WAV 文件目录</span></span><br><span class="line">        <span class="keyword">private</span> String srcFileName;         <span class="comment">// PCM 文件名称</span></span><br><span class="line">        <span class="keyword">private</span> String disFileName;         <span class="comment">// WAV 文件名称</span></span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">audioSource</span><span class="params">(<span class="keyword">int</span> audioSource)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.audioSource = audioSource;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">sampleRate</span><span class="params">(<span class="keyword">int</span> sampleRateInHz)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.sampleRateInHz = sampleRateInHz;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">channel</span><span class="params">(<span class="keyword">int</span> channelConfig)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.channelConfig = channelConfig;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">audioFormat</span><span class="params">(<span class="keyword">int</span> audioFormat)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.audioFormat = audioFormat;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">dirPath</span><span class="params">(String dirPath)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.dirPath = dirPath;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">srcFileName</span><span class="params">(String srcFileName)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.srcFileName = srcFileName;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">disFileName</span><span class="params">(String disFileName)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.disFileName = disFileName;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> AudioRecordWrapper <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> AudioRecordWrapper(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用时需要注意一下几点：</p>
+<ol>
+<li>请确保你获取到了麦克风权限；</li>
+<li>读取文件的IO操作请放到子线程中进行；</li>
+<li>注意资源的释放；</li>
+<li>不要过于依赖其提供的状态来进行业务上的判断，最好自己维护。</li>
+</ol>
+<h2 id="AudioTrack"><a href="#AudioTrack" class="headerlink" title="AudioTrack"></a>AudioTrack</h2><blockquote>
+<p>AudioTrack类管理和播放Java应用程序的单个音频资源。它允许将PCM音频缓冲区流传输到音频接收器以进行播放。</p>
+</blockquote>
+<p><code>AudioTrack</code>有两种工作模式：<code>MODE_STATIC</code> &amp; <code>MODE_STREAM</code>。</p>
+<ul>
+<li><code>MODE_STATIC</code>，静态播放，一次性全部加载到内存播放，这就要求播放的文件小，适用场景自然是短音频；</li>
+<li><code>MODE_STREAM</code>，流式播放，将PCM音频数据读入到输入流，然后不断从输入流中读取数据进行播放，可以播放大文件；</li>
+</ul>
+<p>AudioTrack使用时有一点需要注意，AudioTrack每次能播放多少数据取决于buffer设置：</p>
+<ul>
+<li><code>MODE_STATIC</code>模式下，buffer大小是播放声音的最大大小；</li>
+<li><code>MODE_STREAM</code>模式下，buffer取决于读取数据是采用的totalBufferSize（计算出来的）大小；</li>
+</ul>
+<blockquote>
+<p>AudioTrack虽然提供了getState这个方法来获取当前的状态，但我们实际上并不能依据该状态来进行判断，因为需要调用系统硬件都是采用异步形式，我们不能准确的获取到当前的状态，一般需要自己定义一个变量来表示状态。</p>
+</blockquote>
+<p>下面是对<code>AudioTrack</code>的封装，构造好<code>AudioTrackWrapper</code>后，调用<code>start</code>方法即可播放传入的PCM文件，调用<code>stop</code>方法即可停止播放，注意调用完毕后记得调用release释放资源。（<code>ThreadUtils</code>为封装的一个线程操作工具类）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * AudioTrack 封装</span></span><br><span class="line"><span class="comment"> * AudioTrack 可以读取 音频采集生成的 PCM数据 并播放</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> randy</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2021/01/06</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AudioTrackWrapper</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TAG = <span class="string">"AudioTrackWrapper"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> AudioTrack mAudioTrack;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> streamType = AudioManager.STREAM_MUSIC;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> sampleRateInHz = <span class="number">44100</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> channelConfig = AudioFormat.CHANNEL_IN_MONO;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> audioFormat = AudioFormat.ENCODING_PCM_16BIT;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * See &#123;<span class="doctag">@link</span> AudioTrack#MODE_STATIC&#125; and &#123;<span class="doctag">@link</span> AudioTrack#MODE_STREAM&#125;.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> mode = AudioTrack.MODE_STREAM;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> File pcmFile;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 默认构造行数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AudioTrackWrapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> minBufferSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (android.os.Build.VERSION.SDK_INT &gt;= android.os.Build.VERSION_CODES.LOLLIPOP) &#123;</span><br><span class="line">            AudioAttributes audioAttributes;</span><br><span class="line">            AudioFormat format;</span><br><span class="line">            <span class="keyword">int</span> sessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;</span><br><span class="line">            audioAttributes = <span class="keyword">new</span> AudioAttributes.Builder()</span><br><span class="line">                    .setLegacyStreamType(streamType)</span><br><span class="line">                    .build();</span><br><span class="line">            format = <span class="keyword">new</span> AudioFormat.Builder()</span><br><span class="line">                    .setChannelMask(channelConfig)</span><br><span class="line">                    .setEncoding(audioFormat)</span><br><span class="line">                    .setSampleRate(sampleRateInHz)</span><br><span class="line">                    .build();</span><br><span class="line"></span><br><span class="line">            mAudioTrack = <span class="keyword">new</span> AudioTrack(audioAttributes, format, minBufferSize, mode, sessionId);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            mAudioTrack = <span class="keyword">new</span> AudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat, minBufferSize, mode);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 传参构造器</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> streamType     流类型</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> sampleRateInHz 采样率</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> channelConfig  声道配置</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> audioFormat    音频数据的呈现格式 8位、16位还是浮点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> mode           模式（static or stream)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AudioTrackWrapper</span><span class="params">(<span class="keyword">int</span> streamType, <span class="keyword">int</span> sampleRateInHz, <span class="keyword">int</span> channelConfig, <span class="keyword">int</span> audioFormat, <span class="keyword">int</span> mode)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> minBufferSize = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (android.os.Build.VERSION.SDK_INT &gt;= android.os.Build.VERSION_CODES.LOLLIPOP) &#123;</span><br><span class="line">            AudioAttributes audioAttributes;</span><br><span class="line">            AudioFormat format;</span><br><span class="line">            <span class="keyword">int</span> sessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;</span><br><span class="line">            audioAttributes = <span class="keyword">new</span> AudioAttributes.Builder()</span><br><span class="line">                    .setLegacyStreamType(streamType)</span><br><span class="line">                    .build();</span><br><span class="line">            format = <span class="keyword">new</span> AudioFormat.Builder()</span><br><span class="line">                    .setChannelMask(channelConfig)</span><br><span class="line">                    .setEncoding(audioFormat)</span><br><span class="line">                    .setSampleRate(sampleRateInHz)</span><br><span class="line">                    .build();</span><br><span class="line"></span><br><span class="line">            mAudioTrack = <span class="keyword">new</span> AudioTrack(audioAttributes, format, minBufferSize, mode, sessionId);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            mAudioTrack = <span class="keyword">new</span> AudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat, minBufferSize, mode);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 构造器构造</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> builder 构造器</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AudioTrackWrapper</span><span class="params">(Builder builder)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.streamType = builder.streamType;</span><br><span class="line">        <span class="keyword">this</span>.sampleRateInHz = builder.sampleRateInHz;</span><br><span class="line">        <span class="keyword">this</span>.channelConfig = builder.channelConfig;</span><br><span class="line">        <span class="keyword">this</span>.audioFormat = builder.audioFormat;</span><br><span class="line">        <span class="keyword">this</span>.mode = builder.mode;</span><br><span class="line"></span><br><span class="line">        mAudioTrack = <span class="keyword">new</span> AudioTrack(streamType, sampleRateInHz, channelConfig, audioFormat,</span><br><span class="line">                AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat), mode);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 开始播放</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> pcmPath pcm 所在目录路径</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> pcmName pcm 文件名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(String pcmPath, String pcmName)</span> </span>&#123;</span><br><span class="line">        start(<span class="keyword">new</span> File(pcmPath), pcmName);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 开始播放</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> pcmDir  pcm 所在目录</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> pcmName pcm 文件名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(File pcmDir, String pcmName)</span> </span>&#123;</span><br><span class="line">        File pcmFile = <span class="keyword">new</span> File(pcmDir, pcmName);</span><br><span class="line">        start(pcmFile);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 开始播放</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> pcmFile 要播放的pcm文件</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(File pcmFile)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (pcmFile == <span class="keyword">null</span> || !pcmFile.exists()) &#123;</span><br><span class="line">            LogUtils.e(TAG, <span class="string">"pcmFile is null or not exists!!!"</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.pcmFile = pcmFile;</span><br><span class="line">        LogUtils.d(TAG, <span class="string">"start(), pcmFile: "</span> + pcmFile.getPath());</span><br><span class="line">        <span class="keyword">if</span> (mode == AudioTrack.MODE_STREAM) &#123;</span><br><span class="line">            playByStream(pcmFile);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            playByStatic(pcmFile);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 流模式，数据会从 Java 层传输到底层，并排队阻塞等待播放</span></span><br><span class="line"><span class="comment">     * 1、所以这里需要开启线程独立播放</span></span><br><span class="line"><span class="comment">     * 2、为保证能重复使用，需要对状态进行控制</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> pcmFile pcm 文件</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">playByStream</span><span class="params">(File pcmFile)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.pcmFile = pcmFile;</span><br><span class="line">        LogUtils.d(TAG, <span class="string">"playByStream()"</span>);</span><br><span class="line">        <span class="comment">// 先取消</span></span><br><span class="line">        ThreadUtils.cancel(readPcmFileTask);</span><br><span class="line">        ThreadUtils.executeByIo(readPcmFileTask);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ThreadUtils.Task&lt;Object&gt; readPcmFileTask = <span class="keyword">new</span> ThreadUtils.SimpleTask&lt;Object&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Object <span class="title">doInBackground</span><span class="params">()</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">            FileInputStream inputStream = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                inputStream = <span class="keyword">new</span> FileInputStream(pcmFile);</span><br><span class="line">                <span class="keyword">byte</span>[] buffer = <span class="keyword">new</span> <span class="keyword">byte</span>[AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat)];</span><br><span class="line">                <span class="keyword">int</span> readCount;</span><br><span class="line">                <span class="keyword">while</span> ((readCount = inputStream.read(buffer)) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    mAudioTrack.play();</span><br><span class="line">                    <span class="comment">// 将读取的 pcm 数据写入到AudioTack中，等待播放</span></span><br><span class="line">                    mAudioTrack.write(buffer, <span class="number">0</span>, readCount);</span><br><span class="line">                &#125;</span><br><span class="line">                mAudioTrack.stop();</span><br><span class="line">                mAudioTrack.release();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                LogUtils.printStackTrace(e);</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                CloseUtils.closeIOQuietly(inputStream);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">(Object result)</span> </span>&#123;</span><br><span class="line">            LogUtils.d(TAG, <span class="string">"pcm文件读取完毕"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 一次性读写 PCM 数据到buffer中进行播放</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> pcmFile pcm 文件</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">playByStatic</span><span class="params">(File pcmFile)</span> </span>&#123;</span><br><span class="line">        LogUtils.d(TAG, <span class="string">"playByStatic()"</span>);</span><br><span class="line">        Runnable runnable = () -&gt; &#123;</span><br><span class="line">            FileInputStream inputStream = <span class="keyword">null</span>;</span><br><span class="line">            ByteArrayOutputStream outputStream = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                inputStream = <span class="keyword">new</span> FileInputStream(pcmFile);</span><br><span class="line">                outputStream = <span class="keyword">new</span> ByteArrayOutputStream();</span><br><span class="line">                <span class="keyword">int</span> len;</span><br><span class="line">                <span class="keyword">byte</span>[] buffer = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</span><br><span class="line">                <span class="comment">// 从 pcm 文件中读取数据 并写到 outputStream 中，</span></span><br><span class="line">                <span class="comment">// 然后 从 outputStream 中获取数据共 AudioTrack 播放</span></span><br><span class="line">                <span class="keyword">while</span> ((len = inputStream.read(buffer)) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    outputStream.write(buffer, <span class="number">0</span>, len);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">byte</span>[] bytes = outputStream.toByteArray();</span><br><span class="line">                <span class="keyword">if</span> (mAudioTrack != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    mAudioTrack.write(bytes, <span class="number">0</span>, bytes.length);</span><br><span class="line">                    mAudioTrack.play();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                LogUtils.printStackTrace(e);</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                CloseUtils.closeIOQuietly(outputStream, inputStream);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        ThreadUtils.getIoPool().execute(runnable);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 暂停播放</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">pause</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mAudioTrack != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mAudioTrack.pause();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 停止播放</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mAudioTrack != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mAudioTrack.stop();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 释放资源</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">release</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mAudioTrack != <span class="keyword">null</span>) &#123;</span><br><span class="line">            mAudioTrack.release();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * AudioTrack构造器</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> streamType = AudioManager.STREAM_MUSIC;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> sampleRateInHz = <span class="number">44100</span>;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> channelConfig = AudioFormat.CHANNEL_IN_MONO;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> audioFormat = AudioFormat.ENCODING_PCM_16BIT;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> mode = AudioTrack.MODE_STREAM;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">setStreamType</span><span class="params">(<span class="keyword">int</span> streamType)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.streamType = streamType;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">setSampleRateInHz</span><span class="params">(@IntRange(from = <span class="number">4000</span>, to = <span class="number">192000</span>)</span> <span class="keyword">int</span> sampleRateInHz) </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.sampleRateInHz = sampleRateInHz;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">setChannelConfig</span><span class="params">(<span class="keyword">int</span> channelConfig)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.channelConfig = channelConfig;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">setAudioFormat</span><span class="params">(<span class="keyword">int</span> audioFormat)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.audioFormat = audioFormat;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Builder <span class="title">setMode</span><span class="params">(<span class="keyword">int</span> mode)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.mode = mode;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> AudioTrackWrapper <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> AudioTrackWrapper(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="MediaRecorder"><a href="#MediaRecorder" class="headerlink" title="MediaRecorder"></a>MediaRecorder</h2><p>MediaRecorder用来录制音频和视频的，使用比较广，音视频的录制控制基于下面这个状态机：</p>
+<p><img src="/Users/RandyZhang/Documents/hexo/source/images/A210102/mediarecorder_state_diagram.gif" style="zoom:75%;"></p>
+<p>所以在使用的时候要严格控制函数的调用顺序，否则很容易产生<code>IllegalStateException</code>。录制音频的一般调用循序如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">MediaRecorder mediaRecorder = <span class="keyword">new</span> MediaRecorder();</span><br><span class="line">mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);</span><br><span class="line">mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GP);</span><br><span class="line">mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.ARM_NB);</span><br><span class="line">mediaRecorder.setOutputFile(OUTPUT_FILE_PATH);</span><br><span class="line">mediaRecorder.prepare();</span><br><span class="line">mediaRecorder.start();</span><br><span class="line">...</span><br><span class="line">mediaRecorder.stop();</span><br><span class="line">mediaRecorder.reset();			<span class="comment">// reset之后MediaRecorder会重新回到Initial状态，再次调用setAudioSource可重复使用</span></span><br><span class="line">mediaRecorder.release();		<span class="comment">// 释放了之后就不能再使用了。</span></span><br></pre></td></tr></table></figure>
+<p>录制视频大体和录制音频相同，知识需要加上视频源设置、视频输出格式、视频编码、以及预览的容器，具体如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">MediaRecorder mediaRecorder = <span class="keyword">new</span> MediaRecorder();</span><br><span class="line">mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);</span><br><span class="line">mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA)		<span class="comment">// 指定视频源</span></span><br><span class="line">mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);	<span class="comment">// 这里要换成视频格式</span></span><br><span class="line">mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.ARM_NB);	</span><br><span class="line">mediaRecorder.setVidioEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);	<span class="comment">// 设置视频编码</span></span><br><span class="line">mediaRecorder.setOutputFile(OUTPUT_FILE_PATH);</span><br><span class="line">mediaRecorder.setPreviewDisplay(targetSurface);										<span class="comment">// 指定视频预览的容器</span></span><br><span class="line">mediaRecorder.prepare();</span><br><span class="line">mediaRecorder.start();</span><br><span class="line">...</span><br><span class="line">mediaRecorder.stop();</span><br><span class="line">mediaRecorder.reset();			<span class="comment">// reset之后MediaRecorder会重新回到Initial状态，再次调用setAudioSource可重复使用</span></span><br><span class="line">mediaRecorder.release();		<span class="comment">// 释放了之后就不能再使用了。</span></span><br></pre></td></tr></table></figure>
+<p>下面贴出利用MediaRecorder录制音频的代码片段：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> File outPutFile;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">onMediaRecorderStartClick</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       PermissionUtils.permission(PermissionConstants.MICROPHONE).callback(<span class="keyword">new</span> PermissionUtils.SimpleCallback() &#123;</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onGranted</span><span class="params">()</span> </span>&#123;</span><br><span class="line">               <span class="keyword">if</span> (mMediaRecorder == <span class="keyword">null</span>) &#123;</span><br><span class="line">                   mMediaRecorder = <span class="keyword">new</span> MediaRecorder();</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">try</span> &#123;</span><br><span class="line">                   mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);<span class="comment">// 设置麦克风</span></span><br><span class="line">                   mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);</span><br><span class="line">                   mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);</span><br><span class="line">                   String fileName = TimeUtils.getNowString() + <span class="string">".m4a"</span>;</span><br><span class="line">                   File outPutDir = FileUtils.makeDirs(PathUtils.getExternalAppAudioRecordPath());</span><br><span class="line">                   outPutFile = <span class="keyword">new</span> File(outPutDir, fileName);</span><br><span class="line"></span><br><span class="line">                   mMediaRecorder.setOutputFile(outPutFile.getPath());</span><br><span class="line">                   mMediaRecorder.prepare();</span><br><span class="line">                   mMediaRecorder.start();</span><br><span class="line">               &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                   LogUtils.printStackTrace(TAG, e);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDenied</span><span class="params">()</span> </span>&#123;</span><br><span class="line">               ToastUtils.showLong(<span class="string">"您拒绝了录音权限，无法录音！"</span>);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;).request();</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">onMediaRecorderStopClick</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       LogUtils.d(TAG, <span class="string">"onMediaRecorderStopClick"</span>);</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">           <span class="keyword">if</span> (mMediaRecorder != <span class="keyword">null</span>) &#123;</span><br><span class="line">               mMediaRecorder.stop();</span><br><span class="line">               mMediaRecorder.release();</span><br><span class="line">               mMediaRecorder = <span class="keyword">null</span>;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">           LogUtils.printStackTrace(TAG, e);</span><br><span class="line">           <span class="keyword">if</span> (mMediaRecorder != <span class="keyword">null</span>) &#123;</span><br><span class="line">               mMediaRecorder.reset();</span><br><span class="line">               mMediaRecorder.release();</span><br><span class="line">               mMediaRecorder = <span class="keyword">null</span>;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">// 删除掉异常停止前产生的文件</span></span><br><span class="line">           FileUtils.deleteFile(outPutFile);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上就是Android音频采集相关的内容，AudioRecord主要负责音频采集，AudioTrack负责pcm数据的播放，MediaRecorder既可以进行音频采集，也可以配合CameraApi进行视频采集，视频采集会加接下来的文章中讲到。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/音视频学习/" rel="tag"># 音视频学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A210101.html" rel="next" title="音视频基础0——开篇">
+                <i class="fa fa-chevron-left"></i> 音视频基础0——开篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/A210103.html" rel="prev" title="音视频基础2——Android Camera API及Camera2 API采集视频数据">
+                音视频基础2——Android Camera API及Camera2 API采集视频数据 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">118</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AudioRecord"><span class="nav-number">2.</span> <span class="nav-text">AudioRecord</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AudioTrack"><span class="nav-number">3.</span> <span class="nav-text">AudioTrack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MediaRecorder"><span class="nav-number">4.</span> <span class="nav-text">MediaRecorder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

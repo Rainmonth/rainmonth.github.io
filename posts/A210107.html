@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.1.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.1.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.1.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.1.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.1.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言前面学了一些Android音视频的基础，包括AudioTrack、AudioRecorder、MediaRecorder、MediaMuxer、MediaExtractor、MediaCodec以及Camera API，这些是Android提供的基础内容，而要深入了解音视频编译一些优秀的开源项目是必须的，这就要求掌握交叉编译的基础。   音视频基础0——目录  音视频基础1——AudioTra">
+<meta name="keywords" content="音视频基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频基础6——交叉编译动态库">
+<meta property="og:url" content="http://yoursite.com/posts/A210107.html">
+<meta property="og:site_name" content="荏苒追寻个人博客">
+<meta property="og:description" content="前言前面学了一些Android音视频的基础，包括AudioTrack、AudioRecorder、MediaRecorder、MediaMuxer、MediaExtractor、MediaCodec以及Camera API，这些是Android提供的基础内容，而要深入了解音视频编译一些优秀的开源项目是必须的，这就要求掌握交叉编译的基础。   音视频基础0——目录  音视频基础1——AudioTra">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-01-29T08:39:33.523Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频基础6——交叉编译动态库">
+<meta name="twitter:description" content="前言前面学了一些Android音视频的基础，包括AudioTrack、AudioRecorder、MediaRecorder、MediaMuxer、MediaExtractor、MediaCodec以及Camera API，这些是Android提供的基础内容，而要深入了解音视频编译一些优秀的开源项目是必须的，这就要求掌握交叉编译的基础。   音视频基础0——目录  音视频基础1——AudioTra">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/posts/A210107.html">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>音视频基础6——交叉编译动态库 | 荏苒追寻个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">荏苒追寻个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">做一个有追求的青年</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-schedule">
+    <a href="/schedule/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>日程表</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/posts/A210107.html">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Randy Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="荏苒追寻个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">音视频基础6——交叉编译动态库</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-07T00:00:00+08:00">2021-01-07</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前面学了一些Android音视频的基础，包括AudioTrack、AudioRecorder、MediaRecorder、MediaMuxer、MediaExtractor、MediaCodec以及Camera API，这些是Android提供的基础内容，而要深入了解音视频编译一些优秀的开源项目是必须的，这就要求掌握<strong>交叉编译</strong>的基础。</p>
+<ul>
+<li style="list-style: none"><input type="checkbox" checked> <a href="https://rainmonth.github.io/posts/A210101.html" target="_blank" rel="noopener">音视频基础0——目录</a></li>
+<li style="list-style: none"><input type="checkbox" checked> <a href="https://rainmonth.github.io/posts/A210102.html" target="_blank" rel="noopener">音视频基础1——AudioTrack、AudioRecorder、MediaRecorder音频数据采集播放处理</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210103.html" target="_blank" rel="noopener">音视频基础2——Android Camera API及Camera2 API的使用</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210104.html" target="_blank" rel="noopener">音视频基础3——Android Camera API及Camera2 采集视频数据</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210105.html" target="_blank" rel="noopener">音视频基础4——Android MediaCodec API学习</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210306.html" target="_blank" rel="noopener">音视频基础5——Android 实现rtmp推流</a></li>
+<li style="list-style: none"><input type="checkbox" checked> <a href="https://rainmonth.github.io/posts/A210307.html" target="_blank" rel="noopener">音视频基础6——交叉编译动态库</a></li>
+<li style="list-style: none"><input type="checkbox"> <a href="https://rainmonth.github.io/posts/A210308.html" target="_blank" rel="noopener">音视频基础7——MacOs下编译FFMpeg4.2.2</a></li>
+</ul>
+<a id="more"></a>
+<h2 id="交叉编译"><a href="#交叉编译" class="headerlink" title="交叉编译"></a>交叉编译</h2><p>简单地来说，交叉编译就是程序的编译环境和实际运行环境不一致，即在一个平台上生成另一个平台上的可执行代码。Android要使用交叉编译，就离不开NDK（Native Develop Kit），即原生开发工具集，它包含了API、交叉编译器、调试器、构建工具等，是一个综合的工具集，设计到以下常用组件：</p>
+<ul>
+<li>ARM交叉编译器（对应于toolschains）</li>
+<li>构建工具（对应于build目录）</li>
+<li>Java原生头文件</li>
+<li>C库</li>
+<li>Math库</li>
+<li>最小的C++库</li>
+<li>ZLib库</li>
+<li>POSIX线程</li>
+<li>Android日志库</li>
+<li>Android原生应用API</li>
+<li>OpenGL ES库</li>
+<li>OpenSL ES库</li>
+</ul>
+<p>其目录结构如下：</p>
+<ul>
+<li>ndk脚本<ul>
+<li>ndk-build，该 Shell 脚本是 Android NDK 构建系统的起始点，一般在项目中仅仅执行这一个命令就可以编译出对应的动态链接库了；</li>
+<li>ndk-gdb，该 Shell 脚本允许用 GUN 调试器调试 Native 代码，并且可以配置到 AS 中，可以做到像调试 Java 代码一样调试 Native 代码；</li>
+<li>ndk-stack，该 Shell 脚本可以帮组分析 Native 代码崩溃时的堆栈信息；</li>
+</ul>
+</li>
+<li>build目录，包含了NDK构建系统的所有模块；</li>
+<li>platforms，该目录包含支持不同 Android 目标版本的头文件和库文件， NDK 构建系统会根据具体的配置来引用指定平台下的头文件和库文件；</li>
+<li>toolchains，该目录包含目前 NDK 所支持的不同平台下的交叉编译器 - ARM 、X86、MIPS ，目前比较常用的是 ARM 。构建系统会根据具体的配置选择不同的交叉编译器；</li>
+</ul>
+<h2 id="编译前的配置"><a href="#编译前的配置" class="headerlink" title="编译前的配置"></a>编译前的配置</h2><p>首先，在Mac的Android Studio中下载对应的ndk版本，具体如下：</p>
+<blockquote>
+<p><code>Cmd + ，</code>调出Preferences设置面板，选择Android SDK-&gt;SDK Tools，就可以看到NDK的下载配置了，勾选右下角的show package details就可以看到不同的NDK版本；</p>
+</blockquote>
+<p>然后，配置NDK的环境变量，使用文本工具打开<code>.bash_profile</code>文件，按如下输入：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export NDK_HOME=你的NDK安装目录</span><br><span class="line">export PATH=$PATH:$NDK_HOME</span><br></pre></td></tr></table></figure>
+<p>修改后保存，打开终端，输入：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source ~/.bash_profile</span><br></pre></td></tr></table></figure>
+<p>最后输入如下命令测试环境变量是否配置成功</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ndk-build -v</span><br><span class="line">// 输入如下内容证明配置成功：</span><br><span class="line">GNU Make 3.81</span><br><span class="line">Copyright (C) 2006  Free Software Foundation, Inc.</span><br><span class="line">This is free software; see the source for copying conditions.</span><br><span class="line">There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A</span><br><span class="line">PARTICULAR PURPOSE.</span><br><span class="line"></span><br><span class="line">This program built for x86_64-apple-darwin</span><br></pre></td></tr></table></figure>
+<h3 id="尝试编译"><a href="#尝试编译" class="headerlink" title="尝试编译"></a>尝试编译</h3><p>先写一个简单的test.c文件</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">" 执行成功 ! \n"</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">19921001</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面配置好后，就尝试编译以下test.c文件（文件位于~/Desktop目录），输入下面命令，然后运行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/Users/randy/Library/Android/sdk/ndk-r17/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-gcc -o test test.c</span><br><span class="line"></span><br><span class="line">// 输出如下</span><br><span class="line">test.c:1:19: fatal error: stdio.h: No such file or directory</span><br><span class="line"><span class="meta"> #</span>include &lt;stdio.h&gt;</span><br><span class="line">                   ^</span><br><span class="line">compilation terminated.</span><br></pre></td></tr></table></figure>
+<p>上面错误表示找不到头文件，所以要想编译生工，我们必须告诉编译器头文件在哪儿？</p>
+<h3 id="指定头文件编译"><a href="#指定头文件编译" class="headerlink" title="指定头文件编译"></a>指定头文件编译</h3><p>上面找不到<code>stdio.h</code>文件，利用Mac的查找功能，在NDK根目录下查找，发现该文件位于<code>/Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include</code>中，修改如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/Users/randy/Library/Android/sdk/ndk-r17/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-gcc --sysroot=/Users/randy/Library/Android/sdk/ndk-r17/platforms/android-21/arch-arm -isystem /Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include -pie -o test test.c</span><br><span class="line">// 输出如下：</span><br><span class="line">In file included from /Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include/sys/types.h:36:0,</span><br><span class="line">                 from /Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include/stdio.h:42,</span><br><span class="line">                 from test.c:1:</span><br><span class="line">/Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include/linux/types.h:21:23: fatal error: asm/types.h: No such file or directory</span><br><span class="line"><span class="meta"> #</span>include &lt;asm/types.h&gt;</span><br></pre></td></tr></table></figure>
+<p>这回提示找不到<code>asm/types.h</code>文件，同样的方法，先查找一下该文件，发现它在这个目录中：</p>
+<p><code>/Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include/arm-linux-androideabi</code>，所以同样需要通过<code>-isystem ?</code>来指定这个路径，修改后再运行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/Users/randy/Library/Android/sdk/ndk-r17/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-gcc --sysroot=/Users/randy/Library/Android/sdk/ndk-r17/platforms/android-21/arch-arm -isystem /Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include -isystem /Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include/arm-linux-androideabi -pie -o test test.c</span><br><span class="line">// 没有报错，正常运行，同时发现Desktop目录下生产了test文件</span><br></pre></td></tr></table></figure>
+<p>// 执行一下命令看看能否运行这个test文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./test</span><br><span class="line">// 输出如下</span><br><span class="line">zsh: exec format error: ./test</span><br><span class="line">// 即可执行文件格式错误，者个输出结果是正常的，因为这个test文件是针对升级平台的，Mac下无法运行</span><br></pre></td></tr></table></figure>
+<p>将该文件推送到手机，然后运行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">adb push test /data/local/tmp // 推动到手机</span><br><span class="line">// 在手机的shell 环境下运行</span><br><span class="line">cd /data/local/tmp</span><br><span class="line">./test</span><br><span class="line">// 输出结果</span><br><span class="line">执行成功</span><br></pre></td></tr></table></figure>
+<p>基于以上步骤，我们利用NDK交叉编译（Mac平台编译手机平台可以直接运行的test文件）成功了。</p>
+<p>关于上面用到的选项可以使用–help来查看具体说明（这是gcc的帮助查看选项)，还可以参考</p>
+<ul>
+<li><a href="https://gcc.gnu.org/onlinedocs/gcc-4.6.0/gcc/Directory-Options.html" target="_blank" rel="noopener">gcc选项说明</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gcc-4.6.0/gcc/" target="_blank" rel="noopener">gcc官方文档</a></li>
+</ul>
+<h2 id="动态库和静态库"><a href="#动态库和静态库" class="headerlink" title="动态库和静态库"></a>动态库和静态库</h2><p>Linux平台下静态库以.a（Ar Archive类型文件）结尾，动态库以.so结尾。</p>
+<h3 id="编译动态库"><a href="#编译动态库" class="headerlink" title="编译动态库"></a>编译动态库</h3><p>利用<code>arm-linux-androideabi-g++</code>生成<code>.so</code>文件，具体如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Users/randy/Library/Android/sdk/ndk-r17/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-gcc --sysroot=/Users/randy/Library/Android/sdk/ndk-r17/platforms/android-21/arch-arm -isystem /Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include -isystem /Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include/arm-linux-androideabi -fpic -shared test.c -o libTest.so</span><br></pre></td></tr></table></figure>
+<p>运行完会发现test.c所在目录下多了一个libTest.so文件；</p>
+<h3 id="编译静态库"><a href="#编译静态库" class="headerlink" title="编译静态库"></a>编译静态库</h3><p>利用<code>arm-linux-androideabi-g++</code>生成<code>.o</code>文件，利用<code>arm-linux-androideabi-ar</code>生成<code>.a</code>文件，具体步骤如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// arm-linux-androideabi-g++生成.o文件</span><br><span class="line">/Users/randy/Library/Android/sdk/ndk-r17/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-gcc --sysroot=/Users/randy/Library/Android/sdk/ndk-r17/platforms/android-21/arch-arm -isystem /Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include -isystem /Users/randy/Library/Android/sdk/ndk-r17/sysroot/usr/include/arm-linux-androideabi -fpic -c test.c -o test.o</span><br><span class="line">// 上面的命令表示编译test.c文件，并输出test.o文件</span><br><span class="line"></span><br><span class="line">// arm-linux-androideabi-ar 生成.a文件</span><br><span class="line">/Users/randy/Library/Android/sdk/ndk-r17/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-ar r test.a test.o</span><br><span class="line">// 上面的命令表示将test.o打包成test.a文件</span><br></pre></td></tr></table></figure>
+<p>运行完成后就会发现在<code>test.c</code>这个文件所在目录下多了一个<code>test.a</code>，这样我们就生成了<code>test.a</code>这个静态库了。</p>
+<h3 id="动态库与静态库的区别"><a href="#动态库与静态库的区别" class="headerlink" title="动态库与静态库的区别"></a>动态库与静态库的区别</h3><p>在与静态库链接时，静态库中所有被使用的函数的机器码在<strong>编译</strong>的时候都被拷贝到最终的可执行文件中，并且会被添加到和它链接的每个程序中，<strong>这样运行时就不用在找它以来的函数库了（都拷贝到了可执行文件中），运行速度较快</strong>，当然，这也导致最终的可执行文件代码变多，占用内存变多，总的来说就是用<strong>空间换时间</strong>；</p>
+<p>与动态库链接时，与动态库链接的可执行文件只包含需要函数的引用表，而不是所有的函数代码，只在程序<strong>执行</strong>时那些需要的函数代码才被拷贝到内存中，这就和静态库相比，他的<strong>可执行文件代码少，占用内存小</strong>，但由于运行时需要链接那些函数库（因为它本身只有函数的引用，需要根据引用去加载），导致执行时间慢一些，总的来说就是时间换空间。</p>
+<p>还有一点需要注意的是，如果我们要修改函数库，使用<strong>动态库</strong>的程序只需要将<strong>动态库重新编译</strong>就可以了，而使用<strong>静态库</strong>的程序则<strong>需要将静态库重新编译好后，将程序再重新编译一遍</strong>。</p>
+<h2 id="mk和CMake"><a href="#mk和CMake" class="headerlink" title="mk和CMake"></a>mk和CMake</h2><p>上面讲的是利用NDK将c文件交叉编译成动态库和静态库，但实际项目中makefile和cmake来构建一个C/C++的Android程序，并使用上面生成的静态库test.a和动态库testLib.so。</p>
+<h3 id="mk"><a href="#mk" class="headerlink" title="mk"></a>mk</h3><h4 id="Android-mk"><a href="#Android-mk" class="headerlink" title="Android.mk"></a>Android.mk</h4><p>关于Android.mk文件的详细说明，请参考Google官网的<a href="https://developer.android.google.cn/ndk/guides/android_mk#overview" target="_blank" rel="noopener">Android.mk说明</a>，这里只列出部分常用内容。</p>
+<p>Android.mk文件位于项目jni目录的子目录中，用于向构建系统描述源文件和共享库。本质上是一个微小的GNU makefile 片段，构建系统会将其解析一次或多次。<code>Android.mk</code> 文件用于定义 <code>Application.mk</code>、构建系统和环境变量所未定义的项目级设置。它还可替换特定模块的项目级设置。</p>
+<ul>
+<li><code>LOCAL_PATH := $(call my-dir)</code>，Android.mk文件使用前必须先定义一个LOCAL_PATH，此变量表示源文件在开发树种的位置，即调用<code>my-dir</code>函数，返回当前文件所在的目录；</li>
+<li><code>include $(CLEAR_VARS)</code></li>
+<li><code>LOCAL_MODULE := test</code>，LOCAL_MODULE变量存储要构建的模块的名称，这个名称对于每个模块来说要是唯一的，不能包含空格。构建系统最终生成共享文件，会自动为LOCAL_MODULE添加前缀或后缀：libhello-jni.so；</li>
+<li><code>LOCAL_SRC_FILES := test.c</code> 列举用来生成库的源文件，多个用空格隔开；</li>
+<li><code>include $(BUILD_SHARED_LIBRARY)</code>，<code>.mk</code>文件的最后一行，其实类似的 include 还有很多，都是构建系统提供的内置变量，该变量的意义是构建动态库，其他的内置变量还包括如下几种：<ul>
+<li>BUILD_SHARED_LIBRARY，构建动态库；</li>
+<li>BUILD_STATIC_LIBRARY，构建静态库；</li>
+<li>PREBUILT_STATIC_LIBRARY: 对已有的静态库进行包装，使其成为一个模块，此时<code>LOCAL_SRC_FILES</code>不能是源文件，而是<code>.a</code>（静态库文件）；</li>
+<li>PREBUILT_SHARED_LIBRARY: 对已有的静态库进行包装，使其成为一个模块此时<code>LOCAL_SRC_FILES</code>不能是源文件，而是`.so（动态库文件）；</li>
+</ul>
+</li>
+</ul>
+<h4 id="Application-mk"><a href="#Application-mk" class="headerlink" title="Application.mk"></a>Application.mk</h4><p><code>Application.mk</code>指定ndk-build的项目级设置，主要定义提供项目级别的变量控制，常用的有如下：</p>
+<ul>
+<li>APP_ABI，指定要进行哪些ABI平台的构建，默认为all，多个用空格隔开，如果gradle文件的<strong>externalNativeBuild</strong>指定了abiFilters，则会忽略APP_ABI的设置</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">指令集</th>
+<th style="text-align:left">值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">32 位 ARMv7</td>
+<td style="text-align:left"><code>APP_ABI := armeabi-v7a</code></td>
+</tr>
+<tr>
+<td style="text-align:left">64 位 ARMv8 (AArch64)</td>
+<td style="text-align:left"><code>APP_ABI := arm64-v8a</code></td>
+</tr>
+<tr>
+<td style="text-align:left">x86</td>
+<td style="text-align:left"><code>APP_ABI := x86</code></td>
+</tr>
+<tr>
+<td style="text-align:left">x86-64</td>
+<td style="text-align:left"><code>APP_ABI := x86_64</code></td>
+</tr>
+<tr>
+<td style="text-align:left">所有支持的 ABI（默认）</td>
+<td style="text-align:left"><code>APP_ABI := all</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>APP_DEBUG，构建应用是否可调式（True为可调式）；</li>
+<li>APP_MODULES，要构建的模块的显式列表，此列表的元素是模块在 <a href="https://developer.android.google.cn/ndk/guides/android_mk" target="_blank" rel="noopener">Android.mk</a> 文件的 <code>LOCAL_MODULE</code> 中显示的名称。默认情况下，ndk-build 将构建所有共享库、可执行文件及其依赖项；</li>
+<li>APP_PLATFORM，会声明构建此应用所面向的 Android API 级别，并对应于应用的 <code>minSdkVersion</code>；</li>
+<li>APP_PROJECT_PATH，项目根目录的绝对路径；</li>
+<li>APP_STL，用于此应用的C++标准库；</li>
+</ul>
+<p>下面简单写下在采用mk构建是gradle文件的要点：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="string">plugin:</span> <span class="string">'com.android.application'</span></span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">30</span></span><br><span class="line">    buildToolsVersion <span class="string">"30.0.0"</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        externalNativeBuild &#123;</span><br><span class="line">            ndkBuild &#123;</span><br><span class="line">              	<span class="comment">// 表明支持哪些ABI</span></span><br><span class="line">                abiFilters <span class="string">'arm64-v8a'</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    externalNativeBuild &#123;</span><br><span class="line">        ndkBuild &#123;</span><br><span class="line">          	<span class="comment">// make file文件路径</span></span><br><span class="line">            path <span class="string">'src/main/jni/Android.mk'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="CMake"><a href="#CMake" class="headerlink" title="CMake"></a>CMake</h3><p>关于CMake的介绍，请参考<a href="https://cmake.org/" target="_blank" rel="noopener">CMake官网</a>，在Android Studio 2.2之前的版本，做NDK开发采用的是Android.mk、Application.mk来进行C/C++项目的构建的，Android Studio 2.2之后，就采用CMake来构建了，CMake构建较Android.mk、Application.mk更方便。</p>
+<p>CMake主要包含了四类命令：</p>
+<ul>
+<li>Scripting Command，脚本命令，只要支持CMake，这些命令都可用；</li>
+<li>Project Command，这些命令只有在CMake 项目中才能使用；</li>
+<li>CTest Command，这些命令只能在CTest脚本中才能使用；</li>
+<li>Deprecated Command，已经废弃的命令，这些命令只为了向后兼容；</li>
+</ul>
+<p>这里主要介绍脚本命令中在Android C/C++项目中编译用到的命令。</p>
+<h4 id="基础如法"><a href="#基础如法" class="headerlink" title="基础如法"></a>基础如法</h4><p>下面这个代码演示了CMake的基本语法，说明参见注释。</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定CMake最小版本</span></span><br><span class="line">cmake_mimum_required(VERSION <span class="number">3.10</span>)</span><br><span class="line"><span class="comment"># 设置项目名称</span></span><br><span class="line"><span class="keyword">project</span>(demo)</span><br><span class="line"><span class="comment"># 设置编译类型</span></span><br><span class="line"><span class="keyword">add_executable</span>(demo test.cpp) <span class="comment"># 生成可执行文件</span></span><br><span class="line"><span class="keyword">add_library</span>(common STATIC test.cpp) <span class="comment"># 生成静态库</span></span><br><span class="line"><span class="keyword">add_library</span>(common SHARED test.cpp) <span class="comment"># 生成动态库</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 明确指定包含哪些源文件</span></span><br><span class="line"><span class="keyword">add_library</span>(demo test.cpp test1.cpp test2.cpp)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自定义搜索规则并加载文件，这里参数的意义可以查询CMake官网说明</span></span><br><span class="line">file(GLOB SRC_LIST <span class="string">"*.cpp"</span> <span class="string">"protocol/*.cpp"</span>) <span class="comment"># 类似于正则匹配（但更简单），找到符合规则的文件，然后以列表形式存入SAR_LIST中</span></span><br><span class="line"><span class="keyword">add_library</span>(demo <span class="variable">$&#123;SRC_LIST&#125;</span>) <span class="comment">#加载上面找到的文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 或者</span></span><br><span class="line">file(GLOB SRC_LIST <span class="string">"*.cpp"</span>)</span><br><span class="line">file(GLOB SRC_PROTOCOL <span class="string">"*.cpp"</span>)</span><br><span class="line"><span class="keyword">add_library</span>(demo <span class="variable">$&#123;SRC_LIST&#125;</span> <span class="variable">$&#123;SRC_PROTOCOL&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查找指定的库文件，找到NDK下的lib库（路径），并将其存入log-lib变量中</span></span><br><span class="line"><span class="keyword">find_library</span>(</span><br><span class="line">	log-lib <span class="comment"># 这个log-lib是自己指定的一个变量</span></span><br><span class="line">	lib			<span class="comment"># lib指定是NDK下的lib库</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置包含的目录</span></span><br><span class="line"><span class="keyword">include_directories</span>(</span><br><span class="line">	<span class="variable">$&#123;CMAKE_CURRENT_SOURCE_DIR&#125;</span></span><br><span class="line">	<span class="variable">$&#123;CMAKE_CURRENT_BINARY_DIR&#125;</span></span><br><span class="line">	<span class="variable">$&#123;CMAKE_CURRENT_SOURCE_DIR&#125;</span>/<span class="keyword">include</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置链接库搜索目录</span></span><br><span class="line"><span class="keyword">link_directories</span>(</span><br><span class="line">	<span class="variable">$&#123;CMAKE_CURRENT_SOURCE_DIR&#125;</span>/libs</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置目标库需要链接的库 </span></span><br><span class="line"><span class="keyword">target_link_libraries</span>(</span><br><span class="line">	demo <span class="comment"># 目标库</span></span><br><span class="line">	<span class="variable">$&#123;log-lib&#125;</span> <span class="comment"># demo库要用到NDK的lib，通过这个将其链接起来</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定链接动态库或者静态库</span></span><br><span class="line"><span class="keyword">target_link_libraries</span>(demo libtest.a) <span class="comment"># 链接libtest.a</span></span><br><span class="line"><span class="keyword">target_link_libraries</span>(demo libtest.so)<span class="comment"># 链接libtest.so</span></span><br></pre></td></tr></table></figure>
+<p>上面的<code>$CMAKE_CURRENT_SOURCE_DIR</code>是CMake定义的一个常量，类似的常量可以参见<a href="https://cmake.org/cmake/help/v3.19/manual/cmake-variables.7.html" target="_blank" rel="noopener">CMake  常量</a></p>
+<h4 id="配置CMake"><a href="#配置CMake" class="headerlink" title="配置CMake"></a>配置CMake</h4><p>CMake构建脚本是一个纯文本文件，必须命名为<code>CMakeLists.txt</code>，并在其中包含CMake构建C/C++库时需要用到的命令。如果原生源代码文件没有改文件，需要自己建立一个，并在其中包含适当的CMake命令。例如Android Studio C/C++项目模板生成的CMakeList.txt如下：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># For more information about using CMake with Android Studio, read the</span></span><br><span class="line"><span class="comment"># documentation: https://d.android.com/studio/projects/add-native-code.html</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Sets the minimum version of CMake required to build the native library.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.4</span>.<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Creates and names a library, sets it as either STATIC</span></span><br><span class="line"><span class="comment"># or SHARED, and provides the relative paths to its source code.</span></span><br><span class="line"><span class="comment"># You can define multiple libraries, and CMake builds them for you.</span></span><br><span class="line"><span class="comment"># Gradle automatically packages shared libraries with your APK.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">add_library</span>( <span class="comment"># Sets the name of the library.</span></span><br><span class="line">             native-lib</span><br><span class="line"></span><br><span class="line">             <span class="comment"># Sets the library as a shared library.</span></span><br><span class="line">             SHARED</span><br><span class="line"></span><br><span class="line">             <span class="comment"># Provides a relative path to your source file(s).</span></span><br><span class="line">             native-lib.cpp )</span><br><span class="line"></span><br><span class="line"><span class="comment"># Searches for a specified prebuilt library and stores the path as a</span></span><br><span class="line"><span class="comment"># variable. Because CMake includes system libraries in the search path by</span></span><br><span class="line"><span class="comment"># default, you only need to specify the name of the public NDK library</span></span><br><span class="line"><span class="comment"># you want to add. CMake verifies that the library exists before</span></span><br><span class="line"><span class="comment"># completing its build.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">find_library</span>( <span class="comment"># Sets the name of the path variable.</span></span><br><span class="line">              log-lib</span><br><span class="line"></span><br><span class="line">              <span class="comment"># Specifies the name of the NDK library that</span></span><br><span class="line">              <span class="comment"># you want CMake to locate.</span></span><br><span class="line">              log )</span><br><span class="line"></span><br><span class="line"><span class="comment"># Specifies libraries CMake should link to your target library. You</span></span><br><span class="line"><span class="comment"># can link multiple libraries, such as libraries you define in this</span></span><br><span class="line"><span class="comment"># build script, prebuilt third-party libraries, or system libraries.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">target_link_libraries</span>( <span class="comment"># Specifies the target library.</span></span><br><span class="line">                       native-lib</span><br><span class="line"></span><br><span class="line">                       <span class="comment"># Links the target library to the log library</span></span><br><span class="line">                       <span class="comment"># included in the NDK.</span></span><br><span class="line">                       <span class="variable">$&#123;log-lib&#125;</span> )</span><br></pre></td></tr></table></figure>
+<p>介绍了上面的基础，下面实际操作一把。</p>
+<h2 id="CMake构建C-C-项目"><a href="#CMake构建C-C-项目" class="headerlink" title="CMake构建C/C++项目"></a>CMake构建C/C++项目</h2><h3 id="静态库构建"><a href="#静态库构建" class="headerlink" title="静态库构建"></a>静态库构建</h3><ol>
+<li><p>Activity中定义native接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.rainmonth;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> androidx.appcompat.app.AppCompatActivity;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.os.Bundle;</span><br><span class="line"><span class="keyword">import</span> android.widget.TextView;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Used to load the 'native-lib' library on application startup.</span></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.loadLibrary(<span class="string">"native-lib"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Example of a call to a native method</span></span><br><span class="line">        TextView tv = findViewById(R.id.sample_text);</span><br><span class="line">        tv.setText(stringFromJNI());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 定义原生接口</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">native</span> String <span class="title">stringFromJNI</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编写cpp文件，在项目的main目录下新建cpp目录，然后新建文件native-lib.cpp，内容如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;jni.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;android/log.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="string">"C"</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="string">"C"</span> JNIEXPORT jstring JNICALL</span><br><span class="line">Java_com_rainmonth_MainActivity_stringFromJNI(</span><br><span class="line">        JNIEnv* env,</span><br><span class="line">        jobject <span class="comment">/* this */</span>) &#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> hello = <span class="string">"Hello from C++"</span>;</span><br><span class="line">    <span class="comment">// 注意和.c的区别</span></span><br><span class="line"></span><br><span class="line">    __android_log_print(ANDROID_LOG_DEBUG, <span class="string">"Randy"</span>, <span class="string">"main----&gt;:%d"</span>, main());</span><br><span class="line">    <span class="keyword">return</span> env-&gt;NewStringUTF(hello.c_str());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编写CMakeList.txt文件</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定最小版本</span></span><br><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.4</span>.<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印日志</span></span><br><span class="line"><span class="keyword">message</span>(<span class="string">"当前CMake路径：$&#123;CMAKE_SOURCE_DIR&#125;"</span>)</span><br><span class="line"><span class="keyword">message</span>(<span class="string">"当前CMAKE_ANDROID_ARCH_ABI路径：$&#123;CMAKE_ANDROID_ARCH_ABI&#125;"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 批量引入源文件</span></span><br><span class="line">file(GLOB allCpp *.cpp)</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_library</span>( <span class="comment"># 设置库的名称</span></span><br><span class="line">             native-lib</span><br><span class="line">             <span class="comment"># 设置为动态库</span></span><br><span class="line">             SHARED</span><br><span class="line">             <span class="comment"># Provides a relative path to your source file(s).</span></span><br><span class="line">             <span class="variable">$&#123;allCpp&#125;</span> )</span><br><span class="line"></span><br><span class="line"><span class="comment"># 表明要静态导入test_a这个库</span></span><br><span class="line"><span class="keyword">add_library</span>(test_a STATIC IMPORTED)</span><br><span class="line"></span><br><span class="line"><span class="comment"># test_a这个库的真正位置在 $&#123;CMAKE_SOURCE_DIR&#125;/test.a</span></span><br><span class="line"><span class="keyword">set_target_properties</span>(test_a PROPERTIES IMPORTED_LOCATION <span class="variable">$&#123;CMAKE_SOURCE_DIR&#125;</span>/test.a)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 搜索指定的预构建库并将路径存储为变量，对于NDK库，只需指定名称，因为CMake默认include路径包含NDK路径</span></span><br><span class="line"><span class="keyword">find_library</span>( <span class="comment"># 找到的库存储到的位置</span></span><br><span class="line">              log-lib</span><br><span class="line">              <span class="comment"># 要查找的NDK库名称</span></span><br><span class="line">              log )</span><br><span class="line"><span class="keyword">message</span>(<span class="string">"当前的log路：$&#123;log-lib&#125;"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开始连接指定的库</span></span><br><span class="line"><span class="keyword">target_link_libraries</span>( <span class="comment"># Specifies the target library.</span></span><br><span class="line">                       native-lib</span><br><span class="line">                       <span class="variable">$&#123;log-lib&#125;</span></span><br><span class="line">                        test_a</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>build.gradle配置</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">		...</span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">				...</span><br><span class="line">        externalNativeBuild &#123;</span><br><span class="line">            cmake &#123;</span><br><span class="line"><span class="comment">//                cFlags ""</span></span><br><span class="line"><span class="comment">//                cppFlags ""</span></span><br><span class="line"><span class="comment">//                arguments ""</span></span><br><span class="line"><span class="comment">//                abiFilters ""</span></span><br><span class="line"><span class="comment">//                targets ""</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line">                abiFilters <span class="string">'armeabi-v7a'</span><span class="comment">//编译armeabi-v7a平台</span></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ndk &#123;</span><br><span class="line">            abiFilters <span class="string">'armeabi-v7a'</span><span class="comment">//编译armeabi-v7a平台</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">		...</span><br><span class="line">    sourceSets &#123;</span><br><span class="line">        main &#123;</span><br><span class="line">            jniLibs.srcDirs = [<span class="string">'jniLibs'</span>]</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    externalNativeBuild &#123;</span><br><span class="line">        cmake &#123;</span><br><span class="line">            path <span class="string">"src/main/cpp/CMakeLists.txt"</span></span><br><span class="line">            version <span class="string">"3.10.2"</span></span><br><span class="line"><span class="comment">//            project ""</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>运行项目，运行结果，test.a静态库中定义的函数main正确执行。</p>
+<p>下面看动态库的构建</p>
+<h3 id="动态库构建"><a href="#动态库构建" class="headerlink" title="动态库构建"></a>动态库构建</h3><ol>
+<li><p>与静态库类似，只是需要将Test.so库加载进去，其他部分相同：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">  System.loadLibrary(<span class="string">"Test"</span>);</span><br><span class="line">  System.loadLibrary(<span class="string">"native-lib"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将生成的动态库加入到main目录下的jinLibs文件夹下相应的ABI目录里面；</p>
+</li>
+<li><p>编写动态编译的CMakeList.txt：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">####################动态构建开始####################</span></span><br><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.4</span>.<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">message</span>(<span class="string">"动态构建开始&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印日志</span></span><br><span class="line"><span class="keyword">message</span>(<span class="string">"当前CMake路径：$&#123;CMAKE_SOURCE_DIR&#125;"</span>)</span><br><span class="line"><span class="keyword">message</span>(<span class="string">"当前CMAKE_ANDROID_ARCH_ABI路径：$&#123;CMAKE_ANDROID_ARCH_ABI&#125;"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 批量引入源文件</span></span><br><span class="line">file(GLOB allCpp *.cpp)</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_library</span>( <span class="comment"># 设置库的名称</span></span><br><span class="line">        native-lib</span><br><span class="line">        <span class="comment"># 设置为动态库</span></span><br><span class="line">        SHARED</span><br><span class="line">        <span class="comment"># Provides a relative path to your source file(s).</span></span><br><span class="line">        <span class="variable">$&#123;allCpp&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导入动态库</span></span><br><span class="line"><span class="keyword">add_library</span>(test_so SHARED IMPORTED)</span><br><span class="line"><span class="comment"># 早起的cmake ANDROID_ABI == 当前CPU平台</span></span><br><span class="line"><span class="keyword">set_target_properties</span>(test_so PROPERTIES IMPORTED_LOCATION <span class="variable">$&#123;CMAKE_SOURCE_DIR&#125;</span>/../jniLibs/<span class="variable">$&#123;CMAKE_ANDROID_ARCH_ABI&#125;</span>/libTest.so)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 搜索指定的预构建库并将路径存储为变量，对于NDK库，只需指定名称，因为CMake默认include路径包含NDK路径</span></span><br><span class="line"><span class="keyword">find_library</span>( <span class="comment"># 找到的库存储到的位置</span></span><br><span class="line">        log-lib</span><br><span class="line">        <span class="comment"># 要查找的NDK库名称</span></span><br><span class="line">        log)</span><br><span class="line"><span class="keyword">message</span>(<span class="string">"当前的log路：$&#123;log-lib&#125;"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开始连接指定的库</span></span><br><span class="line"><span class="keyword">target_link_libraries</span>( <span class="comment"># Specifies the target library.</span></span><br><span class="line">        native-lib</span><br><span class="line">        <span class="variable">$&#123;log-lib&#125;</span></span><br><span class="line">        test_so</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line"><span class="comment">####################动态构建结束####################</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>gradle文件配置同上面静态库的配置。</p>
+<blockquote>
+<p>上面的的配置在实际运行时，<code>System.loadLibrary(&quot;native-lib&quot;)</code> 这一行总报找不到libTest.so这个库，暂时没找到原因。</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上就是交叉编译动态库的一些基础知识，还有就是Android通过CMake来编译动态库和静态库的一些实际操作，算是为编译FFMpeg做个预热了。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/音视频基础/" rel="tag"># 音视频基础</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/posts/A210122.html" rel="next" title="Android OpenGL基础">
+                <i class="fa fa-chevron-left"></i> Android OpenGL基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/posts/J210109.html" rel="prev" title="Java并发——Semaphore">
+                Java并发——Semaphore <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Randy Zhang</p>
+              <p class="site-description motion-element" itemprop="description">记录学习Android、前端开发以及Python的点点滴滴</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">118</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Rainmonth" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#交叉编译"><span class="nav-number">2.</span> <span class="nav-text">交叉编译</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译前的配置"><span class="nav-number">3.</span> <span class="nav-text">编译前的配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#尝试编译"><span class="nav-number">3.1.</span> <span class="nav-text">尝试编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指定头文件编译"><span class="nav-number">3.2.</span> <span class="nav-text">指定头文件编译</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态库和静态库"><span class="nav-number">4.</span> <span class="nav-text">动态库和静态库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译动态库"><span class="nav-number">4.1.</span> <span class="nav-text">编译动态库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译静态库"><span class="nav-number">4.2.</span> <span class="nav-text">编译静态库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态库与静态库的区别"><span class="nav-number">4.3.</span> <span class="nav-text">动态库与静态库的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mk和CMake"><span class="nav-number">5.</span> <span class="nav-text">mk和CMake</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mk"><span class="nav-number">5.1.</span> <span class="nav-text">mk</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Android-mk"><span class="nav-number">5.1.1.</span> <span class="nav-text">Android.mk</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Application-mk"><span class="nav-number">5.1.2.</span> <span class="nav-text">Application.mk</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CMake"><span class="nav-number">5.2.</span> <span class="nav-text">CMake</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础如法"><span class="nav-number">5.2.1.</span> <span class="nav-text">基础如法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置CMake"><span class="nav-number">5.2.2.</span> <span class="nav-text">配置CMake</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CMake构建C-C-项目"><span class="nav-number">6.</span> <span class="nav-text">CMake构建C/C++项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#静态库构建"><span class="nav-number">6.1.</span> <span class="nav-text">静态库构建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动态库构建"><span class="nav-number">6.2.</span> <span class="nav-text">动态库构建</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love" id="animate"> 
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Randy Zhang</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Gemini</a> v6.1.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.1.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.1.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.1.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
